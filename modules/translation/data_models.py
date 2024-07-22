@@ -38,6 +38,7 @@ class BaseModule(BaseModel):
         """
         super().__init__(module_config=module_config)
         self.module_config = module_config
+        self.init_module()
 
     def init_module(self):
         """
@@ -252,6 +253,7 @@ class BaseMiner(ABC):
         self.miner_config = miner_config
         self.miner_configs = self._load_configs("modules/miner_configs.json")
         self.router = APIRouter()
+        self.module = module
 
     def _load_configs(self, file_path: str) -> List[Dict[str, Any]]:
         """

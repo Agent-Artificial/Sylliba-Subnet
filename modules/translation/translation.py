@@ -9,24 +9,14 @@ from typing import Optional
 from functools import lru_cache
 from typing import Dict, Tuple, Union
 from transformers import AutoProcessor, SeamlessM4Tv2Model
-from accelerate import Accelerator
+from pydub import AudioSegment
 
 from .data_models import TARGET_LANGUAGES, TASK_STRINGS, TranslationRequest, TranslationConfig
 
 translation_config = TranslationConfig()
 
 class Translation:
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(Translation, cls).__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
-    
     def __init__(self):
-        if self._initialized:
-            return
         """
         Initializes a new instance of the Translation class.
 
@@ -46,14 +36,8 @@ class Translation:
             - target_language (None): The target language for translation.
         """
         self.translation_config = translation_config
-        
-        self.accelerator = Accelerator()
-        
         self.processor = AutoProcessor.from_pretrained(translation_config.model_name_or_card)
         self.model = SeamlessM4Tv2Model.from_pretrained(translation_config.model_name_or_card)
-        
-        self.model, self.processor = self.accelerator.prepare(self.model, self.processor)
-      
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
         self.target_languages: Dict[str, str] = TARGET_LANGUAGES
@@ -62,8 +46,6 @@ class Translation:
         self.task_string = None
         self.source_language = None
         self.target_language = None
-        self._initialized = True
-        logger.info("Model and processor loaded successfully.")
 
     @lru_cache(maxsize=128)
     def _get_language(self, language: str) -> str:

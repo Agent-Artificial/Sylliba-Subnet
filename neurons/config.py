@@ -10,12 +10,12 @@ def miner_config():
             "logging_dir": "~/.bittensor/miners",
         },
         "wallet": {
-            "name": os.getenv("BT_WALLET_COLDKEY", "default"),
-            "hotkey": os.getenv("BT_WALLET_HOTKEY", "default"),
+            "name": os.getenv("BT_MINER_COLDKEY"),
+            "hotkey": os.getenv("BT_MINER_HOTKEY"),
             "path": os.getenv("BT_WALLET_PATH", "~/.bittensor/wallets/"),
         },
         "neuron": {
-            "name": "default",
+            "name": os.getenv("BT_MINER_COLDKEY"),
             "full_path": "~/mining/bittensor/bittensor-subnet-template/neurons/miner.py",
             "events_retention_size": 2 * 1024 * 1024 * 1024,
             "epoch_length": 10,
@@ -23,8 +23,8 @@ def miner_config():
             "dont_save_events": False,
         },
         "subtensor": {
-            "network": "local",
-            "chain_endpoint": "http://localhost:9946",
+            "network": os.getenv("BT_NETWORK"),
+            "chain_endpoint": f"{os.getenv('BT_AXON_EXTERNAL_ADDRESS')}:{os.getenv('BT_AXON_EXTERNAL_PORT')}",
             "mock": False,
         },
         "wandb": {
@@ -37,7 +37,7 @@ def miner_config():
         "blacklist": {
             "force_validator_permit": True,
             "allow_non_registered": False,
-            "netuid": 1,
+            "netuid": os.getenv("BT_NETUID"),
             "mock": False,
         },
     }
@@ -49,12 +49,12 @@ def validator_config():
             "logging_dir": "~/.bittensor/validators",
         },
         "wallet": {
-            "name": "bt_validator_test",
-            "hotkey": "subnet_vali",
-            "path": "~/.bittensor/wallets/",
+            "name": os.getenv("BT_VALIDATOR_COLDKEY"),
+            "hotkey": os.getenv("BT_VALIDATOR_HOTKEY"),
+            "path": os.getenv("BT_WALLET_PATH", "~/.bittensor/wallets/"),
         },
         "neuron": {
-            "name": "default",
+            "name": os.getenv("BT_VALIDATOR_COLDKEY"),
             "timeout": 10,
             "num_concurrent_forwards": 10,
             "sample_size": 50,
@@ -69,8 +69,8 @@ def validator_config():
             "dont_save_events": False,
         },
         "subtensor": {
-            "network": "local",
-            "chain_endpoint": "http://localhost:9946",
+            "network": os.getenv("BT_NETWORK"),
+            "chain_endpoint": f"{os.getenv('BT_AXON_EXTERNAL_ADDRESS')}:{os.getenv('BT_AXON_EXTERNAL_PORT')}",
             "mock": False,
         },
         "wandb": {
@@ -83,7 +83,7 @@ def validator_config():
         "blacklist": {
             "force_validator_permit": True,
             "allow_non_registered": False,
-            "netuid": 1,
+            "netuid": os.getenv("BT_NETUID"),
             "mock": False,
         },
     }
