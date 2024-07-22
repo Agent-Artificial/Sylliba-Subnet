@@ -24,6 +24,7 @@ import asyncio
 import argparse
 import threading
 import bittensor as bt
+import os
 
 from typing import List, Union
 from traceback import print_exception
@@ -35,6 +36,10 @@ from template.base.utils.weight_utils import (
     )
 from template.mock import MockDendrite
 from template.utils.config import add_validator_args
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class BaseValidatorNeuron(BaseNeuron):
@@ -71,7 +76,7 @@ class BaseValidatorNeuron(BaseNeuron):
 
         # Serve axon to enable external connections.
         if not self.config.neuron.axon_off:
-            self.serve_axon()
+            self.serve_axon(netuid=os.getenv("BT_NETUID"))
         else:
             bt.logging.warning("axon off, not serving ip to chain.")
 
@@ -84,7 +89,7 @@ class BaseValidatorNeuron(BaseNeuron):
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
 
-    def serve_axon(self):
+    def serve_axon(self, netuid: str=None):
         """Serve axon to enable external connections."""
 
         bt.logging.info("serving ip to chain...")
@@ -93,7 +98,7 @@ class BaseValidatorNeuron(BaseNeuron):
 
             try:
                 self.subtensor.serve_axon(
-                    netuid=self.config.netuid,
+                    netuid= netuid or os.getenv("BT_NETUID"),
                     axon=self.axon,
                 )
                 bt.logging.info(
@@ -246,7 +251,7 @@ class BaseValidatorNeuron(BaseNeuron):
         ) = process_weights_for_netuid(
             uids=self.metagraph.uids,
             weights=raw_weights,
-            netuid=self.config.netuid,
+            netuid=os.getenv("BT_NETUID"),
             subtensor=self.subtensor,
             metagraph=self.metagraph,
         )
@@ -266,7 +271,7 @@ class BaseValidatorNeuron(BaseNeuron):
         # Set the weights on chain via our subtensor connection.
         result, msg = self.subtensor.set_weights(
             wallet=self.wallet,
-            netuid=self.config.netuid,
+            netuid=os.getenv("BT_NETUID"),
             uids=uint_uids,
             weights=uint_weights,
             wait_for_finalization=False,

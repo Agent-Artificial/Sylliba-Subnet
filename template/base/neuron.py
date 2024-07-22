@@ -14,7 +14,7 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-
+import os
 import copy
 import typing
 
@@ -27,7 +27,9 @@ from template.utils.config import check_config, add_args, config
 from template.utils.misc import ttl_get_block
 from template import __spec_version__ as spec_version
 from template.mock import MockSubtensor, MockMetagraph
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class BaseNeuron(ABC):
     """
@@ -50,7 +52,7 @@ class BaseNeuron(ABC):
     def config(cls):
         return config(cls)
 
-    subtensor: "bt.subtensor"
+    subtensor: "bt.subteensor"
     wallet: "bt.wallet"
     metagraph: "bt.metagraph"
     spec_version: int = spec_version
@@ -100,9 +102,7 @@ class BaseNeuron(ABC):
         self.check_registered()
 
         # Each miner gets a unique identity (UID) in the network for differentiation.
-        self.uid = self.metagraph.hotkeys.index(
-            self.wallet.hotkey.ss58_address
-        )
+        self.uid = self.metagraph.uids
         bt.logging.info(
             f"Running neuron on subnet: {self.config.netuid} with uid {self.uid} using network: {self.subtensor.chain_endpoint}"
         )
@@ -135,7 +135,7 @@ class BaseNeuron(ABC):
     def check_registered(self):
         # --- Check for registration.
         if not self.subtensor.is_hotkey_registered(
-            netuid=self.config.netuid,
+            netuid=os.getenv("BT_NETUID"),
             hotkey_ss58=self.wallet.hotkey.ss58_address,
         ):
             bt.logging.error(
@@ -148,9 +148,7 @@ class BaseNeuron(ABC):
         """
         Check if enough epoch blocks have elapsed since the last checkpoint to sync.
         """
-        return (
-            self.block - self.metagraph.last_update[self.uid]
-        ) > self.config.neuron.epoch_length
+        return True if self.block % self.config.neuron.epoch_length == 0 else False
 
     def should_set_weights(self) -> bool:
         # Don't set weights on initialization.
@@ -162,11 +160,7 @@ class BaseNeuron(ABC):
             return False
 
         # Define appropriate logic for when set weights.
-        return (
-            (self.block - self.metagraph.last_update[self.uid])
-            > self.config.neuron.epoch_length
-            and self.neuron_type != "MinerNeuron"
-        )  # don't set weights if you're a miner
+        return True 
 
     def save_state(self):
         bt.logging.warning(

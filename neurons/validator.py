@@ -40,13 +40,8 @@ from scipy.special import expit
 
 load_dotenv()
 
-config = validator_config()
-
 TASK_STRINGS = [
-    "text2text",
-    "text2speech",
-    "speech2text",
-    "speech2speech"
+    "text2text"
 ]
 
 TARGET_LANGUAGES = [
@@ -83,7 +78,7 @@ class Validator(BaseValidatorNeuron):
     """
 
     def __init__(self, config=None):
-        super(Validator, self).__init__(config=config)
+        super(Validator, self).__init__(config=validator_config())
         self.total_miners = len(self.metagraph.uids)
         self.validated = set()
         self.batch_size = 50
@@ -93,7 +88,7 @@ class Validator(BaseValidatorNeuron):
         self.load_state()
         
     def process(self, synapse_query):
-        return translation.process(**synapse_query.data)
+        return translation.process(synapse_query)
 
     def get_batch(self, batchsize):
         batch = []
@@ -182,9 +177,9 @@ class Validator(BaseValidatorNeuron):
             "model": "meta-llama-3-7b"
         }
         response = requests.post(url, json=body, timeout=30)
-        
+        query = None
         if task_string.startswith("speech"):
-            query = self.forward(
+            query = self.process(
                 ValidatorRequest(
                     data={
                         "input": response.json()["choices"][0]["message"]["content"],
@@ -194,14 +189,14 @@ class Validator(BaseValidatorNeuron):
                     }
                 )
             )
-        return Translate(ValidatorRequest(
+        return ValidatorRequest(
             data={
                 "input": query,
                 "task_string": task_string,
                 "source_language": source_language,
                 "target_language": target_language
             }
-        ))
+        )
 
 
 # The main function parses the configuration and runs the validator.

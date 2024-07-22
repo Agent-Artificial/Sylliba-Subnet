@@ -1,7 +1,11 @@
+import os
 import numpy as np
 from typing import Tuple, List, Union, Any
 import bittensor
 from numpy import ndarray, dtype, floating, complexfloating
+from dotenv import load_dotenv
+
+load_dotenv()
 
 U32_MAX = 4294967295
 U16_MAX = 65535
@@ -125,8 +129,8 @@ def convert_weights_and_uids_for_emit(
 def process_weights_for_netuid(
         uids,
         weights: np.ndarray,
-        netuid: int,
-        subtensor: "bittensor.subtensor",
+        netuid: int = os.getenv("BT_NETUID"),
+        subtensor: "bittensor.subtensor"= None,
         metagraph: "bittensor.metagraph" = None,
         exclude_quantile: int = 0,
 ) -> Union[tuple[ndarray[Any, dtype[Any]], Union[

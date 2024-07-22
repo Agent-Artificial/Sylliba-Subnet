@@ -22,6 +22,7 @@ import typing
 import os
 import asyncio
 from pathlib import Path
+from loguru import logger
 from importlib import import_module
 import bittensor as bt
 
@@ -31,12 +32,14 @@ import template
 # import base miner class which takes care of most of the boilerplate
 from template.base.miner import BaseMinerNeuron
 from modules.install_module import install_module
+from neurons.config import miner_config
 
 
 class Miner(BaseMinerNeuron):
-    def __init__(self, config=None, module_name="translation"):
+    
+    def __init__(self, config=miner_config(), module_name="translation"):
         super(Miner, self).__init__(config=config)
-
+        logger.info(config)
         self.module_configs = self.get_module_configs()
         self.module_config = self.module_configs[module_name]
         self.module_name = module_name
@@ -148,11 +151,13 @@ class Miner(BaseMinerNeuron):
         if synapse.dendrite is None or synapse.dendrite.hotkey is None:
             bt.logging.warning("Received a request without a dendrite or hotkey.")
             return 0.0
+        logger.info(self.metagraph.hotkeys)
         
         # TODO(developer): Define how miners should prioritize requests.
         caller_uid = self.metagraph.hotkeys.index(
             synapse.dendrite.hotkey
         )  # Get the caller index.
+        print(caller_uid)
         priority = float(
             self.metagraph.S[caller_uid]
         )  # Return the stake as the priority.

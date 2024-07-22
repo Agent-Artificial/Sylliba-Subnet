@@ -21,8 +21,8 @@ read -p "Enter your miner external PORT: "  BT_AXON_EXTERNAL_PORT
 read -p "Enter your miner external IP: " BT_AXON_EXTERNAL_IP
 read -p "Enter your miner max workers: " BT_AXON_MAX_WORERS
 read -p "Enter your miner coldkey: " BT_MINER_COLDKEY
-read -p "Enter your miner hotkey: " BT_WMINERHOTKEY
-read -p "Enter your validator coldkey: " BT_VALDIATOR_COLDKEY
+read -p "Enter your miner hotkey: " BT_MINER_HOTKEY
+read -p "Enter your validator coldkey: " BT_VALIDATOR_COLDKEY
 read -p "Enter your validator hotkey: " BT_VALIDATOR_HOTKEY
 read -p "Enter your wallet path: " BT_WALLET_PATH
 read -p "Enter your text_inference url: " INFERENCE_URL

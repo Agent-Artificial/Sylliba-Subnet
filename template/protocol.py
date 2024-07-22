@@ -76,11 +76,7 @@ class Translate(bt.Synapse):
         Returns:
          - str: unencoded string
         """
-        try:
-            return base64.b64decode(value.text).decode("utf-8")
-        except HTTPException as e:
-            logger.error(f"failed to deserialize {e}")
-            return value.text
+        return value
         
     def serilize(self, value) -> str:
         """
@@ -89,6 +85,6 @@ class Translate(bt.Synapse):
         Returns:
          - str: encoded string
         """
-        return base64.b64encode(value.encode("utf-8")).decode("utf-8") + "\n"
+        return value
     
         
