@@ -28,7 +28,6 @@ import bittensor as bt
 
 # Bittensor Miner Template:
 import template
-
 # import base miner class which takes care of most of the boilerplate
 from template.base.miner import BaseMinerNeuron
 from modules.install_module import install_module

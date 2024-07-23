@@ -85,10 +85,16 @@ class Validator(BaseValidatorNeuron):
         self.current_index = 0
         self.current_batch = self.get_batch(self.batch_size)
         bt.logging.info("load_state()")
+        self.now = time.time()
         self.load_state()
         
+        
     def process(self, synapse_query):
-        return translation.process(synapse_query)
+        try:
+            return translation.process(synapse_query)
+        except Exception as e:
+            bt.logging.error(f"Error processing translation request {e}. \n{synapse_query}")
+            return ""
 
     def get_batch(self, batchsize):
         batch = []
@@ -139,7 +145,9 @@ class Validator(BaseValidatorNeuron):
             # Updating the scores
             self.update_scores(results[i][0], results[i][1])
         # Set weights
-        self.set_weights()
+        self.now = time.time()
+        if self.now % 10 == 0:
+            self.set_weights()
         return await forward(self)
         
     def process_validator_output(validator_output, reference_set):
