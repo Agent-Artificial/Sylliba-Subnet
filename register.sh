@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source .venv/bin/activate
-source.env
+source .env
 
 read -p "Launching a miner or a validator? (m/v) " -n 1 -r
 

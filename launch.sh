@@ -3,6 +3,8 @@
 source .venv/bin/activate
 source .env
 
+pip install -e .
+
 read -p "Launching a miner or a validator? (m/v) " -n 1 -r
 
 if [[ $REPLY =~ ^[Mm]$ ]]
