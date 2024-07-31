@@ -8,6 +8,5 @@ numpy
 setuptools
 proto-plus
 jinja2
-git+https://github.com/huggingface/transformers
 loguru
 python-dotenv
