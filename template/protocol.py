@@ -17,11 +17,13 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+
 from fastapi import HTTPException, Response
 from typing import Optional, Any, Dict
 import bittensor as bt
 from loguru import logger
 from pydantic import BaseModel
+
 
 import base64
 
@@ -62,7 +64,6 @@ class Translate(bt.Synapse):
             - target_language: Enum[TARGET_LANGUAGE] - the target language of the text
         miner_response: Optional[Response] = None - normal response object of the miners
     """
-
     # Required request input, filled by sending dendrite caller.
     validator_request: Optional[ValidatorRequest] = None
 

@@ -224,9 +224,9 @@ class Translation:
             else:
                 input_data = self._process_text_inputs(input_data, src_lang)
                 
-            logger.debug(str(input_data)[:30])
-            logger.debug(type(input_data))
-            logger.debug(kwargs)
+            #logger.debug(str(input_data)[:30])
+            #logger.debug(type(input_data))
+            #logger.debug(kwargs)
             output = None
             try:
                 if self.task_string.endswith("speech"):
@@ -236,8 +236,8 @@ class Translation:
             except AttributeError as e:
                 logger.error(f"Error processing translation: {e}")
                 raise ValueError(f"Error processing translation: {e}") from e
-            logger.debug(output)
-            logger.debug(type(output))
+            #logger.debug(output)
+            #logger.debug(type(output))
             return output
         
         except Exception as e:

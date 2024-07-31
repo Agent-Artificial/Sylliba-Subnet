@@ -51,7 +51,7 @@ async def query_synapse(my_uid, wallet_name, hotkey, network, netuid):
                 if i % 5 == 0:
                     print()
                 if isinstance(chunk, list):
-                    print(chunk[0], end="", flush=True)
+                    print(chunk[0][:25], end="", flush=True)
                 else:
                     # last object yielded is the synapse itself with completion filled
                     synapse = chunk

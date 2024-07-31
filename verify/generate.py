@@ -18,10 +18,10 @@ def main(args):
     signature = keypair.sign(data=message)
 
     file_contents = f"{message}\n\tSigned by: {keypair.ss58_address}\n\tSignature: {signature.hex()}"
-    print(file_contents)
+    print(file_contents[:30])
     open("message_and_signature.txt", "w").write(file_contents)
 
-    print(f"Signature generated and saved to message_and_signature.txt")
+    print("Signature generated and saved to message_and_signature.txt")
 
 
 if __name__ == "__main__":

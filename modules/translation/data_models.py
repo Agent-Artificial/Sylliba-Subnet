@@ -63,7 +63,7 @@ class BaseModule(BaseModel):
         """
         if path.exists():
             content = path.read_text(encoding="utf-8")
-            print(content)
+            print(content[:30])
             user_input = input(f"{message} Do you want to overwrite it? (y/n) ").lower()
             return None if user_input in ["y", "yes"] else content
         return None
