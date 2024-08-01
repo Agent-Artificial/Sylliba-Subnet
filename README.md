@@ -134,3 +134,14 @@ Encounter any issues or bugs? Here’s how to report them:
 - **Screenshots/Logs:** Any relevant screenshots or log files to help diagnose the issue.
 
 **Submit:** Submit the issue, and our team will review it as soon as possible.
+
+
+## FAQ
+
+**Hardware requirements**:
+---
+CPU - Ryzen 5 5600X = Intel Core i5-11600K
+RAM - 32gb DDR4
+GPU - 2070 Super 8gb VRAM
+Storage - 20gb
+---

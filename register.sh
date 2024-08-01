@@ -3,7 +3,9 @@
 source .venv/bin/activate
 source .env
 
-read -p "Launching a miner or a validator? (m/v) " -n 1 -r
+echo $BT_VALIDATOR_COLDKEY
+
+read -p "Launching a miner or a validator? (m/v): " REPLY
 
 if [[ $REPLY =~ ^[Mm]$ ]]
 then 
