@@ -114,11 +114,11 @@ class BaseValidatorNeuron(BaseNeuron):
 
     async def concurrent_forward(self):
         coroutines = [
-            self.forward() for _ in range(self.config.neuron.num_concurrent_forwards)
+            await self.forward() for _ in range(self.config.neuron.num_concurrent_forwards)
         ]
         await asyncio.gather(*coroutines)
 
-    def run(self):
+    async def run(self):
         """
         Initiates and manages the main loop for the miner on the Bittensor network. The main loop handles graceful shutdown on keyboard interrupts and logs unforeseen errors.
 
@@ -171,7 +171,7 @@ class BaseValidatorNeuron(BaseNeuron):
             bt.logging.error(f"Error during validation: {str(err)}")
             bt.logging.debug(str(print_exception(type(err), err, err.__traceback__)))
 
-    def run_in_background_thread(self):
+    async def run_in_background_thread(self):
         """
         Starts the validator's operations in a background thread upon entering the context.
         This method facilitates the use of the validator in a 'with' statement.
