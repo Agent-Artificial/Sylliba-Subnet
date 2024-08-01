@@ -1,6 +1,11 @@
 from bittensor.axon import axon, FastAPIThreadedServer
 from template.protocol import ValidatorRequest
+import os
 import bittensor
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class TranslationRequest(ValidatorRequest):
     def __init__(self, data: dict):
@@ -8,64 +13,49 @@ class TranslationRequest(ValidatorRequest):
         self.data = data
         
 # Define a custom request forwarding function using your synapse class
-    def forward( synapse: ValidatorRequest ) -> ValidatorRequest:
+    def forward(synapse: ValidatorRequest) -> ValidatorRequest:
         # Apply custom logic to synapse and return it
         synapse.validator_request = synapse.data
         return synapse
 
     # Define a custom request verification function
-    def verify_my_synapse( synapse: MySyanpse ):
-        # Apply custom verification logic to synapse
-        # Optionally raise Exception
-        assert synapse.input == 1
-        ...
+    def verify_my_synapse(self, synapse: ValidatorRequest):
+        assert synapse.validator_request
 
         # Define a custom request blacklist fucntion
-        def blacklist_my_synapse( synapse: MySyanpse ) -> bool:
+        def blacklist_my_synapse(synapse: ValidatorRequest) -> bool:
             # Apply custom blacklist
-            return False ( if non blacklisted ) or True ( if blacklisted )
+            return False if synapse.blacklisted else True
 
         # Define a custom request priority fucntion
-        def prioritize_my_synape( synapse: MySyanpse ) -> float:
+        def prioritize_my_synape(synapse: ValidatorRequest) -> float:
             # Apply custom priority
             return 1.0
 
         # Initialize Axon object with a custom configuration
         my_axon = bittensor.axon(
-            config=my_config,
-            wallet=my_wallet,
-            port=9090,
-            ip="192.0.2.0",
-            external_ip="203.0.113.0",
-            external_port=7070
+            config=self.model_config,
+            wallet=self.wallet,
+            port=os.getenv("BT_AXON_PORT"),
+            ip=os.getenv("BT_AXON_IP"),
+            external_ip=os.getenv("BT_AXON_EXTERNAL_IP"),
+            external_port=os.getenv("BT_AXON_EXTERNAL_PORT"),
         )
 
         # Attach the endpoint with the specified verification and forward functions.
         my_axon.attach(
-            forward_fn = forward_my_synapse,
-            verify_fn = verify_my_synapse,
-            blacklist_fn = blacklist_my_synapse,
-            priority_fn = prioritize_my_synape
+            forward_fn=self.forward,
+            verify_fn=self.verify_my_synapse,
+            blacklist_fn=blacklist_my_synapse,
+            priority_fn=prioritize_my_synape
         )
 
         # Serve and start your axon.
         my_axon.serve(
-            netuid = ...
-            subtensor = ...
+            netuid=os.getenv("BT_NETUID"),
+            subtensor=bittensor.subtensor(
+                config=self.config["subtensor"]
+            )
         ).start()
 
-        # If you have multiple forwarding functions, you can chain attach them.
-        my_axon.attach(
-            forward_fn = forward_my_synapse,
-            verify_fn = verify_my_synapse,
-            blacklist_fn = blacklist_my_synapse,
-            priority_fn = prioritize_my_synape
-        ).attach(
-            forward_fn = forward_my_synapse_2,
-            verify_fn = verify_my_synapse_2,
-            blacklist_fn = blacklist_my_synapse_2,
-            priority_fn = prioritize_my_synape_2
-        ).serve(
-            netuid = ...
-            subtensor = ...
-        ).start()
+        return synapse

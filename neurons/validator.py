@@ -17,7 +17,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-
+import asyncio
 import time
 import os
 import requests
@@ -88,7 +88,6 @@ class Validator(BaseValidatorNeuron):
         self.now = time.time()
         self.load_state()
         
-        
     def process(self, synapse_query):
         try:
             return translation.process(synapse_query)
@@ -129,7 +128,9 @@ class Validator(BaseValidatorNeuron):
         try:
             for i in range(6):
                 batch = self.get_batch(self.batch_size)
-                responses = self.dendrite.query(synapse_query, axons=[self.metagraph.axons[uid] for uid in batch])
+                axons = [axon for axon in self.metagraph.axons]
+                
+                responses = self.dendrite.query(axons, batch)
                 # Getting the responses
                 for j in len(responses):
                     if responses[j].success:
@@ -185,26 +186,17 @@ class Validator(BaseValidatorNeuron):
             "model": "meta-llama-3-7b"
         }
         response = requests.post(url, json=body, timeout=30)
-        query = None
-        if task_string.startswith("speech"):
-            query = self.process(
-                ValidatorRequest(
-                    data={
-                        "input": response.json()["choices"][0]["message"]["content"],
-                        "task_string": "text2speech",
-                        "source_language": "English",
-                        "target_language": "English"
-                    }
-                )
+        return self.process(
+            ValidatorRequest(
+                data={
+                    "input": response.json()["choices"][0]["message"]["content"],
+                    "task_string": "text2speech",
+                    "source_language": "English",
+                    "target_language": "English"
+                }
             )
-        return ValidatorRequest(
-            data={
-                "input": query,
-                "task_string": task_string,
-                "source_language": source_language,
-                "target_language": target_language
-            }
         )
+
 
 
 # The main function parses the configuration and runs the validator.
