@@ -20,9 +20,9 @@
 import time
 import bittensor as bt
 
-from template.protocol import Translate
-from template.validator.reward import get_rewards
-from template.utils.uids import get_random_uids
+from sylliba.protocol import Translate
+from sylliba.validator.reward import get_rewards
+from sylliba.utils.uids import get_random_uids
 
 
 async def forward(self):

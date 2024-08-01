@@ -29,13 +29,13 @@ import os
 from typing import List, Union
 from traceback import print_exception
 
-from template.base.neuron import BaseNeuron
-from template.base.utils.weight_utils import (
+from sylliba.base.neuron import BaseNeuron
+from sylliba.base.utils.weight_utils import (
     process_weights_for_netuid,
     convert_weights_and_uids_for_emit,
     )
-from template.mock import MockDendrite
-from template.utils.config import add_validator_args
+from sylliba.mock import MockDendrite
+from sylliba.utils.config import add_validator_args
 
 from dotenv import load_dotenv
 

@@ -27,9 +27,9 @@ from importlib import import_module
 import bittensor as bt
 
 # Bittensor Miner Template:
-import template
+import sylliba
 # import base miner class which takes care of most of the boilerplate
-from template.base.miner import BaseMinerNeuron
+from sylliba.base.miner import BaseMinerNeuron
 from modules.install_module import install_module
 from neurons.config import miner_config
 
@@ -59,14 +59,14 @@ class Miner(BaseMinerNeuron):
         self.module = import_module(module_name)
 
     async def forward(
-        self, synapse: template.protocol.Translate
-    ) -> template.protocol.Translate:
+        self, synapse: sylliba.protocol.Translate
+    ) -> sylliba.protocol.Translate:
         response = asyncio.run(self.module.process(synapse.validator_request))
         synapse.miner_response = response.text
         return synapse
 
     async def blacklist(
-        self, synapse: template.protocol.Translate
+        self, synapse: sylliba.protocol.Translate
     ) -> typing.Tuple[bool, str]:
         """
         Determines whether an incoming request should be blacklisted and thus ignored. Your implementation should
@@ -127,7 +127,7 @@ class Miner(BaseMinerNeuron):
         )
         return False, "Hotkey recognized!"
 
-    async def priority(self, synapse: template.protocol.Translate) -> float:
+    async def priority(self, synapse: sylliba.protocol.Translate) -> float:
         """
         The priority function determines the order in which requests are handled. More valuable or higher-priority
         requests are processed before others. You should design your own priority mechanism with care.

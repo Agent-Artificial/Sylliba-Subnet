@@ -1,5 +1,5 @@
 from bittensor.axon import axon, FastAPIThreadedServer
-from template.protocol import ValidatorRequest
+from sylliba.protocol import ValidatorRequest
 import bittensor
 
 class TranslationRequest(ValidatorRequest):

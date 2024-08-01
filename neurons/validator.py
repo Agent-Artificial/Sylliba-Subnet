@@ -26,11 +26,11 @@ import random
 import bittensor as bt
 
 # import base validator class which takes care of most of the boilerplate
-from template.base.validator import BaseValidatorNeuron
+from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
-from template.validator import forward
+from sylliba.validator import forward
 from neurons.config import validator_config
-from template.protocol import ValidatorRequest, Translate, Response
+from sylliba.protocol import ValidatorRequest, Translate, Response
 from modules.translation.translation import Translation
 from dotenv import load_dotenv
 import numpy as np
