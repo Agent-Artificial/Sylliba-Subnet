@@ -137,7 +137,7 @@ class StreamMiner(ABC):
         """
         ...
 
-    def run(self):
+    async def run(self):
         """
         Runs the miner logic. This method starts the miner's operations, including
         listening for incoming requests and periodically updating the miner's knowledge
@@ -164,7 +164,7 @@ class StreamMiner(ABC):
         bt.logging.info(
             f"Starting axon server on port: {self.config.axon.port}"
         )
-        self.axon.start()
+        await self.axon.start()
 
         # --- Run until should_exit = True.
         self.last_epoch_block = self.subtensor.get_current_block()
@@ -247,12 +247,12 @@ class StreamMiner(ABC):
             self.is_running = False
             bt.logging.debug("Stopped")
 
-    def __enter__(self):
+    async def __enter__(self):
         """
         Starts the miner's operations in a background thread upon entering the context.
         This method facilitates the use of the miner in a 'with' statement.
         """
-        self.run_in_background_thread()
+        await self.run_in_background_thread()
 
     def __exit__(self, exc_type, exc_value, traceback):
         """

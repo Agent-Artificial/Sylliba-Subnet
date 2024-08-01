@@ -71,8 +71,6 @@ class BaseMinerNeuron(BaseNeuron):
         bt.logging.info(f"Attaching forward function to miner axon.")
         self.axon.attach(
             forward_fn=self.forward,
-            blacklist_fn=self.blacklist,
-            priority_fn=self.priority,
         )
         bt.logging.info(f"Axon created: {self.axon}")
 
@@ -116,7 +114,7 @@ class BaseMinerNeuron(BaseNeuron):
         await self.axon.serve(netuid=os.getenv("BT_NETUID"), subtensor=self.subtensor)
 
         # Start  starts the miner's axon, making it active on the network.
-        self.axon.start()
+        await self.axon.start()
 
         bt.logging.info(f"Miner starting at block: {self.block}")
 
@@ -173,13 +171,13 @@ class BaseMinerNeuron(BaseNeuron):
             self.is_running = False
             bt.logging.debug("Stopped")
 
-    def __enter__(self):
+    async def __enter__(self):
         """
         Starts the miner's operations in a background thread upon entering the context.
         This method facilitates the use of the miner in a 'with' statement.
         """
         self.run_in_background_thread()
-        return self
+        return await self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """

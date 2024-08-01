@@ -59,9 +59,9 @@ class Miner(BaseMinerNeuron):
         self.module = import_module(module_name)
 
     async def forward(
-        self, synapse: template.protocol.Translate
-    ) -> template.protocol.Translate:
-        response = asyncio.run(self.module.process(synapse.validator_request))
+        self, synapse: sylliba.protocol.TranslateRequest
+    ) -> sylliba.protocol.TranslateRequest:
+        response = await self.module.process(synapse.validator_request)
         synapse.miner_response = response.text
         return synapse
 
@@ -103,7 +103,7 @@ class Miner(BaseMinerNeuron):
             return True, "Missing dendrite or hotkey"
 
         # TODO(developer): Define how miners should blacklist requests.
-        uid = self.metagraph.hotkeys.index(synapse.dendrite.hotkey)
+        uid = await self.metagraph.hotkeys.index(synapse.dendrite.hotkey)
         if (
             not self.config.blacklist.allow_non_registered
             and synapse.dendrite.hotkey not in self.metagraph.hotkeys
