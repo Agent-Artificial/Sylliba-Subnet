@@ -17,10 +17,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from fastapi import HTTPException, Response
 from typing import Optional, Any, Dict, Union
 import bittensor as bt
-from loguru import logger
 from pydantic import BaseModel
 
 import base64
@@ -53,7 +51,7 @@ class ValidatorRequest(BaseModel):
     target_language: str
         
     
-class Translate(bt.Synapse):
+class TranslateRequest(bt.Synapse):
     """
     Base class for Synapse communication object for translating text.
 
@@ -79,7 +77,7 @@ class Translate(bt.Synapse):
          - str: unencoded string
         """
         return base64.b64decode(value)
-        
+    
     def serilize(self, value) -> str:
         """
         Serializes the given string into a base64 encoded string.

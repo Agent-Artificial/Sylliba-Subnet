@@ -59,14 +59,14 @@ class Miner(BaseMinerNeuron):
         self.module = import_module(module_name)
 
     async def forward(
-        self, synapse: sylliba.protocol.Translate
-    ) -> sylliba.protocol.Translate:
+        self, synapse: sylliba.protocol.TranslateRequest
+    ) -> sylliba.protocol.TranslateRequest:
         response = asyncio.run(self.module.process(synapse.validator_request))
         synapse.miner_response = response.text
         return synapse
 
     async def blacklist(
-        self, synapse: sylliba.protocol.Translate
+        self, synapse: sylliba.protocol.TranslateRequest
     ) -> typing.Tuple[bool, str]:
         """
         Determines whether an incoming request should be blacklisted and thus ignored. Your implementation should
