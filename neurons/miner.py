@@ -114,9 +114,9 @@ class Miner(BaseMinerNeuron):
             )
             return True, "Unrecognized hotkey"
 
-        if self.config.blacklist.force_validator_permit:
             # If the config is set to force validator permit, then we should only allow requests from validators.
-            if not self.metagraph.validator_permit[uid]:
+        if not self.metagraph.validator_permit[uid]:
+            if self.config.blacklist.force_validator_permit:
                 bt.logging.warning(
                     f"Blacklisting a request from non-validator hotkey {synapse.dendrite.hotkey}"
                 )
@@ -127,7 +127,7 @@ class Miner(BaseMinerNeuron):
         )
         return False, "Hotkey recognized!"
 
-    async def priority(self, synapse: sylliba.protocol.Translate) -> float:
+    async def priority(self, synapse: sylliba.protocol.TranslateRequest) -> float:
         """
         The priority function determines the order in which requests are handled. More valuable or higher-priority
         requests are processed before others. You should design your own priority mechanism with care.
