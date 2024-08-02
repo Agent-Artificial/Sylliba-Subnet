@@ -20,9 +20,9 @@
 import time
 import bittensor as bt
 
-from template.protocol import Translate
-from template.validator.reward import get_rewards
-from template.utils.uids import get_random_uids
+from sylliba.protocol import TranslateRequest
+from sylliba.validator.reward import get_rewards
+from sylliba.utils.uids import get_random_uids
 
 
 async def forward(self):
@@ -44,7 +44,7 @@ async def forward(self):
         # Send the query to selected miner axons in the network.
         axons=[self.metagraph.axons[uid] for uid in miner_uids],
         # Construct a dummy query. This simply contains a single integer.
-        synapse=Translate(data=self.step),
+        synapse=TranslateRequest(data=self.step),
         # All responses have the deserialize function called on them before returning.
         # You are encouraged to define your own deserialization function.
         deserialize=True,

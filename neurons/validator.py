@@ -26,16 +26,14 @@ import random
 import bittensor as bt
 
 # import base validator class which takes care of most of the boilerplate
-from template.base.validator import BaseValidatorNeuron
+from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
-from template.validator import forward
+from sylliba.validator import forward
 from neurons.config import validator_config
-from template.protocol import Translate, ValidatorRequest
+from sylliba.protocol import ValidatorRequest
 from modules.translation.translation import Translation
 from dotenv import load_dotenv
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from scipy.special import expit
+from sylliba.validator import reward
 
 load_dotenv()
 
@@ -161,28 +159,8 @@ class Validator(BaseValidatorNeuron):
             self.set_weights()
         return await forward(self)
         
-    def process_validator_output(validator_output, reference_set):
-        # Convert the validator output to strings
-        validator_strings = [str(num) for num in validator_output]
-
-        # Combine validator output and reference set
-        all_strings = validator_strings + reference_set
-
-        # Tokenize and vectorize
-        vectorizer = CountVectorizer().fit(all_strings)
-        vectors = vectorizer.transform(all_strings).toarray()
-
-        # Separate validator vectors and reference vectors
-        validator_vectors = vectors[:len(validator_strings)]
-        reference_vectors = vectors[len(validator_strings):]
-
-        # Compute cosine similarity
-        similarities = cosine_similarity(validator_vectors, reference_vectors)
-
-        # Normalize using sigmoid function
-        normalized_similarities = expit(similarities)
-
-        return normalized_similarities
+    def process_validator_output(self, reference_set, validator_output):
+        return reward(query=reference_set, response=validator_output)
     
     def generate_query(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")

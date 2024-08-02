@@ -17,13 +17,9 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-
-from fastapi import HTTPException, Response
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, Union
 import bittensor as bt
-from loguru import logger
 from pydantic import BaseModel
-
 
 import base64
 
@@ -49,10 +45,13 @@ import base64
 
 
 class ValidatorRequest(BaseModel):
-    data: Dict[str, Any]
+    input: str
+    task_string: str
+    soruce_language: str
+    target_language: str
         
     
-class Translate(bt.Synapse):
+class TranslateRequest(bt.Synapse):
     """
     Base class for Synapse communication object for translating text.
 
@@ -65,7 +64,7 @@ class Translate(bt.Synapse):
         miner_response: Optional[Response] = None - normal response object of the miners
     """
     # Required request input, filled by sending dendrite caller.
-    validator_request: Optional[ValidatorRequest] = None
+    validator_request: Optional[Union[Dict[str, Any], ValidatorRequest]] = None
 
     # Optional request output, filled by receiving axon.
     miner_response: Optional[Any] = None
@@ -77,8 +76,8 @@ class Translate(bt.Synapse):
         Returns:
          - str: unencoded string
         """
-        return value
-        
+        return base64.b64decode(value)
+    
     def serilize(self, value) -> str:
         """
         Serializes the given string into a base64 encoded string.
@@ -86,6 +85,6 @@ class Translate(bt.Synapse):
         Returns:
          - str: encoded string
         """
-        return value
+        return base64.b64encode(value)
     
         

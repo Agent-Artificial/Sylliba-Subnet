@@ -26,24 +26,20 @@ import threading
 import bittensor as bt
 import os
 
-from bittensor.axon import FastAPIThreadedServer
 from typing import List, Union
 from traceback import print_exception
 
-from template.base.neuron import BaseNeuron
-from template.base.utils.weight_utils import (
+from sylliba.base.neuron import BaseNeuron
+from sylliba.base.utils.weight_utils import (
     process_weights_for_netuid,
     convert_weights_and_uids_for_emit,
     )
-from template.utils.config import add_validator_args
-from template.validator.forward import forward
-from template.validator.reward import reward
+from sylliba.mock import MockDendrite
+from sylliba.utils.config import add_validator_args
 
 from dotenv import load_dotenv
 
 load_dotenv()
-
-
 
 
 class BaseValidatorNeuron(BaseNeuron):
@@ -65,10 +61,10 @@ class BaseValidatorNeuron(BaseNeuron):
         self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
 
         # Dendrite lets us send messages to other nodes (axons) in the network.
-        # if self.config.mock:
-        #     self.dendrite = MockDendrite(wallet=self.wallet)
-        # else:
-        self.dendrite = bt.dendrite(wallet=self.wallet)
+        if self.config.mock:
+            self.dendrite = MockDendrite(wallet=self.wallet)
+        else:
+            self.dendrite = bt.dendrite(wallet=self.wallet)
         bt.logging.info(f"Dendrite: {self.dendrite}")
 
         # Set up initial scoring weights for validation
@@ -93,13 +89,12 @@ class BaseValidatorNeuron(BaseNeuron):
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
 
-    def serve_axon(self, netuid=None):
+    def serve_axon(self, netuid: str=None):
         """Serve axon to enable external connections."""
 
         bt.logging.info("serving ip to chain...")
         try:
             self.axon = bt.axon(wallet=self.wallet, config=self.config)
-            self.axon.fast_server = FastAPIThreadedServer(config=self.config)
 
             try:
                 self.subtensor.serve_axon(
@@ -107,7 +102,7 @@ class BaseValidatorNeuron(BaseNeuron):
                     axon=self.axon,
                 )
                 bt.logging.info(
-                    f"Running validator {self.axon} on network: {self.config['subtensor']} with netuid: {self.config['netuid']}"
+                    f"Running validator {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
                 )
             except Exception as e:
                 bt.logging.error(f"Failed to serve Axon with exception: {e}")
@@ -232,7 +227,7 @@ class BaseValidatorNeuron(BaseNeuron):
         # Check if self.scores contains any NaN values and log a warning if it does.
         if np.isnan(self.scores).any():
             bt.logging.warning(
-                "Scores contain NaN values. This may be due to a lack of responses from miners, or a bug in your reward functions."
+                f"Scores contain NaN values. This may be due to a lack of responses from miners, or a bug in your reward functions."
             )
 
         # Calculate the average reward for each uid across non-zero values.

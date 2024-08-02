@@ -19,6 +19,9 @@
 import numpy as np
 from typing import List
 import bittensor as bt
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from scipy.special import expit
 
 
 def reward(query: int, response: int) -> float:
@@ -30,11 +33,31 @@ def reward(query: int, response: int) -> float:
     - float: The reward value for the miner.
     """
     bt.logging.info(f"In rewards, query val: {query}, response val: {response}, rewards val: {1.0 if response == query * 2 else 0}")
-    return 1.0 if response == query * 2 else 0
+    
+    # Convert the validator output to strings
+    validator_strings = [str(num) for num in response]
+    
+    # Combine validator output and reference set
+    all_strings = validator_strings + query
+    
+    # Tokenize and vectorize
+    vectorizer = CountVectorizer().fit(all_strings)
+    vectors = vectorizer.transform(all_strings).toarray()
+    
+    # Separate validator vectors and reference vectors
+    validator_vectors = vectors[:len(validator_strings)]
+    reference_vectors = vectors[len(validator_strings):]
+    
+    # Compute cosine similarity
+    similarities = cosine_similarity(validator_vectors, reference_vectors)
+    
+    # Normalize using sigmoid function
+    normalized_similarities = expit(similarities)
+    
+    return normalized_similarities    
 
 
 def get_rewards(
-    self,
     query: int,
     responses: List[float],
 ) -> np.ndarray:
