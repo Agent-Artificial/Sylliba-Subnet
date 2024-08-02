@@ -16,26 +16,26 @@ class TranslationRequest(ValidatorRequest):
         self.blacklisted = []
         
 # Define a custom request forwarding function using your synapse class
-    def forward( synapse: ValidatorRequest ) -> ValidatorRequest:
+    def forward(synapse: ValidatorRequest) -> ValidatorRequest:
         # Apply custom logic to synapse and return it
         synapse.validator_request = synapse.data
         return synapse
 
     # Define a custom request verification function
-    def verify_my_synapse( synapse: ValidatorRequest ):
+    def verify_my_synapse(synapse: ValidatorRequest):
         # Apply custom verification logic to synapse
         # Optionally raise Exception
         assert synapse.validator_request is not None
 
         # Define a custom request blacklist fucntion
-        def blacklist_my_synapse( synapse: ValidatorRequest ) -> bool:
+        def blacklist_my_synapse(synapse: ValidatorRequest) -> bool:
             # Apply custom blacklist
             if synapse.validator_request is not None:
                 return False
             return True
 
         # Define a custom request priority fucntion
-        def prioritize_my_synape( synapse: ValidatorRequest ) -> float:
+        def prioritize_my_synape(synapse: ValidatorRequest) -> float:
             # Apply custom priority
             return 1.0
 
