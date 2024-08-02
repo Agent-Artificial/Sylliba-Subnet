@@ -30,10 +30,9 @@ from template.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from template.validator import forward
 from neurons.config import validator_config
-from template.protocol import ValidatorRequest, Translate, Response
+from template.protocol import Translate, ValidatorRequest
 from modules.translation.translation import Translation
 from dotenv import load_dotenv
-import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.special import expit
@@ -67,6 +66,14 @@ TOPICS = [
 
 translation = Translation()
 
+
+class TranslationRequest(Translate):
+    def __init__(self, **kwargs):
+        super(TranslationRequest, self).__init__(**kwargs)
+        self.validator_request = ValidatorRequest(data=kwargs)
+            
+    
+        
 
 class Validator(BaseValidatorNeuron):
     """
@@ -122,15 +129,18 @@ class Validator(BaseValidatorNeuron):
         topic = random.choice(TOPICS)
         # Generating the query
         successful = []
-        synapse_query = self.generate_query(target_language, source_language, task_string, topic)
-        reference_set = self.process(synapse_query)
+        sample_request = self.generate_query(target_language, source_language, task_string, topic)
+        
+        reference_set = self.process(sample_request)
         # Querying the miners
+        axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
         try:
             for i in range(6):
                 batch = self.get_batch(self.batch_size)
-                axons = [axon for axon in self.metagraph.axons]
-                
-                responses = self.dendrite.query(axons, batch)
+                responses = await self.dendrite.query(
+                    axons,
+                    TranslationRequest()
+                )
                 # Getting the responses
                 for j in len(responses):
                     if responses[j].success:
@@ -201,7 +211,6 @@ class Validator(BaseValidatorNeuron):
 
 # The main function parses the configuration and runs the validator.
 if __name__ == "__main__":
-    with Validator() as validator:
-        while True:
-            bt.logging.info(f"Validator running... {time.time()}")
-            time.sleep(5)
+    validator = Validator()
+    validator.run()
+    

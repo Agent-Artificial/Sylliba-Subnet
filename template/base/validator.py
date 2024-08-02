@@ -26,6 +26,7 @@ import threading
 import bittensor as bt
 import os
 
+from bittensor.axon import FastAPIThreadedServer
 from typing import List, Union
 from traceback import print_exception
 
@@ -41,6 +42,8 @@ from template.validator.reward import reward
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
 
 
 class BaseValidatorNeuron(BaseNeuron):
@@ -90,12 +93,13 @@ class BaseValidatorNeuron(BaseNeuron):
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
 
-    def serve_axon(self, netuid: str=None):
+    def serve_axon(self, netuid=None):
         """Serve axon to enable external connections."""
 
         bt.logging.info("serving ip to chain...")
         try:
             self.axon = bt.axon(wallet=self.wallet, config=self.config)
+            self.axon.fast_server = FastAPIThreadedServer(config=self.config)
 
             try:
                 self.subtensor.serve_axon(
@@ -103,7 +107,7 @@ class BaseValidatorNeuron(BaseNeuron):
                     axon=self.axon,
                 )
                 bt.logging.info(
-                    f"Running validator {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
+                    f"Running validator {self.axon} on network: {self.config['subtensor']} with netuid: {self.config['netuid']}"
                 )
             except Exception as e:
                 bt.logging.error(f"Failed to serve Axon with exception: {e}")
@@ -115,7 +119,7 @@ class BaseValidatorNeuron(BaseNeuron):
 
     async def concurrent_forward(self):
         coroutines = [
-            self.forward() for _ in range(self.config.neuron.num_concurrent_forwards)
+            self.forward() for _ in range(self.config["neuron"]["num_concurrent_forwards"])
         ]
         await asyncio.gather(*coroutines)
 
