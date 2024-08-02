@@ -34,8 +34,9 @@ from template.base.utils.weight_utils import (
     process_weights_for_netuid,
     convert_weights_and_uids_for_emit,
     )
-from template.mock import MockDendrite
 from template.utils.config import add_validator_args
+from template.validator.forward import forward
+from template.validator.reward import reward
 
 from dotenv import load_dotenv
 
@@ -227,7 +228,7 @@ class BaseValidatorNeuron(BaseNeuron):
         # Check if self.scores contains any NaN values and log a warning if it does.
         if np.isnan(self.scores).any():
             bt.logging.warning(
-                f"Scores contain NaN values. This may be due to a lack of responses from miners, or a bug in your reward functions."
+                "Scores contain NaN values. This may be due to a lack of responses from miners, or a bug in your reward functions."
             )
 
         # Calculate the average reward for each uid across non-zero values.
