@@ -13,6 +13,16 @@ pip install --upgrade pip
 pip install setuptools wheel
 pip install -r requirements.txt
 
+git clone https://github.com/opentensor/bittensor.git
+
+cd bittensor
+
+git checkout release/7.3.1
+
+pip install -e . 
+
+cd .. 
+
 read -p "Enter your network: " BT_NETWORK
 read -p "Enter your subnet netuid: " BT_NETUID
 read -p "Enter your miner PORT: " BT_AXON_PORT

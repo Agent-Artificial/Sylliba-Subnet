@@ -14,6 +14,7 @@ class TranslationRequest(ValidatorRequest):
         super().__init__()
         self.data = data
         self.blacklisted = []
+        self.fast_server = FastAPIThreadedServer(config)
         
 # Define a custom request forwarding function using your synapse class
     def forward(synapse: ValidatorRequest) -> ValidatorRequest:

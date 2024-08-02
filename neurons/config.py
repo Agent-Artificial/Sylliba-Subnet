@@ -16,7 +16,7 @@ def miner_config():
         },
         "neuron": {
             "name": os.getenv("BT_MINER_COLDKEY"),
-            "full_path": "~/mining/bittensor/bittensor-subnet-template/neurons/miner.py",
+            "full_path": "./neurons/miner.py",
             "events_retention_size": 2 * 1024 * 1024 * 1024,
             "epoch_length": 10,
             "device": "cuda:0",
@@ -55,7 +55,7 @@ def validator_config():
         },
             
         "logging": {
-            "logging_dir": "~/.bittensor/validators",
+            "logging_dir": "~/.bittensor/logs",
         },
         "wallet": {
             "name": os.getenv("BT_VALIDATOR_COLDKEY"),
@@ -71,7 +71,7 @@ def validator_config():
             "moving_average_alpha": 0.1,
             "axon_off": False,
             "vpermit_tao_limit": 4096,
-            "full_path": "~/mining/bittensor/bittensor-subnet-template/neurons/validator.py",
+            "full_path": "./neurons/validator.py",
             "events_retention_size": 2 * 1024 * 1024 * 1024,
             "epoch_length": 10,
             "device": "cuda:0",

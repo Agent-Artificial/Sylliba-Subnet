@@ -1,6 +1,3 @@
-bittensor
-starlette
-pydantic
 rich
 pytest
 torch>=2
