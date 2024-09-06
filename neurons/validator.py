@@ -31,7 +31,7 @@ from sylliba.base.validator import BaseValidatorNeuron
 from sylliba.validator import forward
 from neurons.config import validator_config
 from sylliba.protocol import ValidatorRequest
-from modules.translation.translation import Translation
+from module_validator.modules.translation.translation import Translation
 from dotenv import load_dotenv
 from sylliba.validator import reward
 
@@ -65,7 +65,7 @@ TOPICS = [
 translation = Translation()
 
 
-class TranslationRequest(Translate):
+class TranslationRequest(bt.Synapse):
     def __init__(self, **kwargs):
         super(TranslationRequest, self).__init__(**kwargs)
         self.validator_request = ValidatorRequest(data=kwargs)
@@ -189,6 +189,10 @@ class Validator(BaseValidatorNeuron):
 
 # The main function parses the configuration and runs the validator.
 if __name__ == "__main__":
-    validator = Validator()
-    validator.run()
+    # validator = Validator()
+    # validator.run()
     
+    with Validator() as validator:
+        while True:
+            bt.logging.info(f'validator running ... {time.time()}')
+            time.sleep(5)   

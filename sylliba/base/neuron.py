@@ -135,7 +135,7 @@ class BaseNeuron(ABC):
     def check_registered(self):
         # --- Check for registration.
         if not self.subtensor.is_hotkey_registered(
-            netuid=os.getenv("BT_NETUID"),
+            netuid=int(os.getenv("BT_NETUID")),
             hotkey_ss58=self.wallet.hotkey.ss58_address,
         ):
             bt.logging.error(

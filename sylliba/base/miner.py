@@ -109,9 +109,9 @@ class BaseMinerNeuron(BaseNeuron):
         # Serve passes the axon information to the network + netuid we are hosting on.
         # This will auto-update if the axon port of external ip have changed.
         bt.logging.info(
-            f"Serving miner axon {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {os.getenv('BT_NETUID')}"
+            f"Serving miner axon {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {int(os.getenv('BT_NETUID'))}"
         )
-        await self.axon.serve(netuid=os.getenv("BT_NETUID"), subtensor=self.subtensor)
+        await self.axon.serve(netuid=int(os.getenv("BT_NETUID")), subtensor=self.subtensor)
 
         # Start  starts the miner's axon, making it active on the network.
         await self.axon.start()

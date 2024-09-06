@@ -129,7 +129,7 @@ def convert_weights_and_uids_for_emit(
 def process_weights_for_netuid(
         uids,
         weights: np.ndarray,
-        netuid: int = os.getenv("BT_NETUID"),
+        netuid: int = int(os.getenv("BT_NETUID")),
         subtensor: "bittensor.subtensor"= None,
         metagraph: "bittensor.metagraph" = None,
         exclude_quantile: int = 0,

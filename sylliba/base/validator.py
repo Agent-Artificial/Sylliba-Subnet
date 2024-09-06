@@ -76,7 +76,7 @@ class BaseValidatorNeuron(BaseNeuron):
 
         # Serve axon to enable external connections.
         if not self.config.neuron.axon_off:
-            self.serve_axon(netuid=os.getenv("BT_NETUID"))
+            self.serve_axon(netuid=int(os.getenv("BT_NETUID")))
         else:
             bt.logging.warning("axon off, not serving ip to chain.")
 
@@ -93,24 +93,24 @@ class BaseValidatorNeuron(BaseNeuron):
         """Serve axon to enable external connections."""
 
         bt.logging.info("serving ip to chain...")
+        # try:
+        self.axon = bt.axon(wallet=self.wallet, config=self.config)
+
         try:
-            self.axon = bt.axon(wallet=self.wallet, config=self.config)
-
-            try:
-                self.subtensor.serve_axon(
-                    netuid= netuid or os.getenv("BT_NETUID"),
-                    axon=self.axon,
-                )
-                bt.logging.info(
-                    f"Running validator {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
-                )
-            except Exception as e:
-                bt.logging.error(f"Failed to serve Axon with exception: {e}")
-                pass
-
+            self.subtensor.serve_axon(
+                netuid= netuid or int(os.getenv("BT_NETUID")),
+                axon=self.axon,
+            )
+            bt.logging.info(
+                f"Running validator {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
+            )
         except Exception as e:
-            bt.logging.error(f"Failed to create Axon initialize with exception: {e}")
+            bt.logging.error(f"Failed to serve Axon with exception: {e}")
             pass
+
+        # except Exception as e:
+        #     bt.logging.error(f"Failed to create Axon initialize with exception: {e}")
+        #     pass
 
     async def concurrent_forward(self):
         coroutines = [
@@ -195,7 +195,8 @@ class BaseValidatorNeuron(BaseNeuron):
             self.is_running = False
             bt.logging.debug("Stopped")
 
-    def __enter__(self):
+    async def __enter__(self):
+        print('-----------------------------------------------------------')
         self.run_in_background_thread()
         return self
 
@@ -251,7 +252,7 @@ class BaseValidatorNeuron(BaseNeuron):
         ) = process_weights_for_netuid(
             uids=self.metagraph.uids,
             weights=raw_weights,
-            netuid=os.getenv("BT_NETUID"),
+            netuid=int(os.getenv("BT_NETUID")),
             subtensor=self.subtensor,
             metagraph=self.metagraph,
         )
@@ -271,7 +272,7 @@ class BaseValidatorNeuron(BaseNeuron):
         # Set the weights on chain via our subtensor connection.
         result, msg = self.subtensor.set_weights(
             wallet=self.wallet,
-            netuid=os.getenv("BT_NETUID"),
+            netuid=int(os.getenv("BT_NETUID")),
             uids=uint_uids,
             weights=uint_weights,
             wait_for_finalization=False,

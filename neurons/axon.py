@@ -64,6 +64,6 @@ class TranslationRequest(ValidatorRequest):
 
         # Serve and start your axon.
         my_axon.serve(
-            netuid = os.getenv("BT_NETUID"),
-            subtensor = bittensor.subtensor(os.getenv("BT_NETUID"), config=config),
+            netuid = int(os.getenv("BT_NETUID")),
+            subtensor = bittensor.subtensor(int(os.getenv("BT_NETUID")), config=config),
             ).start()

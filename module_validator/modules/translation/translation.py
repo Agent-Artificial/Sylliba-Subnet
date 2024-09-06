@@ -133,9 +133,9 @@ class Translation:
         Raises:
             None
         """
-        with open("modules/translation/in/audio_request.wav", "wb") as f:
+        with open("./module_validator/modules/translation/in/audio_request.wav", "wb") as f:
             f.write(base64.b64decode(input_data))
-        return "modules/translation/in/audio_request.wav"
+        return "./module_validator/modules/translation/in/audio_request.wav"
     
     def _process_text_inputs(self, input_data: str, src_lang: str) -> Dict[str, torch.Tensor]:
         """
@@ -337,7 +337,7 @@ def speech2text(translation: Translation, miner_request: Optional[TranslationReq
         The processed text output.
     """
     translation_request = miner_request or TranslationRequest(
-        data={"input": "modules/translation/in/audio_request.wav", "task_string": "speech2text", "source_language": "English", "target_language": "French"}
+        data={"input": "./module_validator/modules/translation/in/audio_request.wav", "task_string": "speech2text", "source_language": "English", "target_language": "French"}
     )
     return translation.process(translation_request)
 
@@ -354,13 +354,18 @@ def speech2speech(translation: Translation, miner_request: Optional[TranslationR
         The processed speech output.
     """
     translation_request = miner_request or TranslationRequest(
-        data={"input": "modules/translation/in/audio_request.wav", "task_string": "speech2speech", "source_language": "English", "target_language": "French"}
+        data={"input": "./module_validator/modules/translation/in/audio_request.wav", "task_string": "speech2speech", "source_language": "English", "target_language": "French"}
     )
     return translation.process(translation_request)
+
+
+def process(translation_request: TranslationRequest):
+    translation = Translation()
+    translation.process(miner_request=translation_request)
     
 
 if __name__ == "__main__":
-    translation = Translation(TranslationConfig())
+    translation = Translation()
     result = speech2text(translation)
     print(f"speech2text: {result}")
     result = speech2speech(translation)
