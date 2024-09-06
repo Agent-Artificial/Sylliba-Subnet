@@ -47,7 +47,7 @@ import base64
 class ValidatorRequest(BaseModel):
     input: str
     task_string: str
-    soruce_language: str
+    source_language: str
     target_language: str
         
     

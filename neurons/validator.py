@@ -32,6 +32,7 @@ from sylliba.validator import forward
 from neurons.config import validator_config
 from sylliba.protocol import ValidatorRequest
 from module_validator.modules.translation.translation import Translation
+from module_validator.modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward
 
@@ -63,14 +64,6 @@ TOPICS = [
 ]
 
 translation = Translation()
-
-
-class TranslationRequest(bt.Synapse):
-    def __init__(self, **kwargs):
-        super(TranslationRequest, self).__init__(**kwargs)
-        self.validator_request = ValidatorRequest(data=kwargs)
-            
-    
         
 
 class Validator(BaseValidatorNeuron):
@@ -164,6 +157,12 @@ class Validator(BaseValidatorNeuron):
     
     def generate_query(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")
+        token = os.getenv("INFERENCE_API_KEY")
+        bt.logging.info(token)
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {token}'
+        }
         body = {
             "messages": [
                 {
@@ -171,11 +170,11 @@ class Validator(BaseValidatorNeuron):
                     "content": f"You are an expert story teller. You can write short stories that capture the imagination, send readers on an adventure and complete an alegorical thought all within 100 words. Please write a short story about {topic}. Keep the story short but be sure to use an alegory and complete the idea. This story will be translated into {target_language} so use any relevant cultural ideas or contexts but be sure to write the story in English."
                 }
             ],
-            "model": "meta-llama-3-7b"
+            "model": "gpt-4o"
         }
-        response = requests.post(url, json=body, timeout=30)
+        response = requests.post(url, headers = headers, json = body, timeout=30)
         return self.process(
-            ValidatorRequest(
+            TranslationRequest(
                 data={
                     "input": response.json()["choices"][0]["message"]["content"],
                     "task_string": "text2speech",
