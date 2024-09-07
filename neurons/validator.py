@@ -87,6 +87,7 @@ class Validator(BaseValidatorNeuron):
         self.load_state()
         
     def process(self, synapse_query):
+        bt.logging.info(f"synapse_query:{synapse_query}")
         try:
             return translation.process(synapse_query)
         except Exception as e:
@@ -121,25 +122,30 @@ class Validator(BaseValidatorNeuron):
         # Generating the query
         successful = []
         sample_request = self.generate_query(target_language, source_language, task_string, topic)
-        
+        # bt.logging.info(f"sample_request: {sample_request}")
         reference_set = self.process(sample_request)
         # Querying the miners
-        axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
-        try:
-            for i in range(6):
-                batch = self.get_batch(self.batch_size)
-                responses = await self.dendrite.query(
-                    axons,
-                    TranslationRequest()
-                )
-                # Getting the responses
-                for j in len(responses):
-                    if responses[j].success:
-                        successful.append(responses[j].data, batch[i])
-                    else:
-                        bt.logging.warning(f"Miner {batch[i]} failed to respond.")
-        except Exception as e:
-            bt.logging.error(f"Failed to query miners with exception: {e}")
+        # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
+        # axons = self.metagraph.axons
+        axons = [self.metagraph.axons[10]]
+        bt.logging.info(f"axons:{axons}")
+        # try:
+        for i in range(6):
+            batch = self.get_batch(self.batch_size)
+            responses = self.dendrite.query(
+                axons,
+                sample_request
+            )
+            bt.logging.info(f"")
+            bt.logging.info(f"responses:{responses}")
+            # Getting the responses
+            for j in len(responses):
+                if responses[j].success:
+                    successful.append(responses[j].data, batch[i])
+                else:
+                    bt.logging.warning(f"Miner {batch[i]} failed to respond.")
+        # except Exception as e:
+        #     bt.logging.error(f"Failed to query miners with exception: {e}")
         # Rewarding the miners
         results = []
         for i in range(len(successful)):
@@ -173,16 +179,14 @@ class Validator(BaseValidatorNeuron):
             "model": "gpt-4o"
         }
         response = requests.post(url, headers = headers, json = body, timeout=30)
-        return self.process(
-            TranslationRequest(
-                data={
+        bt.logging.info(f"openairesponse:{response.json()}")
+        
+        return TranslationRequest(data = {
                     "input": response.json()["choices"][0]["message"]["content"],
                     "task_string": "text2speech",
                     "source_language": "English",
                     "target_language": "English"
-                }
-            )
-        )
+                })
 
 
 

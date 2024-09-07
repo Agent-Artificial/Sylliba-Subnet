@@ -25,9 +25,9 @@ def miner_config():
         "subtensor": {
             "network": os.getenv("BT_NETWORK"),
             "chain_endpoint": "",
-            "netuid": int(os.getenv("BT_NETUID")),
             "mock": False,
         },
+        "netuid": int(os.getenv("BT_NETUID")),
         "wandb": {
             "off": True,
             "offline": False,
@@ -39,6 +39,13 @@ def miner_config():
             "force_validator_permit": True,
             "allow_non_registered": False,
             "mock": False,
+        },
+        "axon":{
+            "port": int(os.getenv('BT_AXON_PORT')),
+            "ip": os.getenv('BT_AXON_IP'),
+            "external_port": int(os.getenv('BT_AXON_EXTERNAL_PORT')),
+            "external_ip": os.getenv('BT_AXON_EXTERNAL_IP'),
+            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS')),
         },
     }
 

@@ -12,7 +12,7 @@ from transformers import AutoProcessor, SeamlessM4Tv2Model
 from pydub import AudioSegment
 
 from .data_models import TARGET_LANGUAGES, TASK_STRINGS, TranslationRequest, TranslationConfig
-
+import bittensor as bt
 translation_config = TranslationConfig()
 
 class Translation:
@@ -82,21 +82,27 @@ class Translation:
                 A tuple containing either a string or None, and either a torch.Tensor or None, 
                 representing the processed output.
         """
+        bt.logging.info(f"miner_request:{miner_request}")
+        bt.logging.info(f"miner_requestdata:{miner_request.data}")
         if "input" in miner_request.data:
             self.data_input = miner_request.data["input"]
+            bt.logging.info(f"data_input:{self.data_input}")
         if "task_string" in miner_request.data:
             self.task_string = miner_request.data["task_string"]
+            bt.logging.info(f"task_string:{self.task_string}")
         if "source_language" in miner_request.data:
             self.source_language = miner_request.data["source_language"].title()
+            bt.logging.info(f"source_language:{self.source_language}")
         if "target_language" in miner_request.data:
             self.target_language = miner_request.data["target_language"].title()
-
+            bt.logging.info(f"target_language:{self.target_language}")
         if not self.task_string:
             raise ValueError(f"Invalid task string: {miner_request.data}")
 
         if self.data_input is None:
             raise ValueError("No input provided")
         if self.task_string.startswith("speech"):
+            bt.logging.info("startswith(speech)")
             try:
             
                 self.data_input = self._preprocess(self.data_input)
@@ -112,12 +118,14 @@ class Translation:
                 src_lang=self.target_languages[self.source_language],
                 tgt_lang=self.target_languages[self.target_language]
             )
-            
+        # bt.logging.info(f"output:{output}")    
         if self.task_string.endswith("speech"):
+            bt.logging.info("endswith(speech)")
             output = self._process_audio_output(output)
         else:
             output = output.encode("utf-8")
-
+        # bt.logging.info(f"output:{output}") 
+        # bt.logging.info(f"generateoutput:{self._process_output(output)}")
         return self._process_output(output)
     
     def _preprocess(self, input_data):

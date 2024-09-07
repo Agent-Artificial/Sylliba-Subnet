@@ -167,9 +167,9 @@ class BaseValidatorNeuron(BaseNeuron):
             exit()
 
         # In case of unforeseen errors, the validator will log the error and continue operations.
-        except Exception as err:
-            bt.logging.error(f"Error during validation: {str(err)}")
-            bt.logging.debug(str(print_exception(type(err), err, err.__traceback__)))
+        # except Exception as err:
+        #     bt.logging.error(f"Error during validation: {str(err)}")
+        #     bt.logging.debug(str(print_exception(type(err), err, err.__traceback__)))
 
     def run_in_background_thread(self):
         """

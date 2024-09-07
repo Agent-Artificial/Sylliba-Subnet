@@ -80,7 +80,7 @@ class BaseMinerNeuron(BaseNeuron):
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
 
-    async def run(self):
+    def run(self):
         """
         Initiates and manages the main loop for the miner on the Bittensor network. The main loop handles graceful shutdown on keyboard interrupts and logs unforeseen errors.
 
@@ -111,10 +111,10 @@ class BaseMinerNeuron(BaseNeuron):
         bt.logging.info(
             f"Serving miner axon {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {int(os.getenv('BT_NETUID'))}"
         )
-        await self.axon.serve(netuid=int(os.getenv("BT_NETUID")), subtensor=self.subtensor)
+        self.axon.serve(netuid=int(os.getenv("BT_NETUID")), subtensor=self.subtensor)
 
         # Start  starts the miner's axon, making it active on the network.
-        await self.axon.start()
+        self.axon.start()
 
         bt.logging.info(f"Miner starting at block: {self.block}")
 
@@ -171,13 +171,13 @@ class BaseMinerNeuron(BaseNeuron):
             self.is_running = False
             bt.logging.debug("Stopped")
 
-    async def __enter__(self):
+    def __enter__(self):
         """
         Starts the miner's operations in a background thread upon entering the context.
         This method facilitates the use of the miner in a 'with' statement.
         """
         self.run_in_background_thread()
-        return await self
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
