@@ -41,10 +41,10 @@ def miner_config():
             "mock": False,
         },
         "axon":{
-            "port": int(os.getenv('BT_AXON_PORT')),
-            "ip": os.getenv('BT_AXON_IP'),
-            "external_port": int(os.getenv('BT_AXON_EXTERNAL_PORT')),
-            "external_ip": os.getenv('BT_AXON_EXTERNAL_IP'),
+            "port": int(os.getenv('BT_AXON_MINER_PORT')),
+            "ip": os.getenv('BT_AXON_MINER_IP'),
+            "external_port": int(os.getenv('BT_AXON_MINER_EXTERNAL_PORT')),
+            "external_ip": os.getenv('BT_AXON_MINER_EXTERNAL_IP'),
             "max_workers": int(os.getenv('BT_AXON_MAX_WORERS')),
         },
     }
@@ -54,10 +54,10 @@ def validator_config():
     return {
         "netuid": int(os.getenv("BT_NETUID")),
         "axon":{
-            "port": int(os.getenv('BT_AXON_PORT')),
-            "ip": os.getenv('BT_AXON_IP'),
-            "external_port": int(os.getenv('BT_AXON_EXTERNAL_PORT')),
-            "external_ip": os.getenv('BT_AXON_EXTERNAL_IP'),
+            "port": int(os.getenv('BT_AXON_VALIDATOR_PORT')),
+            "ip": os.getenv('BT_AXON_VALIDATOR_IP'),
+            "external_port": int(os.getenv('BT_AXON_VALIDATOR_EXTERNAL_PORT')),
+            "external_ip": os.getenv('BT_AXON_VALIDATOR_EXTERNAL_IP'),
             "max_workers": int(os.getenv('BT_AXON_MAX_WORERS')),
         },
             
