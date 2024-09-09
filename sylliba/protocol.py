@@ -20,6 +20,7 @@
 from typing import Optional, Any, Dict, Union
 import bittensor as bt
 from pydantic import BaseModel
+from module_validator.modules.translation.data_models import TranslationRequest
 
 import base64
 
@@ -64,7 +65,7 @@ class TranslateRequest(bt.Synapse):
         miner_response: Optional[Response] = None - normal response object of the miners
     """
     # Required request input, filled by sending dendrite caller.
-    validator_request: Optional[Union[Dict[str, Any], ValidatorRequest]] = None
+    translation_request: Optional[Union[Dict[str, Any], TranslationRequest]] = None
 
     # Optional request output, filled by receiving axon.
     miner_response: Optional[Any] = None

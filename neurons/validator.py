@@ -31,6 +31,7 @@ from sylliba.base.validator import BaseValidatorNeuron
 from sylliba.validator import forward
 from neurons.config import validator_config
 from sylliba.protocol import ValidatorRequest
+from sylliba.protocol import TranslateRequest
 from module_validator.modules.translation.translation import Translation
 from module_validator.modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
@@ -122,19 +123,23 @@ class Validator(BaseValidatorNeuron):
         # Generating the query
         successful = []
         sample_request = self.generate_query(target_language, source_language, task_string, topic)
-        # bt.logging.info(f"sample_request: {sample_request}")
-        reference_set = self.process(sample_request)
+        bt.logging.info(f"sample_request: {sample_request}")
+        translation_request = TranslationRequest(data=sample_request)
+        reference_set = self.process(translation_request)
         # Querying the miners
         # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
         # axons = self.metagraph.axons
         axons = [self.metagraph.axons[8]]
         bt.logging.info(f"axons:{axons}")
+        synapse = TranslateRequest(
+            translation_request=translation_request,
+        )
         # try:
         for i in range(6):
             batch = self.get_batch(self.batch_size)
             responses = self.dendrite.query(
-                axons,
-                sample_request
+                axons=axons,
+                synapse=synapse
             )
             bt.logging.info(f"")
             bt.logging.info(f"responses:{responses}")
@@ -156,7 +161,6 @@ class Validator(BaseValidatorNeuron):
         self.now = time.time()
         if self.now % 10 == 0:
             self.set_weights()
-        return await forward(self)
         
     def process_validator_output(self, reference_set, validator_output):
         return reward(query=reference_set, response=validator_output)
@@ -181,12 +185,12 @@ class Validator(BaseValidatorNeuron):
         response = requests.post(url, headers = headers, json = body, timeout=30)
         bt.logging.info(f"openairesponse:{response.json()}")
         
-        return TranslationRequest(data = {
+        return {
                     "input": response.json()["choices"][0]["message"]["content"],
                     "task_string": "text2speech",
                     "source_language": "English",
                     "target_language": "English"
-                })
+                }
 
 
 

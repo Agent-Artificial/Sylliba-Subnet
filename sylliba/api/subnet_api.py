@@ -30,6 +30,7 @@ class SubnetAPI(SubnetsAPI):
         self.name = "translation"
         self.axon = bt.Axon()
 
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def prepare_synapse(
         self, validator_request: ValidatorRequest
     ) -> TranslateRequest:
