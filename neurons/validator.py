@@ -127,7 +127,7 @@ class Validator(BaseValidatorNeuron):
         # Querying the miners
         # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
         # axons = self.metagraph.axons
-        axons = [self.metagraph.axons[10]]
+        axons = [self.metagraph.axons[8]]
         bt.logging.info(f"axons:{axons}")
         # try:
         for i in range(6):

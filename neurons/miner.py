@@ -61,6 +61,7 @@ class Miner(BaseMinerNeuron):
     async def forward(
         self, synapse: sylliba.protocol.TranslateRequest
     ) -> sylliba.protocol.TranslateRequest:
+        bt.logging.info(f"synapse received")
         response = await self.module.process(synapse.validator_request)
         synapse.miner_response = response.text
         return synapse
