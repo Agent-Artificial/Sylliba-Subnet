@@ -129,7 +129,7 @@ class Validator(BaseValidatorNeuron):
         # Querying the miners
         # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
         # axons = self.metagraph.axons
-        axons = [self.metagraph.axons[8]]
+        axons = self.metagraph.axons[8:10]
         bt.logging.info(f"axons:{axons}")
         synapse = TranslateRequest(
             translation_request=translation_request,
@@ -137,14 +137,15 @@ class Validator(BaseValidatorNeuron):
         # try:
         for i in range(6):
             batch = self.get_batch(self.batch_size)
-            responses = self.dendrite.query(
+            responses = await self.dendrite(
                 axons=axons,
-                synapse=synapse
+                synapse=synapse,
+                deserialize=False
             )
             bt.logging.info(f"")
             bt.logging.info(f"responses:{responses}")
             # Getting the responses
-            for j in len(responses):
+            for j in range(0, len(responses)):
                 if responses[j].success:
                     successful.append(responses[j].data, batch[i])
                 else:
