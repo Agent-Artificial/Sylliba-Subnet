@@ -3,6 +3,7 @@ import scipy
 import torch
 import base64
 import torchaudio
+import asyncio
 
 from loguru import logger
 from typing import Optional
@@ -65,7 +66,7 @@ class Translation:
             logger.error(f"Invalid language: {language} {e}")
             raise ValueError(f"Invalid language: {language}") from e
 
-    def process(self, translation_request: TranslationRequest) -> Tuple[Union[str, None], Union[torch.Tensor, None]]:
+    async def process(self, translation_request: TranslationRequest) -> Tuple[Union[str, None], Union[torch.Tensor, None]]:
         """
         A function that processes a TranslationRequest object to perform translation tasks. 
         Retrieves input data, task string, source and target languages, preprocesses the input data, 
@@ -123,9 +124,7 @@ class Translation:
             output = self._process_audio_output(output)
         else:
             output = output.encode("utf-8")
-        # bt.logging.info(f"output:{output}") 
         generated_output = self._process_output(output)
-        bt.logging.info(f"generateoutput:{generated_output[:100]}")
         
         return generated_output
     
@@ -369,9 +368,19 @@ def speech2speech(translation: Translation, miner_request: Optional[TranslationR
     return translation.process(translation_request)
 
 
-def process(translation_request: TranslationRequest):
+async def process(translation_request: TranslationRequest):
     translation = Translation()
-    return translation.process(translation_request=translation_request)
+    result = None
+    try:
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete(translation.process(translation_request=translation_request))
+    except Exception:
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        result = loop.run_until_complete(translation.process(translation_request=translation_request))
+        new_loop.close()
+    finally:
+        return result  # type: ignore
     
 
 if __name__ == "__main__":

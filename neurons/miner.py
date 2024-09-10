@@ -62,13 +62,9 @@ class Miner(BaseMinerNeuron):
         self, synapse: sylliba.protocol.TranslateRequest
     ) -> sylliba.protocol.TranslateRequest:
         bt.logging.info(f'synapse received : {synapse}')
-        bt.logging.info(f'type of synapse : {type(synapse)}')
-        bt.logging.info(f'type of synapse.translation_request : {type(synapse.translation_request)}')
-        response = self.module.process(synapse.translation_request)
-        bt.logging.info(f"response : {response[:100]}")
+        response = await self.module.process(synapse.translation_request)
         synapse.miner_response = response
         bt.logging.info(f"synapse.miner_response : {synapse.miner_response[:100]}")
-        bt.logging.info(f'synapse returned : {synapse}')
         return synapse
 
     async def blacklist(
