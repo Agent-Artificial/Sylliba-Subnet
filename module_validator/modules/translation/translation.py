@@ -104,7 +104,6 @@ class Translation:
         if self.task_string.startswith("speech"):
             bt.logging.info("startswith(speech)")
             try:
-            
                 self.data_input = self._preprocess(self.data_input)
             except Exception as e:
                 logger.error(f"Error preprocessing input: {e}")
@@ -125,8 +124,10 @@ class Translation:
         else:
             output = output.encode("utf-8")
         # bt.logging.info(f"output:{output}") 
-        # bt.logging.info(f"generateoutput:{self._process_output(output)}")
-        return self._process_output(output)
+        generated_output = self._process_output(output)
+        bt.logging.info(f"generateoutput:{generated_output[:100]}")
+        
+        return generated_output
     
     def _preprocess(self, input_data):
         """
@@ -290,6 +291,7 @@ class Translation:
         except Exception as e:
             logger.error(f"Error processing final output: {e}")
             raise ValueError(f"Error processing final output: {e}") from e
+        # bt.logging.info(f"generateoutput : {output[:100]}")
         return output
 
     
@@ -369,7 +371,7 @@ def speech2speech(translation: Translation, miner_request: Optional[TranslationR
 
 def process(translation_request: TranslationRequest):
     translation = Translation()
-    translation.process(translation_request=translation_request)
+    return translation.process(translation_request=translation_request)
     
 
 if __name__ == "__main__":

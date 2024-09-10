@@ -21,8 +21,7 @@ from typing import Optional, Any, Dict, Union
 import bittensor as bt
 from pydantic import BaseModel
 from module_validator.modules.translation.data_models import TranslationRequest
-
-import base64
+import json
 
 
 # TODO(developer): Rewrite with your protocol definition.
@@ -65,27 +64,39 @@ class TranslateRequest(bt.Synapse):
         miner_response: Optional[Response] = None - normal response object of the miners
     """
     # Required request input, filled by sending dendrite caller.
-    translation_request: Optional[Union[Dict[str, Any], TranslationRequest]] = None
+    translation_request: Optional[TranslationRequest] = None
 
     # Optional request output, filled by receiving axon.
-    miner_response: Optional[Any] = None
+    miner_response: Optional[str] = None
 
-    def deserialize(self, value) -> str:
+    def deserialize(serialized_str) -> dict:
         """
         Deserializes the given string from a base64 encoded string.
         
         Returns:
          - str: unencoded string
         """
-        return base64.b64decode(value)
+        request_dict = json.loads(serialized_str)
+        
+        # Create a new TranslateRequest instance and populate its attributes
+        obj = TranslateRequest()
+        if request_dict['translation_request']:
+            obj.translation_request = TranslationRequest.from_dict(request_dict['translation_request'])
+        obj.miner_response = request_dict['miner_response']
+        
+        return obj
     
-    def serilize(self, value) -> str:
+    def serilize(self) -> str:
         """
         Serializes the given string into a base64 encoded string.
         
         Returns:
          - str: encoded string
         """
-        return base64.b64encode(value)
+        request_dict = {
+            'translation_request': self.translation_request.to_dict() if self.translation_request else None,
+            'miner_response': self.miner_response
+        }
+        return json.dumps(request_dict)
     
         
