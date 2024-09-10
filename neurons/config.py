@@ -72,7 +72,7 @@ def validator_config():
         "neuron": {
             "name": os.getenv("BT_VALIDATOR_COLDKEY"),
             "timeout": 10,
-            "num_concurrent_forwards": 10,
+            "num_concurrent_forwards": 1,
             "sample_size": 50,
             "disable_set_weights": False,
             "moving_average_alpha": 0.1,

@@ -93,28 +93,28 @@ class BaseValidatorNeuron(BaseNeuron):
         """Serve axon to enable external connections."""
 
         bt.logging.info("serving ip to chain...")
-        # try:
-        self.axon = bt.axon(wallet=self.wallet, config=self.config)
-
         try:
-            self.subtensor.serve_axon(
-                netuid= netuid or int(os.getenv("BT_NETUID")),
-                axon=self.axon,
-            )
-            bt.logging.info(
-                f"Running validator {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
-            )
-        except Exception as e:
-            bt.logging.error(f"Failed to serve Axon with exception: {e}")
-            pass
+            self.axon = bt.axon(wallet=self.wallet, config=self.config)
 
-        # except Exception as e:
-        #     bt.logging.error(f"Failed to create Axon initialize with exception: {e}")
-        #     pass
+            try:
+                self.subtensor.serve_axon(
+                    netuid= netuid or int(os.getenv("BT_NETUID")),
+                    axon=self.axon,
+                )
+                bt.logging.info(
+                    f"Running validator {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
+                )
+            except Exception as e:
+                bt.logging.error(f"Failed to serve Axon with exception: {e}")
+                pass
+
+        except Exception as e:
+            bt.logging.error(f"Failed to create Axon initialize with exception: {e}")
+            pass
 
     async def concurrent_forward(self):
         coroutines = [
-            await self.forward() for _ in range(self.config.neuron.num_concurrent_forwards)
+            self.forward() for _ in range(self.config.neuron.num_concurrent_forwards)
         ]
         await asyncio.gather(*coroutines)
 
