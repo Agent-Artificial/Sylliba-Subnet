@@ -129,7 +129,7 @@ class Validator(BaseValidatorNeuron):
         # Querying the miners
         # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
         # axons = self.metagraph.axons
-        axons = [self.metagraph.axons[8]]
+        axons = self.metagraph.axons[8:10]
         bt.logging.info(f"axons:{axons}")
         synapse = TranslateRequest(
             translation_request=translation_request,
