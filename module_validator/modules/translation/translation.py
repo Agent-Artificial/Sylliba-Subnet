@@ -65,7 +65,7 @@ class Translation:
             logger.error(f"Invalid language: {language} {e}")
             raise ValueError(f"Invalid language: {language}") from e
 
-    def process(self, miner_request: TranslationRequest) -> Tuple[Union[str, None], Union[torch.Tensor, None]]:
+    def process(self, translation_request: TranslationRequest) -> Tuple[Union[str, None], Union[torch.Tensor, None]]:
         """
         A function that processes a TranslationRequest object to perform translation tasks. 
         Retrieves input data, task string, source and target languages, preprocesses the input data, 
@@ -74,7 +74,7 @@ class Translation:
 
         Parameters:
             self: The Translation object.
-            miner_request (TranslationRequest): The request object containing input data, task string, 
+            translation_request (TranslationRequest): The request object containing input data, task string, 
                 source language, and target language.
 
         Returns:
@@ -82,29 +82,28 @@ class Translation:
                 A tuple containing either a string or None, and either a torch.Tensor or None, 
                 representing the processed output.
         """
-        bt.logging.info(f"miner_request:{miner_request}")
-        bt.logging.info(f"miner_requestdata:{miner_request.data}")
-        if "input" in miner_request.data:
-            self.data_input = miner_request.data["input"]
+        bt.logging.info(f"translation_request:{translation_request}")
+        bt.logging.info(f"translation_requestdata:{translation_request.data}")
+        if "input" in translation_request.data:
+            self.data_input = translation_request.data["input"]
             bt.logging.info(f"data_input:{self.data_input}")
-        if "task_string" in miner_request.data:
-            self.task_string = miner_request.data["task_string"]
+        if "task_string" in translation_request.data:
+            self.task_string = translation_request.data["task_string"]
             bt.logging.info(f"task_string:{self.task_string}")
-        if "source_language" in miner_request.data:
-            self.source_language = miner_request.data["source_language"].title()
+        if "source_language" in translation_request.data:
+            self.source_language = translation_request.data["source_language"].title()
             bt.logging.info(f"source_language:{self.source_language}")
-        if "target_language" in miner_request.data:
-            self.target_language = miner_request.data["target_language"].title()
+        if "target_language" in translation_request.data:
+            self.target_language = translation_request.data["target_language"].title()
             bt.logging.info(f"target_language:{self.target_language}")
         if not self.task_string:
-            raise ValueError(f"Invalid task string: {miner_request.data}")
+            raise ValueError(f"Invalid task string: {translation_request.data}")
 
         if self.data_input is None:
             raise ValueError("No input provided")
         if self.task_string.startswith("speech"):
             bt.logging.info("startswith(speech)")
             try:
-            
                 self.data_input = self._preprocess(self.data_input)
             except Exception as e:
                 logger.error(f"Error preprocessing input: {e}")
@@ -125,8 +124,10 @@ class Translation:
         else:
             output = output.encode("utf-8")
         # bt.logging.info(f"output:{output}") 
-        # bt.logging.info(f"generateoutput:{self._process_output(output)}")
-        return self._process_output(output)
+        generated_output = self._process_output(output)
+        bt.logging.info(f"generateoutput:{generated_output[:100]}")
+        
+        return generated_output
     
     def _preprocess(self, input_data):
         """
@@ -290,6 +291,7 @@ class Translation:
         except Exception as e:
             logger.error(f"Error processing final output: {e}")
             raise ValueError(f"Error processing final output: {e}") from e
+        # bt.logging.info(f"generateoutput : {output[:100]}")
         return output
 
     
@@ -369,7 +371,7 @@ def speech2speech(translation: Translation, miner_request: Optional[TranslationR
 
 def process(translation_request: TranslationRequest):
     translation = Translation()
-    translation.process(miner_request=translation_request)
+    return translation.process(translation_request=translation_request)
     
 
 if __name__ == "__main__":
