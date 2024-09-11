@@ -3,55 +3,77 @@
 # **Bittensor Subnet Template** <!-- omit in toc -->
 [![Discord Chat](https://img.shields.io/discord/308323056592486420.svg)](https://discord.gg/bittensor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+</div>
 
 ---
 
 ## Install
-You can run the setup script if you're on linux using the commands
-`chmod -x setup.sh`
-`bash setup.sh`
 
-Follow the prompt and the script will walk you through setting up your environment. Make sure that the config values are filled. If you'd rather fill them out manually you can find the configs in neurons/config.py. 
+You can run the following commands in your console to install the Sylliba Subnet:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Agent-Artificial/Sylliba-Subnet.git
+   ```
+
+2. **Navigate to the project directory:**
+   ```bash
+   cd Sylliba-subnet
+   ```
+
+3. **Create a Python virtual environment:**
+   ```bash
+   python3 -m venv .venv
+   ```
+
+4. **Activate the virtual environment:**
+   ```bash
+   source .venv/bin/activate
+   ```
+
+5. **Copy the environment variables template:**
+   ```bash
+   cp .env.example .env
+   ```
+
+6. **Set up the environment variables**  
+   Edit the `.env` file and configure the necessary values.
+
+7. **Install the required dependencies:**
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+
+8. **Set up the translation module:**
+   ```bash
+   python3 -m modules.translation.setup_translation
+   ```
 
 ## Registering
-Once installed you can register the miner or validator by using the register script. Registering lets the block chain and the validator know that you are are going to be available to provide the service on the chain.
-`chmod -x register.sh`
-`bash register.sh`
+Once installed you can register the miner or validator by executing following command. Registering lets the block chain and the validator know that you are are going to be available to provide the service on the chain.
+
+1. **Registering a validator:**
+   ```bash
+   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_VALIDATOR_COLDKEY --wallet.hotkey YOUR_VALIDATOR_HOTKEY
+   ```
+
+2. **Registering a miner:**
+   ```bash
+   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
+   ```
 
 ## Serving
-Finally you can serve the miner or validator with the launch script. 
-`bash launch.sh`
+Finally you can serve the miner or validator with the following command. 
 
-## Manual Install
+1. **Running a validator:**
+   ```bash
+   python3 neurons/validator.py --logging.debug
+   ```
 
-If you would like to manually install the library you can follow these steps.
-
-### Setup your environment
-You can skip these steps if you already have the required installed.
-`sudo apt update && sudo apt upgrade -y`
-`sudo apt install make build-essential git clang curl libssl-dev llvm libudev-dev protobuf-compiler tmux libsndfile1-dev python3 python3-dev python3-venv python3-pip python-is-python3`
-`python -m venv .venv`
-`source .venv/bin/activate`
-
-`cp .env.example .env`
-
-Fill out the .env file with the correct configuration information
-
-### Setup pip
-`python -m pip install --upgrade pip`
-`pip install setuptools wheel`
-`pip install -r requirements.txt`
-
-### Install module
-`rm -r modules/translation/seamless`
-`python -m modules.install_module translation`
-
-### Register Miner/Validator
-`btcli subnet register --netuid "$BT_NETUID" --subtensor.network "$BT_NETUID" --wallet.name "$BT_VALIDATOR_COLDKEY" --wallet.hotkey "$BT_VALIDATOR_HOTKEY"`
-
-
-The Bittensor Subnet 1 for Text Prompting is built using this template. See [prompting](https://github.com/macrocosm-os/prompting) for how to configure the files and how to add monitoring and telemetry and support multiple miner types. Also see this Subnet 1 in action on [Taostats](https://taostats.io/subnets/netuid-1/) explorer.
-
+2. **Running a miner:**
+   ```bash
+   python3 neurons/miner.py --logging.debug
+   ```
 ---
 
 ## Installation
