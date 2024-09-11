@@ -118,12 +118,13 @@ class Translation:
                 src_lang=self.target_languages[self.source_language],
                 tgt_lang=self.target_languages[self.target_language]
             )
-        # bt.logging.info(f"output:{output}")    
+        bt.logging.info(f"output:{output[:100]}")    
         if self.task_string.endswith("speech"):
             bt.logging.info("endswith(speech)")
             output = self._process_audio_output(output)
         else:
             output = output.encode("utf-8")
+        bt.logging.info(f"output:{output[:100]}")  
         generated_output = self._process_output(output)
         
         return generated_output

@@ -80,7 +80,7 @@ class Validator(BaseValidatorNeuron):
         super(Validator, self).__init__(config=validator_config())
         self.total_miners = len(self.metagraph.uids)
         self.validated = set()
-        self.batch_size = 50
+        self.batch_size = 3
         self.current_index = 0
         self.current_batch = self.get_batch(self.batch_size)
         bt.logging.info("load_state()")
@@ -125,37 +125,43 @@ class Validator(BaseValidatorNeuron):
         sample_request = self.generate_query(target_language, source_language, task_string, topic)
         bt.logging.info(f"sample_request: {sample_request}")
         translation_request = TranslationRequest(data=sample_request)
-        reference_set = self.process(translation_request)
+        reference_set = await self.process(translation_request)
         # Querying the miners
         # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
         # axons = self.metagraph.axons
-        axons = self.metagraph.axons[8:10]
+        axons = self.metagraph.axons
         bt.logging.info(f"axons:{axons}")
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
         try:
-            for i in range(6):
+            for i in range(5):
                 batch = self.get_batch(self.batch_size)
+                bt.logging.info(f"batch:{batch}")
                 responses = await self.dendrite(
-                    axons=axons,
+                    axons=[axons[i] for i in batch],
                     synapse=synapse,
                     deserialize=False,
                     timeout=300
                 )
-                bt.logging.info(f"responses from miners:{responses[0].miner_response[:100]}")
+                for j in range(0, len(responses)):
+                    if responses[j].miner_response is not None:
+                        bt.logging.info(f"responses from miners {batch[j]}:{responses[j].miner_response[:100]}")
+                    else:
+                        bt.logging.info(f"responses from miners {batch[j]}:{responses[j].miner_response}")
                 # Getting the responses
                 for j in range(0, len(responses)):
                     if responses[j].miner_response is not None:
-                        successful.append(responses[j].translation_request.data, batch[i])
+                        successful.append([responses[j].translation_request.data, batch[j]])
                     else:
-                        bt.logging.warning(f"Miner {batch[i]} failed to respond.")
+                        bt.logging.warning(f"Miner {batch[j]} failed to respond.")
         except Exception as e:
             bt.logging.error(f"Failed to query miners with exception: {e}")
         # Rewarding the miners
+        bt.logging.info(f"successful:{successful}")
         results = []
         for i in range(len(successful)):
-            results.append(successful[i][1], self.process_validator_output(successful[i][0], reference_set))
+            results.append([successful[i][1], self.process_validator_output(successful[i][0], reference_set)])
             # Updating the scores
             self.update_scores(results[i][0], results[i][1])
         # Set weights
