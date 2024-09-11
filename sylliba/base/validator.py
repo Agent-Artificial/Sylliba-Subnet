@@ -96,7 +96,7 @@ class BaseValidatorNeuron(BaseNeuron):
         try:
             self.axon = bt.axon(wallet=self.wallet, config=self.config)
 
-            self.axon.fast_server = bt.SubnetsAPI(self.wallet)
+            # self.axon.fast_server = bt.SubnetsAPI(self.wallet)
             try:
                 self.subtensor.serve_axon(
                     netuid= netuid or int(os.getenv("BT_NETUID")),
