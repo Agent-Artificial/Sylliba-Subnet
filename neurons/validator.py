@@ -134,24 +134,24 @@ class Validator(BaseValidatorNeuron):
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
-        # try:
-        for i in range(6):
-            batch = self.get_batch(self.batch_size)
-            responses = await self.dendrite(
-                axons=axons,
-                synapse=synapse,
-                deserialize=False,
-                timeout=300
-            )
-            bt.logging.info(f"responses from miners:{responses[0].miner_response[:100]}")
-            # Getting the responses
-            for j in range(0, len(responses)):
-                if responses[j].miner_response is not None:
-                    successful.append(responses[j].data, batch[i])
-                else:
-                    bt.logging.warning(f"Miner {batch[i]} failed to respond.")
-        # except Exception as e:
-        #     bt.logging.error(f"Failed to query miners with exception: {e}")
+        try:
+            for i in range(6):
+                batch = self.get_batch(self.batch_size)
+                responses = await self.dendrite(
+                    axons=axons,
+                    synapse=synapse,
+                    deserialize=False,
+                    timeout=300
+                )
+                bt.logging.info(f"responses from miners:{responses[0].miner_response[:100]}")
+                # Getting the responses
+                for j in range(0, len(responses)):
+                    if responses[j].miner_response is not None:
+                        successful.append(responses[j].translation_request.data, batch[i])
+                    else:
+                        bt.logging.warning(f"Miner {batch[i]} failed to respond.")
+        except Exception as e:
+            bt.logging.error(f"Failed to query miners with exception: {e}")
         # Rewarding the miners
         results = []
         for i in range(len(successful)):
