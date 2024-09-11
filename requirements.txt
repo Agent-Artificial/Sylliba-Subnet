@@ -7,3 +7,4 @@ proto-plus
 jinja2
 loguru
 python-dotenv
+bittensor
