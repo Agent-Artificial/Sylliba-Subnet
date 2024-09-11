@@ -163,5 +163,3 @@ testing/
 
 # Editors
 .vscode/settings.json
-
-./modules/translation/
