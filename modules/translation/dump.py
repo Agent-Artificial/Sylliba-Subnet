@@ -28,6 +28,6 @@ def dump_file(folder_path, file_name):
 
 # Example usage
 folder_path = 'modules/translation/'
-file_name = 'install_translation.sh'
+file_name = 'setup.py'
 
 dump_file(folder_path, file_name)
