@@ -28,7 +28,7 @@ import os
 
 from typing import List, Union
 from traceback import print_exception
-
+from loguru import logger
 from sylliba.base.neuron import BaseNeuron
 from sylliba.base.utils.weight_utils import (
     process_weights_for_netuid,
@@ -53,7 +53,7 @@ class BaseValidatorNeuron(BaseNeuron):
     def add_args(cls, parser: argparse.ArgumentParser):
         super().add_args(parser)
         add_validator_args(cls, parser)
-
+    @logger.catch()
     def __init__(self, config=None):
         super().__init__(config=config)
 
@@ -96,6 +96,7 @@ class BaseValidatorNeuron(BaseNeuron):
         try:
             self.axon = bt.axon(wallet=self.wallet, config=self.config)
 
+            self.axon.fast_server = bt.SubnetsAPI(self.wallet)
             try:
                 self.subtensor.serve_axon(
                     netuid= netuid or int(os.getenv("BT_NETUID")),
@@ -195,8 +196,8 @@ class BaseValidatorNeuron(BaseNeuron):
             self.is_running = False
             bt.logging.debug("Stopped")
 
-    def __enter__(self):
-        self.run_in_background_thread()
+    async def __enter__(self):
+        await self.run_in_background_thread()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

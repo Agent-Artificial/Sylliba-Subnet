@@ -34,10 +34,9 @@ def get_module(module_name: str):
         
     
 def install_module(module_name):
-    module_data = get_module(module_name)
     command = ["python", "-m", "venv", ".venv"]
     subprocess.run(command, check=True)
-    command = ["python", "-m", f"modules.{module_data['name']}.setup_{module_data['name']}"]
+    command = ["python", "-m", f"modules.{module_name}.setup_{module_name}"]
     subprocess.run(command, check=True)
     
     
