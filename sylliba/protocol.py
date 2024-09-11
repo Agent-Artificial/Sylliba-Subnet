@@ -20,7 +20,7 @@
 from typing import Optional, Any, Dict, Union
 import bittensor as bt
 from pydantic import BaseModel
-from module_validator.modules.translation.data_models import TranslationRequest
+from modules.translation.data_models import TranslationRequest
 import json
 
 

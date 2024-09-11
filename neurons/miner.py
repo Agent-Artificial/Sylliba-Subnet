@@ -46,7 +46,7 @@ class Miner(BaseMinerNeuron):
         self.module_endpoint = self.module_config["endpoint"]
         self.module_full_url = f"{self.module_config['url']}{self.module_config['endpoint']}"
         self.module_path = Path(self.module_config["path"])
-        self.module = import_module('module_validator.modules.translation.translation')
+        self.module = import_module('modules.translation.translation')
         
     def get_module_configs(self):
         with open("modules/data/module_registar.json", "r") as f:

@@ -21,13 +21,13 @@ else
     exit 1
 fi
 
-if [ ! -d "./module_validator/modules/translation/seamless" ]; then
-    git clone https://github.com/facebookresearch/seamless_communication.git ./module_validator/modules/translation/seamless
+if [ ! -d "./modules/translation/seamless" ]; then
+    git clone https://github.com/facebookresearch/seamless_communication.git ./modules/translation/seamless
     
 fi
-pip install ./module_validator/modules/translation/seamless
+pip install ./modules/translation/seamless
 pip install git+https://github.com/huggingface/transformers torch torchaudio torchvision fairseq2
 
-mkdir -p ./module_validator/modules/translation/in
+mkdir -p ./modules/translation/in
 
-mkdir -p ./module_validator/modules/translation/out
+mkdir -p ./modules/translation/out

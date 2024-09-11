@@ -32,8 +32,8 @@ from sylliba.validator import forward
 from neurons.config import validator_config
 from sylliba.protocol import ValidatorRequest
 from sylliba.protocol import TranslateRequest
-from module_validator.modules.translation.translation import Translation
-from module_validator.modules.translation.data_models import TranslationRequest
+from modules.translation.translation import Translation
+from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward
 
