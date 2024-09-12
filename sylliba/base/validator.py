@@ -196,8 +196,8 @@ class BaseValidatorNeuron(BaseNeuron):
             self.is_running = False
             bt.logging.debug("Stopped")
 
-    async def __enter__(self):
-        await self.run_in_background_thread()
+    def __enter__(self):
+        self.run_in_background_thread()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

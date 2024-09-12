@@ -175,7 +175,6 @@ class Validator(BaseValidatorNeuron):
     def generate_query(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")
         token = os.getenv("INFERENCE_API_KEY")
-        bt.logging.info(token)
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
