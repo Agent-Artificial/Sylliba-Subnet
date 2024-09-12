@@ -25,15 +25,9 @@ from scipy.special import expit
 
 
 def reward(query: int, response: int) -> float:
-    """
-    Reward the miner response to the dummy request. This method returns a reward
-    value for the miner, which is used to update the miner's score.
-
-    Returns:
-    - float: The reward value for the miner.
-    """
-    bt.logging.info(f"In rewards, query val: {query}, response val: {response}, rewards val: {1.0 if response == query * 2 else 0}")
-    
+    bt.logging.info('REWARD HERE')
+    bt.logging.info(f'query: {query}')
+    bt.logging.info(f'response: {response[:100]}')
     # Convert the validator output to strings
     validator_strings = [str(num) for num in response]
     

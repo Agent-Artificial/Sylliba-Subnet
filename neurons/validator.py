@@ -124,8 +124,13 @@ class Validator(BaseValidatorNeuron):
         successful = []
         sample_request = self.generate_query(target_language, source_language, task_string, topic)
         bt.logging.info(f"sample_request: {sample_request}")
-        translation_request = TranslationRequest(data=sample_request)
-        reference_set = await self.process(translation_request)
+        translation_request = TranslationRequest(data = {
+                    "input": sample_request['input'],
+                    "task_string": sample_request["task_string"],
+                    "source_language": sample_request["source_language"],
+                    "target_language": sample_request["target_language"]
+                })
+        # reference_set = await self.process(translation_request)
         # Querying the miners
         # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
         # axons = self.metagraph.axons
@@ -135,8 +140,9 @@ class Validator(BaseValidatorNeuron):
             translation_request=translation_request,
         )
         try:
-            for i in range(5):
-                batch = self.get_batch(self.batch_size)
+            # for i in range(5):
+                # batch = self.get_batch(self.batch_size)
+                batch = [8]
                 bt.logging.info(f"batch:{batch}")
                 responses = await self.dendrite(
                     axons=[axons[i] for i in batch],
@@ -183,19 +189,32 @@ class Validator(BaseValidatorNeuron):
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are an expert story teller. You can write short stories that capture the imagination, send readers on an adventure and complete an alegorical thought all within 100 words. Please write a short story about {topic}. Keep the story short but be sure to use an alegory and complete the idea. This story will be translated into {target_language} so use any relevant cultural ideas or contexts but be sure to write the story in English."
+                    "content": f"\
+                    You are an expert story teller.\
+                    You can write short stories that capture the imagination, \
+                    end readers on an adventure and complete an alegorical thought all within 100 words. \
+                    Please write a short story about {topic}. \
+                    Keep the story short but be sure to use an alegory and complete the idea. \
+                    Write story in two languages, those are {source_language} and {target_language}.\
+                    Don't put any descriptions, just follow below format:\
+                    {source_language}: \n {target_language}:"
                 }
             ],
             "model": "gpt-4o"
         }
         response = requests.post(url, headers = headers, json = body, timeout=30)
         bt.logging.info(f"openairesponse:{response.json()}")
+
+        text = response.json()["choices"][0]["message"]["content"]
+        input_data = text.split(f"{source_language}:\n")[1].split(f"\n\n{target_language}:\n")[0]
+        output_data = text.split(f"{target_language}:\n")[1]
         
         return {
-                    "input": response.json()["choices"][0]["message"]["content"],
-                    "task_string": "text2speech",
-                    "source_language": "English",
-                    "target_language": "English"
+                    "input": input_data,
+                    "output": output_data,
+                    "task_string": task_string,
+                    "source_language": source_language,
+                    "target_language": target_language
                 }
 
 
