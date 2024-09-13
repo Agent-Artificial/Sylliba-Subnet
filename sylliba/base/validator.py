@@ -24,22 +24,17 @@ import asyncio
 import argparse
 import threading
 import bittensor as bt
-import os
 
 from typing import List, Union
 from traceback import print_exception
-from loguru import logger
+
 from sylliba.base.neuron import BaseNeuron
 from sylliba.base.utils.weight_utils import (
     process_weights_for_netuid,
     convert_weights_and_uids_for_emit,
-    )
+)  # TODO: Replace when bittensor switches to numpy
 from sylliba.mock import MockDendrite
 from sylliba.utils.config import add_validator_args
-
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class BaseValidatorNeuron(BaseNeuron):
@@ -53,7 +48,7 @@ class BaseValidatorNeuron(BaseNeuron):
     def add_args(cls, parser: argparse.ArgumentParser):
         super().add_args(parser)
         add_validator_args(cls, parser)
-    @logger.catch()
+
     def __init__(self, config=None):
         super().__init__(config=config)
 
@@ -76,7 +71,7 @@ class BaseValidatorNeuron(BaseNeuron):
 
         # Serve axon to enable external connections.
         if not self.config.neuron.axon_off:
-            self.serve_axon(netuid=int(os.getenv("BT_NETUID")))
+            self.serve_axon()
         else:
             bt.logging.warning("axon off, not serving ip to chain.")
 
@@ -89,7 +84,7 @@ class BaseValidatorNeuron(BaseNeuron):
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
 
-    def serve_axon(self, netuid: str=None):
+    def serve_axon(self):
         """Serve axon to enable external connections."""
 
         bt.logging.info("serving ip to chain...")
@@ -99,7 +94,7 @@ class BaseValidatorNeuron(BaseNeuron):
             # self.axon.fast_server = bt.SubnetsAPI(self.wallet)
             try:
                 self.subtensor.serve_axon(
-                    netuid= netuid or int(os.getenv("BT_NETUID")),
+                    netuid=self.config.netuid,
                     axon=self.axon,
                 )
                 bt.logging.info(
@@ -168,9 +163,9 @@ class BaseValidatorNeuron(BaseNeuron):
             exit()
 
         # In case of unforeseen errors, the validator will log the error and continue operations.
-        # except Exception as err:
-        #     bt.logging.error(f"Error during validation: {str(err)}")
-        #     bt.logging.debug(str(print_exception(type(err), err, err.__traceback__)))
+        except Exception as err:
+            bt.logging.error(f"Error during validation: {str(err)}")
+            bt.logging.debug(str(print_exception(type(err), err, err.__traceback__)))
 
     def run_in_background_thread(self):
         """
@@ -252,7 +247,7 @@ class BaseValidatorNeuron(BaseNeuron):
         ) = process_weights_for_netuid(
             uids=self.metagraph.uids,
             weights=raw_weights,
-            netuid=int(os.getenv("BT_NETUID")),
+            netuid=self.config.netuid,
             subtensor=self.subtensor,
             metagraph=self.metagraph,
         )
@@ -272,7 +267,7 @@ class BaseValidatorNeuron(BaseNeuron):
         # Set the weights on chain via our subtensor connection.
         result, msg = self.subtensor.set_weights(
             wallet=self.wallet,
-            netuid=int(os.getenv("BT_NETUID")),
+            netuid=self.config.netuid,
             uids=uint_uids,
             weights=uint_weights,
             wait_for_finalization=False,

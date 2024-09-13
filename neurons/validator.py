@@ -158,7 +158,7 @@ class Validator(BaseValidatorNeuron):
                 # Getting the responses
                 for j in range(0, len(responses)):
                     if responses[j].miner_response is not None:
-                        successful.append([responses[j].translation_request.data, batch[j]])
+                        successful.append([responses[j].miner_response, batch[j]])
                     else:
                         bt.logging.warning(f"Miner {batch[j]} failed to respond.")
         except Exception as e:
@@ -167,16 +167,16 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info(f"successful:{successful}")
         results = []
         for i in range(len(successful)):
-            results.append([successful[i][1], self.process_validator_output(successful[i][0], reference_set)])
+            results.append([successful[i][1], self.process_validator_output(successful[i][0], sample_request['output'])])
             # Updating the scores
-            self.update_scores(results[i][0], results[i][1])
+            self.update_scores(results[i][1], results[i][0])
         # Set weights
         self.now = time.time()
         if self.now % 10 == 0:
             self.set_weights()
         
-    def process_validator_output(self, reference_set, validator_output):
-        return reward(query=reference_set, response=validator_output)
+    def process_validator_output(self, miner_response, sample_output):
+        return reward(miner_response, sample_output)
     
     def generate_query(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")
@@ -206,8 +206,8 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info(f"openairesponse:{response.json()}")
 
         text = response.json()["choices"][0]["message"]["content"]
-        input_data = text.split(f"{source_language}:\n")[1].split(f"\n\n{target_language}:\n")[0]
-        output_data = text.split(f"{target_language}:\n")[1]
+        input_data = text.split(f"{source_language}:")[1].split(f"{target_language}:")[0]
+        output_data = text.split(f"{target_language}:")[1]
         
         return {
                     "input": input_data,

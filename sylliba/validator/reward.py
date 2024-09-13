@@ -20,35 +20,38 @@ import numpy as np
 from typing import List
 import bittensor as bt
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from scipy.special import expit
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from nltk.translate.bleu_score import sentence_bleu
+from difflib import SequenceMatcher
+import numpy as np
 
-def reward(query: int, response: int) -> float:
-    bt.logging.info('REWARD HERE')
-    bt.logging.info(f'query: {query}')
-    bt.logging.info(f'response: {response[:100]}')
-    # Convert the validator output to strings
-    validator_strings = [str(num) for num in response]
+def reward(miner_response: str, sample_output: str) -> float:
+    bt.logging.info('-------------------------------- REWARD HERE ---------------------------------')
+    bt.logging.info(f'miner_response : {miner_response}')
+    bt.logging.info(f'sample_output : {sample_output}')
+    # Compute cosine similarity using TF-IDF vectorization
+    vectorizer = TfidfVectorizer().fit([miner_response, sample_output])
+    vectors = vectorizer.transform([miner_response, sample_output])
+    cosine_sim = cosine_similarity(vectors[0], vectors[1])[0][0]
     
-    # Combine validator output and reference set
-    all_strings = validator_strings + query
+    # Compute BLEU score for translation evaluation
+    miner_response_tokens = miner_response.split()
+    sample_output_tokens = sample_output.split()
+    bleu_score = sentence_bleu([sample_output_tokens], miner_response_tokens)
     
-    # Tokenize and vectorize
-    vectorizer = CountVectorizer().fit(all_strings)
-    vectors = vectorizer.transform(all_strings).toarray()
+    # Compute Levenshtein similarity (as a ratio of matched characters)
+    lev_sim = SequenceMatcher(None, miner_response, sample_output).ratio()
     
-    # Separate validator vectors and reference vectors
-    validator_vectors = vectors[:len(validator_strings)]
-    reference_vectors = vectors[len(validator_strings):]
+    # Aggregate the scores (with customizable weights)
+    aggregated_score = 0.5 * cosine_sim + 0.3 * bleu_score + 0.2 * lev_sim
+
+    bt.logging.info(f'similarity score: {aggregated_score}')
+    bt.logging.info('------------------------------- REWARDS FINISEHD ------------------------------')
     
-    # Compute cosine similarity
-    similarities = cosine_similarity(validator_vectors, reference_vectors)
-    
-    # Normalize using sigmoid function
-    normalized_similarities = expit(similarities)
-    
-    return normalized_similarities    
+    return aggregated_score
 
 
 def get_rewards(
