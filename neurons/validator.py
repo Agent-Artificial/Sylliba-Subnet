@@ -44,7 +44,7 @@ from sylliba.validator import reward_text, reward_speech
 load_dotenv()
 
 TASK_STRINGS = [
-    "speech2text"
+    "speech2speech"
 ]
 
 TARGET_LANGUAGES = [
@@ -121,7 +121,7 @@ class Validator(BaseValidatorNeuron):
                 
     async def forward(self):
         source_language = "English"
-        target_language = random.choice(TARGET_LANGUAGES)
+        target_language = "French"
         task_string = random.choice(TASK_STRINGS)
         topic = random.choice(TOPICS)
         # Generating the query
