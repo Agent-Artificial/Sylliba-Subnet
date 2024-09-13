@@ -148,10 +148,10 @@ class Translation:
         """
         file_name = "./modules/translation/in/audio_request.wav"
         decoded_data = base64.b64decode(input_data)
-        self._tensor_to_wav(input_data, file_name)
         buffer = io.BytesIO(decoded_data)
         decoded_data = torch.load(buffer)
         bt.logging.info(f'DECODED INPUT DATA: {decoded_data}')
+        self._tensor_to_wav(decoded_data, file_name)
         return "./modules/translation/in/audio_request.wav"
     
     def _process_text_inputs(self, input_data: str, src_lang: str) -> Dict[str, torch.Tensor]:
@@ -283,6 +283,45 @@ class Translation:
             raise ValueError(f"Error processing audio output: {e}") from e
         return buffer.getvalue()
 
+    def wav_to_tensor(self, file_path: str):
+        """
+        Reads a WAV file and converts it into a PyTorch tensor.
+
+        Args:
+        file_path (str): The path to the input wav file.
+
+        Returns:
+        torch.Tensor: A tensor containing the audio data.
+        int: The sample rate of the audio.
+        """
+        # Open the wav file
+        with wave.open(file_path, 'rb') as wav_file:
+            # Extract audio parameters
+            sample_rate = wav_file.getframerate()
+            num_frames = wav_file.getnframes()
+            num_channels = wav_file.getnchannels()
+            sampwidth = wav_file.getsampwidth()
+
+            # Read all audio frames
+            frames = wav_file.readframes(num_frames)
+
+            # Convert byte data to numpy array
+            audio_data = np.frombuffer(frames, dtype=np.float32)
+
+            # If stereo, reshape the array to have the correct number of channels
+            if num_channels > 1:
+                audio_data = np.reshape(audio_data, (-1, num_channels))
+                # Average the channels if you want to convert it to mono
+                audio_data = np.mean(audio_data, axis=1)
+
+            # Convert the numpy array to a PyTorch tensor
+            audio_tensor = torch.tensor(audio_data, dtype=torch.float32)
+
+            # Normalize the tensor to the range [-1, 1]
+            audio_tensor /= 2**(8 * sampwidth - 1)
+
+        return audio_tensor, sample_rate
+
     def _tensor_to_wav(self, tensor: torch.Tensor, file_path: str, sample_rate: int = 16000):
         """
         Converts a PyTorch tensor to a WAV file.
@@ -305,14 +344,9 @@ class Translation:
             wav_file.setframerate(sample_rate)
             
             # Convert NumPy array to int16 and write to the wave file
-            wav_file.writeframes(audio_data.astype(np.int16).tobytes())
+            wav_file.writeframes(audio_data.astype(np.float32).tobytes())
 
         print(f"Audio saved as '{file_path}'")
-
-    # Example usage:
-    # Assuming 'audio_tensor' is a tensor with audio waveform data
-    # tensor_to_wav(audio_tensor, "output_audio.wav", sample_rate=16000)
-
     
     def _process_output(self, output: str) -> str:
         """
