@@ -25,6 +25,10 @@ import random
 # Bittensor
 import bittensor as bt
 
+import base64
+import io
+import torch
+
 # import base validator class which takes care of most of the boilerplate
 from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
@@ -40,7 +44,7 @@ from sylliba.validator import reward_text, reward_speech
 load_dotenv()
 
 TASK_STRINGS = [
-    "text2speech"
+    "speech2text"
 ]
 
 TARGET_LANGUAGES = [
@@ -87,10 +91,10 @@ class Validator(BaseValidatorNeuron):
         self.now = time.time()
         self.load_state()
         
-    def process(self, synapse_query):
-        bt.logging.info(f"synapse_query:{synapse_query}")
+    async def process(self, synapse_query, serialize = True):
+        # bt.logging.info(f"synapse_query:{synapse_query}")
         try:
-            return translation.process(synapse_query)
+            return await translation.process(synapse_query, serialize)
         except Exception as e:
             bt.logging.error(f"Error processing translation request {e}. \n{synapse_query}")
             return ""
@@ -122,8 +126,8 @@ class Validator(BaseValidatorNeuron):
         topic = random.choice(TOPICS)
         # Generating the query
         successful = []
-        sample_request = self.generate_query(target_language, source_language, task_string, topic)
-        bt.logging.info(f"sample_request: {sample_request}")
+        sample_request = await self.generate_query(target_language, source_language, task_string, topic)
+        # bt.logging.info(f"sample_request: {sample_request}")
         translation_request = TranslationRequest(data = {
                     "input": sample_request['input'],
                     "task_string": sample_request["task_string"],
@@ -158,7 +162,14 @@ class Validator(BaseValidatorNeuron):
                 # Getting the responses
                 for j in range(0, len(responses)):
                     if responses[j].miner_response is not None:
-                        successful.append([responses[j].miner_response, batch[j]])
+        
+                        decoded_data = base64.b64decode(responses[j].miner_response)
+                        if translation_request.data['task_string'].endswith('speech'):
+                            buffer = io.BytesIO(decoded_data)
+                            decoded_data = torch.load(buffer)
+                        bt.logging.info(f'DECODED OUTPUT DATA: {decoded_data}')
+                        
+                        successful.append([decoded_data, batch[j]])
                     else:
                         bt.logging.warning(f"Miner {batch[j]} failed to respond.")
         except Exception as e:
@@ -181,7 +192,7 @@ class Validator(BaseValidatorNeuron):
         else:
             return reward_speech(miner_response, sample_output)
     
-    def generate_query(self, target_language, source_language, task_string, topic):
+    async def generate_query(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")
         token = os.getenv("INFERENCE_API_KEY")
         headers = {
@@ -213,20 +224,23 @@ class Validator(BaseValidatorNeuron):
         output_data = text.split(f"{target_language}:")[1]
 
         if task_string.startswith("speech"):
-            input_data = self.process(TranslationRequest(data = {
+            input_data = await self.process(TranslationRequest(data = {
                 "input" : input_data,
                 "task_string": "text2speech",
                 "source_language": source_language,
-                "target_language": target_language
+                "target_language": source_language
             }))
 
         if task_string.endswith("speech"):
-            output_data = self.process(TranslationRequest(data = {
+            output_data = await self.process(TranslationRequest(data = {
                 "input" : output_data,
                 "task_string": "text2speech",
-                "source_language": source_language,
+                "source_language": target_language,
                 "target_language": target_language
-            }))
+            }), serialize = False)
+        
+        output = {"input": input_data[:100],"output": output_data[:100],"task_string": task_string,"source_language": source_language,"target_language": target_language}
+        bt.logging.info(f'Generated Trnaslation Request: {output}')
         
         return {
                     "input": input_data,
