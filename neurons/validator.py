@@ -144,9 +144,8 @@ class Validator(BaseValidatorNeuron):
             translation_request=translation_request,
         )
         try:
-            # for i in range(5):
-                # batch = self.get_batch(self.batch_size)
-                batch = [8]
+            for i in range(5):
+                batch = self.get_batch(self.batch_size)
                 bt.logging.info(f"batch:{batch}")
                 responses = await self.dendrite(
                     axons=[axons[i] for i in batch],
