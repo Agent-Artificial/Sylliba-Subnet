@@ -607,7 +607,7 @@ class TranslationConfig(BaseModel):
 
 
 class TranslationData(BaseModel):
-    input: str
+    input: Any
     task_string: str
     source_language: Optional[str] = None
     target_language: str

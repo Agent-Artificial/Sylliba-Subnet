@@ -28,8 +28,8 @@ from nltk.translate.bleu_score import sentence_bleu
 from difflib import SequenceMatcher
 import numpy as np
 
-def reward(miner_response: str, sample_output: str) -> float:
-    bt.logging.info('-------------------------------- REWARD HERE ---------------------------------')
+def reward_text(miner_response: str, sample_output: str) -> float:
+    bt.logging.info('-------------------------------- REWARD_TEXT HERE ---------------------------------')
     bt.logging.info(f'miner_response : {miner_response}')
     bt.logging.info(f'sample_output : {sample_output}')
     # Compute cosine similarity using TF-IDF vectorization
@@ -49,9 +49,57 @@ def reward(miner_response: str, sample_output: str) -> float:
     aggregated_score = 0.5 * cosine_sim + 0.3 * bleu_score + 0.2 * lev_sim
 
     bt.logging.info(f'similarity score: {aggregated_score}')
-    bt.logging.info('------------------------------- REWARDS FINISEHD ------------------------------')
+    bt.logging.info('------------------------------- REWARD_TEXT FINISEHD ------------------------------')
     
     return aggregated_score
+
+from scipy.spatial.distance import euclidean
+import librosa
+
+def extract_mfcc_from_array(audio_data: np.ndarray, sample_rate: int, n_mfcc: int = 13) -> np.ndarray:
+    """
+    Extract MFCC features from audio data represented as a NumPy array.
+    
+    :param audio_data: Tensor or NumPy array of audio waveform data
+    :param sample_rate: Sample rate of the audio data
+    :param n_mfcc: Number of MFCC features to extract
+    :return: MFCC features as a NumPy array
+    """
+    try:
+        mfccs = librosa.feature.mfcc(y=audio_data, sr=sample_rate, n_mfcc=n_mfcc)
+        return np.mean(mfccs.T, axis=0)  # Take the mean of the MFCC features
+    except Exception as e:
+        bt.logging.error(f"Error extracting MFCCs from audio data: {e}")
+        return None
+
+def reward_speech(miner_audio: np.ndarray, sample_audio: np.ndarray) -> float:
+    bt.logging.info('-------------------------------- REWARD_SPEECH HERE ---------------------------------')
+    
+    # Extract MFCC features from the audio tensors
+    miner_mfcc = extract_mfcc_from_array(miner_audio, 16000)
+    sample_mfcc = extract_mfcc_from_array(sample_audio, 16000)
+    
+    if miner_mfcc is None or sample_mfcc is None:
+        bt.logging.error("Failed to extract MFCCs from one or both audio inputs. Returning 0 similarity score.")
+        return 0.0
+    
+    bt.logging.info(f'miner_mfcc shape: {miner_mfcc.shape}')
+    bt.logging.info(f'sample_mfcc shape: {sample_mfcc.shape}')
+    
+    # Compute cosine similarity between the MFCC features
+    cosine_sim = cosine_similarity([miner_mfcc], [sample_mfcc])[0][0]
+    
+    # Compute Euclidean distance (or use another distance metric if needed)
+    euclidean_dist = euclidean(miner_mfcc, sample_mfcc)
+    
+    # Aggregate the scores (with customizable weights)
+    aggregated_score = 0.7 * cosine_sim + 0.3 * (1 / (1 + euclidean_dist))  # inverse to make it similarity
+    
+    bt.logging.info(f'similarity score: {aggregated_score}')
+    bt.logging.info('------------------------------- REWARD_SPEECH FINISHED ------------------------------')
+    
+    return aggregated_score
+
 
 
 def get_rewards(

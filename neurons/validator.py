@@ -35,12 +35,12 @@ from sylliba.protocol import TranslateRequest
 from modules.translation.translation import Translation
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
-from sylliba.validator import reward
+from sylliba.validator import reward_text, reward_speech
 
 load_dotenv()
 
 TASK_STRINGS = [
-    "text2text"
+    "text2speech"
 ]
 
 TARGET_LANGUAGES = [
@@ -167,7 +167,7 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info(f"successful:{successful}")
         results = []
         for i in range(len(successful)):
-            results.append([successful[i][1], self.process_validator_output(successful[i][0], sample_request['output'])])
+            results.append([successful[i][1], self.process_validator_output(successful[i][0], sample_request['output'], task_string)])
             # Updating the scores
             self.update_scores(results[i][1], results[i][0])
         # Set weights
@@ -175,8 +175,11 @@ class Validator(BaseValidatorNeuron):
         if self.now % 10 == 0:
             self.set_weights()
         
-    def process_validator_output(self, miner_response, sample_output):
-        return reward(miner_response, sample_output)
+    def process_validator_output(self, miner_response, sample_output, task_string):
+        if task_string.endswith('text'):
+            return reward_text(miner_response, sample_output)
+        else:
+            return reward_speech(miner_response, sample_output)
     
     def generate_query(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")
@@ -208,6 +211,22 @@ class Validator(BaseValidatorNeuron):
         text = response.json()["choices"][0]["message"]["content"]
         input_data = text.split(f"{source_language}:")[1].split(f"{target_language}:")[0]
         output_data = text.split(f"{target_language}:")[1]
+
+        if task_string.startswith("speech"):
+            input_data = self.process(TranslationRequest(data = {
+                "input" : input_data,
+                "task_string": "text2speech",
+                "source_language": source_language,
+                "target_language": target_language
+            }))
+
+        if task_string.endswith("speech"):
+            output_data = self.process(TranslationRequest(data = {
+                "input" : output_data,
+                "task_string": "text2speech",
+                "source_language": source_language,
+                "target_language": target_language
+            }))
         
         return {
                     "input": input_data,
