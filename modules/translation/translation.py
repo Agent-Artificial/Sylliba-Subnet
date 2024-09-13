@@ -4,6 +4,8 @@ import torch
 import base64
 import torchaudio
 import asyncio
+import wave
+import numpy as np
 
 from loguru import logger
 from typing import Optional
@@ -273,12 +275,44 @@ class Translation:
             ValueError: If there is an error processing the audio output.
         """
         try:
+            self._tensor_to_wav(output, './modules/translation/out/audio_generated.wav')
             buffer = io.BytesIO()
             torch.save(output, buffer)
         except Exception as e:
             logger.error(f"Error processing audio output: {e}")
             raise ValueError(f"Error processing audio output: {e}") from e
         return buffer.getvalue()
+
+    def _tensor_to_wav(self, tensor: torch.Tensor, file_path: str, sample_rate: int = 16000):
+        """
+        Converts a PyTorch tensor to a WAV file.
+
+        Args:
+        tensor (torch.Tensor): The input tensor representing audio waveform.
+        file_path (str): The output path for the wav file.
+        sample_rate (int): The sample rate of the audio (default is 16000).
+
+        """
+        # Ensure the tensor is on the CPU and converted to NumPy
+        audio_data = tensor.cpu().numpy()
+
+        # Open a wav file in write mode
+        with wave.open(file_path, 'wb') as wav_file:
+            n_channels = 1  # Mono audio
+            sampwidth = 2  # 2 bytes = 16-bit audio
+            wav_file.setnchannels(n_channels)
+            wav_file.setsampwidth(sampwidth)
+            wav_file.setframerate(sample_rate)
+            
+            # Convert NumPy array to int16 and write to the wave file
+            wav_file.writeframes(audio_data.astype(np.int16).tobytes())
+
+        print(f"Audio saved as '{file_path}'")
+
+    # Example usage:
+    # Assuming 'audio_tensor' is a tensor with audio waveform data
+    # tensor_to_wav(audio_tensor, "output_audio.wav", sample_rate=16000)
+
     
     def _process_output(self, output: str) -> str:
         """
