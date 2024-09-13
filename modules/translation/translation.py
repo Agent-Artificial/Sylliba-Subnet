@@ -124,10 +124,16 @@ class Translation:
             output = self._process_audio_output(output)
         else:
             output = output.encode("utf-8")
-        # bt.logging.info(f"output after audio processing:{output[:100]}")  
-        # generated_output = self._process_output(output)
+        bt.logging.info(f"output after audio processing:{output[:100]}")  
+        generated_output = self._process_output(output)
         
-        return output
+        decoded_data = base64.b64decode(generated_output)
+        if translation_request.data['task_string'].endswith('speech'):
+            buffer = io.BytesIO(decoded_data)
+            decoded_data = torch.load(buffer)
+        bt.logging.info(f'DECODED OUTPUT DATA: {decoded_data}')
+        
+        return generated_output
     
     def _preprocess(self, input_data):
         """
@@ -291,7 +297,7 @@ class Translation:
         except Exception as e:
             logger.error(f"Error processing final output: {e}")
             raise ValueError(f"Error processing final output: {e}") from e
-        # bt.logging.info(f"generateoutput : {output[:100]}")
+        bt.logging.info(f"generateoutput : {output[:100]}")
         return output
 
     
