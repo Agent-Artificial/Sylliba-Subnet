@@ -129,7 +129,7 @@ class Translation:
         # bt.logging.info(f"output after audio processing:{output[:100]}")  
         generated_output = self._process_output(output)
         
-        return output
+        return generated_output
     
     def _preprocess(self, input_data):
         """
