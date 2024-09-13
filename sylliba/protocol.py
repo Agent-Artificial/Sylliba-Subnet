@@ -67,7 +67,7 @@ class TranslateRequest(bt.Synapse):
     translation_request: Optional[TranslationRequest] = None
 
     # Optional request output, filled by receiving axon.
-    miner_response: Optional[str] = None
+    miner_response: Optional[Any] = None
 
     def deserialize(serialized_str) -> dict:
         """
