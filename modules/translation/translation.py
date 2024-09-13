@@ -127,12 +127,6 @@ class Translation:
         bt.logging.info(f"output after audio processing:{output[:100]}")  
         generated_output = self._process_output(output)
         
-        decoded_data = base64.b64decode(generated_output)
-        if translation_request.data['task_string'].endswith('speech'):
-            buffer = io.BytesIO(decoded_data)
-            decoded_data = torch.load(buffer)
-        bt.logging.info(f'DECODED OUTPUT DATA: {decoded_data}')
-        
         return generated_output
     
     def _preprocess(self, input_data):
