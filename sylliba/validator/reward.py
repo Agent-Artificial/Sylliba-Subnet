@@ -17,6 +17,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 import numpy as np
+import torch
 from typing import List
 import bittensor as bt
 from sklearn.feature_extraction.text import CountVectorizer
@@ -72,12 +73,17 @@ def extract_mfcc_from_array(audio_data: np.ndarray, sample_rate: int, n_mfcc: in
         bt.logging.error(f"Error extracting MFCCs from audio data: {e}")
         return None
 
-def reward_speech(miner_audio: np.ndarray, sample_audio: np.ndarray) -> float:
+def reward_speech(miner_audio: torch.Tensor, sample_audio: torch.Tensor) -> float:
     bt.logging.info('-------------------------------- REWARD_SPEECH HERE ---------------------------------')
+    bt.logging.info(f'type of miner_audio : {type(miner_audio)}')
+    bt.logging.info(f'type of sample_audio : {type(sample_audio)}')
     
     # Extract MFCC features from the audio tensors
-    miner_mfcc = extract_mfcc_from_array(miner_audio, 16000)
-    sample_mfcc = extract_mfcc_from_array(sample_audio, 16000)
+    miner_audio = np.array(miner_audio.cpu())
+    sample_audio = np.array(sample_audio.cpu())
+
+    miner_mfcc = extract_mfcc_from_array(miner_audio, 16000).flatten()
+    sample_mfcc = extract_mfcc_from_array(sample_audio, 16000).flatten()
     
     if miner_mfcc is None or sample_mfcc is None:
         bt.logging.error("Failed to extract MFCCs from one or both audio inputs. Returning 0 similarity score.")

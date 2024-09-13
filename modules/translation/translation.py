@@ -66,7 +66,7 @@ class Translation:
             logger.error(f"Invalid language: {language} {e}")
             raise ValueError(f"Invalid language: {language}") from e
 
-    async def process(self, translation_request: TranslationRequest) -> Tuple[Union[str, None], Union[torch.Tensor, None]]:
+    async def process(self, translation_request: TranslationRequest, serialize = True) -> Tuple[Union[str, None], Union[torch.Tensor, None]]:
         """
         A function that processes a TranslationRequest object to perform translation tasks. 
         Retrieves input data, task string, source and target languages, preprocesses the input data, 
@@ -83,11 +83,9 @@ class Translation:
                 A tuple containing either a string or None, and either a torch.Tensor or None, 
                 representing the processed output.
         """
-        bt.logging.info(f"translation_request:{translation_request}")
-        bt.logging.info(f"translation_requestdata:{translation_request.data}")
         if "input" in translation_request.data:
             self.data_input = translation_request.data["input"]
-            bt.logging.info(f"data_input:{self.data_input}")
+            bt.logging.info(f"data_input:{self.data_input[:100]}")
         if "task_string" in translation_request.data:
             self.task_string = translation_request.data["task_string"]
             bt.logging.info(f"task_string:{self.task_string}")
@@ -118,14 +116,18 @@ class Translation:
                 src_lang=self.target_languages[self.source_language],
                 tgt_lang=self.target_languages[self.target_language]
             )
-        bt.logging.info(f"output before audio processing:{output[:100]}")  
+        bt.logging.info(f"output before audio processing:{output[:100]}")
+        
+        if serialize is False:
+            return output
+        
         if self.task_string.endswith("speech"):
             bt.logging.info("endswith(speech)")
             output = self._process_audio_output(output)
         else:
             output = output.encode("utf-8")
         # bt.logging.info(f"output after audio processing:{output[:100]}")  
-        # generated_output = self._process_output(output)
+        generated_output = self._process_output(output)
         
         return output
     
