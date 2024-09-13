@@ -145,7 +145,11 @@ class Translation:
             None
         """
         with open("./modules/translation/in/audio_request.wav", "wb") as f:
-            f.write(base64.b64decode(input_data))
+            decoded_data = base64.b64decode(input_data)
+            f.write(decoded_data)
+            buffer = io.BytesIO(decoded_data)
+            decoded_data = torch.load(buffer)
+            bt.logging.info(f'DECODED INPUT DATA: {decoded_data}')
         return "./modules/translation/in/audio_request.wav"
     
     def _process_text_inputs(self, input_data: str, src_lang: str) -> Dict[str, torch.Tensor]:
