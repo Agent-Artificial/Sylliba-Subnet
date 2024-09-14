@@ -44,11 +44,6 @@ You can run the following commands in your console to install the Sylliba Subnet
    pip3 install -r requirements.txt
    ```
 
-8. **Set up the translation module:**
-   ```bash
-   python3 -m modules.translation.setup_translation
-   ```
-
 ## Registering
 Once installed you can register the miner or validator by executing following command. Registering lets the block chain and the validator know that you are are going to be available to provide the service on the chain.
 
@@ -67,11 +62,13 @@ Finally you can serve the miner or validator with the following command.
 
 1. **Running a validator:**
    ```bash
+   export PYTHONPATH=.
    python3 neurons/validator.py --logging.debug
    ```
 
 2. **Running a miner:**
    ```bash
+   export PYTHONPATH=.
    python3 neurons/miner.py --logging.debug
    ```
 ---

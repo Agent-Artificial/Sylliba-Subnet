@@ -9,3 +9,5 @@ loguru
 python-dotenv
 bittensor
 nltk
+scikit-learn
+librosa
