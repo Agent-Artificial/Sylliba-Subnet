@@ -71,6 +71,12 @@ Finally you can serve the miner or validator with the following command.
    export PYTHONPATH=.
    python3 neurons/miner.py --logging.debug
    ```
+
+3. **Serving a subnet api:**
+   ```bash
+   export PYTHONPATH=.
+   python3 api/run_subnet_api.py --logging.debug
+   ```
 ---
 
 ## Installation
