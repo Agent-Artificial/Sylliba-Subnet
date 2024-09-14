@@ -19,7 +19,7 @@
 
 import bittensor as bt
 from typing import List, Optional, Union, Any, Dict
-from sylliba.protocol import TranslateRequest, ValidatorRequest
+from sylliba.protocol import TranslateRequest, TranslationRequest
 from bittensor.subnets import SubnetsAPI
 
 
@@ -28,33 +28,18 @@ class SubnetAPI(SubnetsAPI):
         super().__init__(wallet)
         self.netuid = 197
         self.name = "translation"
-        self.axon = bt.Axon()
 
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def prepare_synapse(
-        self, validator_request: ValidatorRequest
+        self, translation_request: TranslationRequest
     ) -> TranslateRequest:
+        bt.logging.info(f"translation_request{translation_request}")
         return TranslateRequest(
-            name=self.name,
-            timeout=0.1,
-            total_size=len(validator_request.model_dump()),
-            dendrite=self.dendrite,
-            netuid=self.netuid,
-            axon=self.axon,
-            computed_body_hash=None,
-            validator_request=validator_request,
-            miner_response=None
+            translation_request=translation_request
             )
 
     def process_responses(
         self, responses: List[Union["bt.Synapse", Any]]
     ) -> List[int]:
-        outputs = []
-        return next(
-            (
-                outputs.append(response.miner_response)
-                for response in responses
-                if response.dendrite.status_code == 200
-            ),
-            outputs,
-        )
+        bt.logging.info(f"responses:{responses}")
+        return responses
+    
