@@ -14,15 +14,20 @@ def get_module(module_name: str):
     try:
         response = requests.get(f"{module_data['url']}{module_data['endpoint']}")
         logger.debug(response.status_code)
-        module = json.loads(response.text)
+        module = f"import os\n{response.text.split('import os')[1]}"
+        module = module.replace('', "")
+        module = module.replace("\\n", " \n")
+        module = module.replace("\\", "").strip()
         paths = module_data['path'].split("/")
+        module = f"{module.split('subprocess.run(command, check=True)')[0]}\nsubprocess.run(command, check=True)"
         folder_path = Path().cwd()
         for path in paths:
             folder_path = folder_path / path / ""
             folder_path.mkdir(parents=True, exist_ok=True)
         logger.debug(folder_path)
+        logger.debug(module)
         with open(f"{folder_path}/setup_{module_data['name']}.py", "w") as f:
-            f.write(json.loads(module))
+            f.write(module)
     except Exception as e:
         logger.error(f"Failed to install module: {e}\n{folder_path}")
     return module_data

@@ -1,0 +1,3 @@
+On 2024-07-27 01:10:35.391971 UTC verify that Bakobiibizo is the key holder of testnet 197 on bittensor
+	Signed by: 5FTsVkehoW5hJD9G6ADWYbuZBB3F4XQxg4Pkh1kjTtj3WQBT
+	Signature: 3c17435b3d8cbe73afba90635a66b8909d0f8c39f8c14f3c81939fa92dc4513d37b3ceb4deda43a8f5718743a08186a5ec3c474ae9685028436b9f4fc7cd3585

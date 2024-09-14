@@ -1,11 +1,7 @@
-import os
 import numpy as np
 from typing import Tuple, List, Union, Any
 import bittensor
 from numpy import ndarray, dtype, floating, complexfloating
-from dotenv import load_dotenv
-
-load_dotenv()
 
 U32_MAX = 4294967295
 U16_MAX = 65535
@@ -129,8 +125,8 @@ def convert_weights_and_uids_for_emit(
 def process_weights_for_netuid(
         uids,
         weights: np.ndarray,
-        netuid: int = os.getenv("BT_NETUID"),
-        subtensor: "bittensor.subtensor"= None,
+        netuid: int,
+        subtensor: "bittensor.subtensor",
         metagraph: "bittensor.metagraph" = None,
         exclude_quantile: int = 0,
 ) -> Union[tuple[ndarray[Any, dtype[Any]], Union[
@@ -161,6 +157,7 @@ def process_weights_for_netuid(
 
     # Find all non zero weights.
     non_zero_weight_idx = np.argwhere(weights > 0).squeeze()
+    non_zero_weight_idx = np.atleast_1d(non_zero_weight_idx)
     non_zero_weight_uids = uids[non_zero_weight_idx]
     non_zero_weights = weights[non_zero_weight_idx]
     if non_zero_weights.size == 0 or metagraph.n < min_allowed_weights:
@@ -182,8 +179,6 @@ def process_weights_for_netuid(
             x=weights, limit=max_weight_limit
         )
         return np.arange(len(normalized_weights)), normalized_weights
-
-    bittensor.logging.debug("non_zero_weights", non_zero_weights)
 
     # Compute the exclude quantile and find the weights in the lowest quantile
     max_exclude = max(0, len(non_zero_weights) - min_allowed_weights) / len(

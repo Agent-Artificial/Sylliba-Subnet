@@ -25,9 +25,9 @@ def miner_config():
         "subtensor": {
             "network": os.getenv("BT_NETWORK"),
             "chain_endpoint": "",
-            "netuid": os.getenv("BT_NETUID"),
             "mock": False,
         },
+        "netuid": int(os.getenv("BT_NETUID")),
         "wandb": {
             "off": True,
             "offline": False,
@@ -40,18 +40,25 @@ def miner_config():
             "allow_non_registered": False,
             "mock": False,
         },
+        "axon":{
+            "port": int(os.getenv('BT_AXON_MINER_PORT')),
+            "ip": os.getenv('BT_AXON_MINER_IP'),
+            "external_port": int(os.getenv('BT_AXON_MINER_EXTERNAL_PORT')),
+            "external_ip": os.getenv('BT_AXON_MINER_EXTERNAL_IP'),
+            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS')),
+        },
     }
 
 
 def validator_config():
     return {
-        "netuid": os.getenv("BT_NETUID"),
+        "netuid": int(os.getenv("BT_NETUID")),
         "axon":{
-            "port": os.getenv('BT_AXON_PORT'),
-            "ip": os.getenv('BT_AXON_IP'),
-            "external_port": os.getenv('BT_AXON_EXTERNAL_PORT'),
-            "external_ip": os.getenv('BT_AXON_EXTERNAL_IP'),
-            "max_workers": os.getenv('BT_AXON_MAX_WORERS'),
+            "port": int(os.getenv('BT_AXON_VALIDATOR_PORT')),
+            "ip": os.getenv('BT_AXON_VALIDATOR_IP'),
+            "external_port": int(os.getenv('BT_AXON_VALIDATOR_EXTERNAL_PORT')),
+            "external_ip": os.getenv('BT_AXON_VALIDATOR_EXTERNAL_IP'),
+            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS')),
         },
             
         "logging": {
@@ -65,7 +72,7 @@ def validator_config():
         "neuron": {
             "name": os.getenv("BT_VALIDATOR_COLDKEY"),
             "timeout": 10,
-            "num_concurrent_forwards": 10,
+            "num_concurrent_forwards": 1,
             "sample_size": 50,
             "disable_set_weights": False,
             "moving_average_alpha": 0.1,
@@ -92,7 +99,7 @@ def validator_config():
         "blacklist": {
             "force_validator_permit": False,
             "allow_non_registered": False,
-            "netuid": os.getenv("BT_NETUID"),
+            "netuid": int(os.getenv("BT_NETUID")),
             "mock": False,
         },
     }

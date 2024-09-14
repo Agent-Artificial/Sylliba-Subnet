@@ -17,7 +17,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-
+import asyncio
 import time
 import os
 import requests
@@ -25,20 +25,26 @@ import random
 # Bittensor
 import bittensor as bt
 
+import base64
+import io
+import torch
+
 # import base validator class which takes care of most of the boilerplate
 from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from sylliba.validator import forward
 from neurons.config import validator_config
 from sylliba.protocol import ValidatorRequest
+from sylliba.protocol import TranslateRequest
 from modules.translation.translation import Translation
+from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
-from sylliba.validator import reward
+from sylliba.validator import reward_text, reward_speech
 
 load_dotenv()
 
 TASK_STRINGS = [
-    "text2text"
+    "speech2speech"
 ]
 
 TARGET_LANGUAGES = [
@@ -63,7 +69,7 @@ TOPICS = [
 ]
 
 translation = Translation()
-
+        
 
 class Validator(BaseValidatorNeuron):
     """
@@ -78,16 +84,17 @@ class Validator(BaseValidatorNeuron):
         super(Validator, self).__init__(config=validator_config())
         self.total_miners = len(self.metagraph.uids)
         self.validated = set()
-        self.batch_size = 50
+        self.batch_size = 3
         self.current_index = 0
         self.current_batch = self.get_batch(self.batch_size)
         bt.logging.info("load_state()")
         self.now = time.time()
         self.load_state()
         
-    def process(self, synapse_query):
+    async def process(self, synapse_query, serialize = True):
+        # bt.logging.info(f"synapse_query:{synapse_query}")
         try:
-            return translation.process(synapse_query)
+            return await translation.process(synapse_query, serialize)
         except Exception as e:
             bt.logging.error(f"Error processing translation request {e}. \n{synapse_query}")
             return ""
@@ -114,78 +121,142 @@ class Validator(BaseValidatorNeuron):
                 
     async def forward(self):
         source_language = "English"
-        target_language = random.choice(TARGET_LANGUAGES)
+        target_language = "French"
         task_string = random.choice(TASK_STRINGS)
         topic = random.choice(TOPICS)
         # Generating the query
         successful = []
-        synapse_query = self.generate_query(target_language, source_language, task_string, topic)
-        reference_set = self.process(synapse_query)
+        sample_request = await self.generate_query(target_language, source_language, task_string, topic)
+        # bt.logging.info(f"sample_request: {sample_request}")
+        translation_request = TranslationRequest(data = {
+                    "input": sample_request['input'],
+                    "task_string": sample_request["task_string"],
+                    "source_language": sample_request["source_language"],
+                    "target_language": sample_request["target_language"]
+                })
+        # reference_set = await self.process(translation_request)
         # Querying the miners
+        # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
+        # axons = self.metagraph.axons
+        axons = self.metagraph.axons
+        bt.logging.info(f"axons:{axons}")
+        synapse = TranslateRequest(
+            translation_request=translation_request,
+        )
         try:
-            for i in range(6):
+            for i in range(5):
                 batch = self.get_batch(self.batch_size)
-                responses = self.dendrite.query(synapse_query, axons=[self.metagraph.axons[uid] for uid in batch])
-                # Getting the responses
-                for j in len(responses):
-                    if responses[j].success:
-                        successful.append(responses[j].data, batch[i])
+                bt.logging.info(f"batch:{batch}")
+                responses = await self.dendrite(
+                    axons=[axons[i] for i in batch],
+                    synapse=synapse,
+                    deserialize=False,
+                    timeout=300
+                )
+                for j in range(0, len(responses)):
+                    if responses[j].miner_response is not None:
+                        bt.logging.info(f"responses from miners {batch[j]}:{responses[j].miner_response[:100]}")
                     else:
-                        bt.logging.warning(f"Miner {batch[i]} failed to respond.")
+                        bt.logging.info(f"responses from miners {batch[j]}:{responses[j].miner_response}")
+                # Getting the responses
+                for j in range(0, len(responses)):
+                    if responses[j].miner_response is not None:
+        
+                        decoded_data = base64.b64decode(responses[j].miner_response)
+                        if translation_request.data['task_string'].endswith('speech'):
+                            buffer = io.BytesIO(decoded_data)
+                            decoded_data = torch.load(buffer)
+                        bt.logging.info(f'DECODED OUTPUT DATA: {decoded_data}')
+                        
+                        successful.append([decoded_data, batch[j]])
+                    else:
+                        bt.logging.warning(f"Miner {batch[j]} failed to respond.")
         except Exception as e:
             bt.logging.error(f"Failed to query miners with exception: {e}")
         # Rewarding the miners
+        bt.logging.info(f"successful:{successful}")
         results = []
         for i in range(len(successful)):
-            results.append(successful[i][1], self.process_validator_output(successful[i][0], reference_set))
+            results.append([successful[i][1], self.process_validator_output(successful[i][0], sample_request['output'], task_string)])
             # Updating the scores
-            self.update_scores(results[i][0], results[i][1])
+            self.update_scores(results[i][1], results[i][0])
         # Set weights
         self.now = time.time()
         if self.now % 10 == 0:
             self.set_weights()
-        return await forward(self)
         
-    def process_validator_output(self, reference_set, validator_output):
-        return reward(query=reference_set, response=validator_output)
+    def process_validator_output(self, miner_response, sample_output, task_string):
+        if task_string.endswith('text'):
+            return reward_text(miner_response, sample_output)
+        else:
+            return reward_speech(miner_response, sample_output)
     
-    def generate_query(self, target_language, source_language, task_string, topic):
+    async def generate_query(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")
+        token = os.getenv("INFERENCE_API_KEY")
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {token}'
+        }
         body = {
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are an expert story teller. You can write short stories that capture the imagination, send readers on an adventure and complete an alegorical thought all within 100 words. Please write a short story about {topic}. Keep the story short but be sure to use an alegory and complete the idea. This story will be translated into {target_language} so use any relevant cultural ideas or contexts but be sure to write the story in English."
+                    "content": f"\
+                    You are an expert story teller.\
+                    You can write short stories that capture the imagination, \
+                    end readers on an adventure and complete an alegorical thought all within 100 words. \
+                    Please write a short story about {topic}. \
+                    Keep the story short but be sure to use an alegory and complete the idea. \
+                    Write story in two languages, those are {source_language} and {target_language}.\
+                    Don't put any descriptions, just follow below format:\
+                    {source_language}: \n {target_language}:"
                 }
             ],
-            "model": "meta-llama-3-7b"
+            "model": "gpt-4o"
         }
-        response = requests.post(url, json=body, timeout=30)
-        query = None
+        response = requests.post(url, headers = headers, json = body, timeout=30)
+        bt.logging.info(f"openairesponse:{response.json()}")
+
+        text = response.json()["choices"][0]["message"]["content"]
+        input_data = text.split(f"{source_language}:")[1].split(f"{target_language}:")[0]
+        output_data = text.split(f"{target_language}:")[1]
+
         if task_string.startswith("speech"):
-            query = self.process(
-                ValidatorRequest(
-                    data={
-                        "input": response.json()["choices"][0]["message"]["content"],
-                        "task_string": "text2speech",
-                        "source_language": "English",
-                        "target_language": "English"
-                    }
-                )
-            )
-        return ValidatorRequest(
-            data={
-                "input": query,
-                "task_string": task_string,
+            input_data = await self.process(TranslationRequest(data = {
+                "input" : input_data,
+                "task_string": "text2speech",
                 "source_language": source_language,
+                "target_language": source_language
+            }))
+
+        if task_string.endswith("speech"):
+            output_data = await self.process(TranslationRequest(data = {
+                "input" : output_data,
+                "task_string": "text2speech",
+                "source_language": target_language,
                 "target_language": target_language
-            }
-        )
+            }), serialize = False)
+        
+        output = {"input": input_data[:100],"output": output_data[:100],"task_string": task_string,"source_language": source_language,"target_language": target_language}
+        bt.logging.info(f'Generated Trnaslation Request: {output}')
+        
+        return {
+                    "input": input_data,
+                    "output": output_data,
+                    "task_string": task_string,
+                    "source_language": source_language,
+                    "target_language": target_language
+                }
+
 
 
 # The main function parses the configuration and runs the validator.
 if __name__ == "__main__":
+    # validator = Validator()
+    # validator.run()
+    
     with Validator() as validator:
         while True:
-            bt.logging.info(f"Validator running... {time.time()}")
-            time.sleep(5)
+            bt.logging.info(f'validator running ... {time.time()}')
+            time.sleep(5) 
