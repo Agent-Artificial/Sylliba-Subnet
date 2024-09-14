@@ -110,3 +110,10 @@ def ttl_get_block(self) -> int:
     Note: self here is the miner or validator instance
     """
     return self.subtensor.get_current_block()
+
+# 12 seconds updating block.
+@ttl_cache(maxsize=1, ttl=1200)
+def ttl_metagraph(self):
+    metagraph = self.subtensor.metagraph(self.config.netuid)
+    metagraph.sync(subtensor=self.subtensor)
+    return metagraph
