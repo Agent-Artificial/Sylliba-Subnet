@@ -102,4 +102,5 @@ def validator_config():
             "netuid": int(os.getenv("BT_NETUID")),
             "mock": False,
         },
+        "api_port": int(os.getenv("SUBNET_API_PORT")),
     }
