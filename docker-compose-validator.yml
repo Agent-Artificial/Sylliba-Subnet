@@ -1,0 +1,13 @@
+services:
+  validator:
+    build: 
+      context: .
+    env_file:
+      - .env
+    ports:
+      - ${BT_AXON_VALIDATOR_EXTERNAL_PORT}:${BT_AXON_VALIDATOR_EXTERNAL_PORT}
+    volumes:
+      - ${HOME}/.bittensor:/root/.bittensor      
+    command:
+      - neruons/validator.py
+      - --logging.debug

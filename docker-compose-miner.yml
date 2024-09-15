@@ -12,13 +12,4 @@ services:
       - neurons/miner.py
       - --logging.debug
 
-  # validator:
-  #   build: 
-  #     context: .
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - ${BT_AXON_VALIDATOR_EXTERNAL_PORT}:${BT_AXON_VALIDATOR_EXTERNAL_PORT}
-  #   command:
-  #     - neruons/validator.py
-  #     - --logging.debug
+
