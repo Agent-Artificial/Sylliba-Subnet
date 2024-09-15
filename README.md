@@ -1,13 +1,41 @@
 <div align="center">
 
-# **Bittensor Subnet Template** <!-- omit in toc -->
-[![Discord Chat](https://img.shields.io/discord/308323056592486420.svg)](https://discord.gg/bittensor)
+# **Sylliba Subnet** <!-- omit in toc -->
+[![Bittensor Discord Chat](https://img.shields.io/discord/308323056592486420.svg)](https://discord.gg/bittensor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 </div>
 
+# Sylliba
+**Sylliba** is a revolutionary translation module designed to bridge the gap in communication across diverse languages. With the capability to translate many languages, Sylliba supports both audio and text for inputs and outputs, making it a versatile tool for global interactions.
+
+As our first step into the Bittensor ecosystem, Sylliba connects to the network we are building, providing AI tooling and linking various blockchain networks together. Our mission is to create a seamless and intuitive translation experience that leverages advanced AI to foster better understanding and collaboration across different languages and cultures.
+
+Explore Sylliba and experience the future of translation [here](https://agentartificial.com/)
+
+## Features
+
+**Multi-Language Support:** Translate many languages.
+Versatile Input and Output: Handles both audio and text formats.
+
+**Bittensor Integration:** Connects to our AI-driven network for enhanced capabilities.
+
+**User-Friendly Interface:** Designed to be easy to use for everyone.
+
 ---
 
-## Install
+## Contribution Guidelines
+We welcome contributions from the community to help us improve Sylliba. Please fork this repo and create a PR with your changes for us to review.
+
+# Installation
+
+
+
+There are multiple ways to launch our miner or validator.  Choose what works best for you!
+
+
+## Option 1: Local Python Install
+
+This approach install directly on your Ubuntu server.
 
 You can run the following commands in your console to install the Sylliba Subnet:
 
@@ -18,10 +46,11 @@ You can run the following commands in your console to install the Sylliba Subnet
 
 2. **Navigate to the project directory:**
    ```bash
-   cd Sylliba-subnet
+   cd Sylliba-Subnet
    ```
 
 3. **Create a Python virtual environment:**
+   (if you prefer to use Anaconda or Poetry use that)
    ```bash
    python3 -m venv .venv
    ```
@@ -37,179 +66,84 @@ You can run the following commands in your console to install the Sylliba Subnet
    ```
 
 6. **Set up the environment variables**  
-   Edit the `.env` file and configure the necessary values.
+   Edit the `.env` file and configure the necessary values.  (You do not need to fill in the validator parts if you are only running a miner.)
 
 7. **Install the required dependencies:**
    ```bash
    pip3 install -r requirements.txt
    ```
 
-## Registering
-Once installed you can register the miner or validator by executing following command. Registering lets the block chain and the validator know that you are are going to be available to provide the service on the chain.
-
-1. **Registering a validator:**
-   ```bash
-   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_VALIDATOR_COLDKEY --wallet.hotkey YOUR_VALIDATOR_HOTKEY
-   ```
-
-2. **Registering a miner:**
-   ```bash
-   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
-   ```
-
-## Serving
+### Serving
 Finally you can serve the miner or validator with the following command. 
 
 1. **Running a validator:**
    ```bash
-   export PYTHONPATH=.
    python3 neurons/validator.py --logging.debug
    ```
 
 2. **Running a miner:**
    ```bash
-   export PYTHONPATH=.
    python3 neurons/miner.py --logging.debug
    ```
 
-3. **Serving a subnet api:**
+## Option 2: Building a Docker Container
+
+This approach runs a miner or validator in a container built on your server (Windows (WSL), Linux or Mac).
+
+You can run the following commands in your console to install the Sylliba Subnet:
+
+1. **Clone the repository:**
    ```bash
-   export PYTHONPATH=.
-   python3 api/run_subnet_api.py --logging.debug
+   git clone https://github.com/Agent-Artificial/Sylliba-Subnet.git
    ```
+
+2. **Navigate to the project directory:**
+   ```bash
+   cd Sylliba-Subnet
+   ```
+
+3. **Copy the environment variables template:**
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Set up the environment variables**  
+   Edit the `.env` file and configure the necessary values.  (You do not need to fill in the validator parts if you are only running a miner.)
+
+5. **Docker Compose Build:**
+   ```bash
+   docker compose build
+   ```
+
+6a. **Miner - Docker Compose Up:**
+   ```bash
+   docker compose -f docker-compose-miner.yml up -d 
+   ```
+
+6b. **Validator - Docker Compose Up:**
+   ```bash
+   docker compose -f docker-compose-validator.yml up -d 
+   ```
+
+
+
+## Registering
+You can register a key for use with a miner or validator by executing following commands. Registering lets the block chain and the validator know that you are are going to be available to provide the service on the chain.
+
+1. **Registering a validator:**
+   Use ```--subtensor.network finney and --netuid #``` for mainnet if you wish to deploy there
+   ```bash
+   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_VALIDATOR_COLDKEY --wallet.hotkey YOUR_VALIDATOR_HOTKEY
+   ```
+
+2. **Registering a miner:**
+   Use ```--subtensor.network finney and --netuid #``` for mainnet if you wish to deploy there
+   ```bash
+   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
+   ```
+
 ---
 
-## Installation
-
-### Before you proceed
-Before you proceed with the installation of the subnet, note the following: 
-
-- Use these instructions to run your subnet locally for your development and testing, or on Bittensor testnet or on Bittensor mainnet. 
-- **IMPORTANT**: We **strongly recommend** that you first run your subnet locally and complete your development and testing before running the subnet on Bittensor testnet. Furthermore, make sure that you next run your subnet on Bittensor testnet before running it on the Bittensor mainnet.
-- You can run your subnet either as a subnet owner, or as a subnet validator or as a subnet miner. 
-- **IMPORTANT:** Make sure you are aware of the minimum compute requirements for your subnet. See the [Minimum compute YAML configuration](./min_compute.yml).
-- Note that installation instructions differ based on your situation: For example, installing for local development and testing will require a few additional steps compared to installing for testnet. Similarly, installation instructions differ for a subnet owner vs a validator or a miner. 
-
-### Install
-
-- **Running locally**: Follow the step-by-step instructions described in this section: [Running Subnet Locally](./docs/running_on_staging.md).
-- **Running on Bittensor testnet**: Follow the step-by-step instructions described in this section: [Running on the Test Network](./docs/running_on_testnet.md).
-- **Running on Bittensor mainnet**: Follow the step-by-step instructions described in this section: [Running on the Main Network](./docs/running_on_mainnet.md).
-
----
-
-## Writing your own incentive mechanism
-
-As described in [Quickstarter template](#quickstarter-template) section above, when you are ready to write your own incentive mechanism, update this template repository by editing the following files. The code in these files contains detailed documentation on how to update the template. Read the documentation in each of the files to understand how to update the template. There are multiple **TODO**s in each of the files identifying sections you should update. These files are:
-- `template/protocol.py`: Contains the definition of the wire-protocol used by miners and validators.
-- `neurons/miner.py`: Script that defines the miner's behavior, i.e., how the miner responds to requests from validators.
-- `neurons/validator.py`: This script defines the validator's behavior, i.e., how the validator requests information from the miners and determines the scores.
-- `template/forward.py`: Contains the definition of the validator's forward pass.
-- `template/reward.py`: Contains the definition of how validators reward miner responses.
-
-In addition to the above files, you should also update the following files:
-- `README.md`: This file contains the documentation for your project. Update this file to reflect your project's documentation.
-- `CONTRIBUTING.md`: This file contains the instructions for contributing to your project. Update this file to reflect your project's contribution guidelines.
-- `template/__init__.py`: This file contains the version of your project.
-- `setup.py`: This file contains the metadata about your project. Update this file to reflect your project's metadata.
-- `docs/`: This directory contains the documentation for your project. Update this directory to reflect your project's documentation.
-
-__Note__
-The `template` directory should also be renamed to your project name.
----
-
-# Writing your own subnet API
-To leverage the abstract `SubnetsAPI` in Bittensor, you can implement a standardized interface. This interface is used to interact with the Bittensor network and can be used by a client to interact with the subnet through its exposed axons.
-
-What does Bittensor communication entail? Typically two processes, (1) preparing data for transit (creating and filling `synapse`s) and (2), processing the responses received from the `axon`(s).
-
-This protocol uses a handler registry system to associate bespoke interfaces for subnets by implementing two simple abstract functions:
-- `prepare_synapse`
-- `process_responses`
-
-These can be implemented as extensions of the generic `SubnetsAPI` interface.  E.g.:
-
-
-This is abstract, generic, and takes(`*args`, `**kwargs`) for flexibility. See the extremely simple base class:
-```python
-class SubnetsAPI(ABC):
-    def __init__(self, wallet: "bt.wallet"):
-        self.wallet = wallet
-        self.dendrite = bt.dendrite(wallet=wallet)
-
-    async def __call__(self, *args, **kwargs):
-        return await self.query_api(*args, **kwargs)
-
-    @abstractmethod
-    def prepare_synapse(self, *args, **kwargs) -> Any:
-        """
-        Prepare the synapse-specific payload.
-        """
-        ...
-
-    @abstractmethod
-    def process_responses(self, responses: List[Union["bt.Synapse", Any]]) -> Any:
-        """
-        Process the responses from the network.
-        """
-        ...
-
-```
-
-
-Here is a toy example:
-
-```python
-from bittensor.subnets import SubnetsAPI
-from MySubnet import MySynapse
-
-class MySynapseAPI(SubnetsAPI):
-    def __init__(self, wallet: "bt.wallet"):
-        super().__init__(wallet)
-        self.netuid = 99
-
-    def prepare_synapse(self, prompt: str) -> MySynapse:
-        # Do any preparatory work to fill the synapse
-        data = do_prompt_injection(prompt)
-
-        # Fill the synapse for transit
-        synapse = StoreUser(
-            messages=[data],
-        )
-        # Send it along
-        return synapse
-
-    def process_responses(self, responses: List[Union["bt.Synapse", Any]]) -> str:
-        # Look through the responses for information required by your application
-        for response in responses:
-            if response.dendrite.status_code != 200:
-                continue
-            # potentially apply post processing
-            result_data = postprocess_data_from_response(response)
-        # return data to the client
-        return result_data
-```
-
-You can use a subnet API to the registry by doing the following:
-1. Download and install the specific repo you want
-1. Import the appropriate API handler from bespoke subnets
-1. Make the query given the subnet specific API
-
-
-
-# Subnet Links
-In order to see real-world examples of subnets in-action, see the `subnet_links.py` document or access them from inside the `template` package by:
-```python
-import template
-template.SUBNET_LINKS
-[{'name': 'sn0', 'url': ''},
- {'name': 'sn1', 'url': 'https://github.com/opentensor/prompting/'},
- {'name': 'sn2', 'url': 'https://github.com/bittranslateio/bittranslate/'},
- {'name': 'sn3', 'url': 'https://github.com/gitphantomman/scraping_subnet/'},
- {'name': 'sn4', 'url': 'https://github.com/manifold-inc/targon/'},
-...
-]
-```
 
 ## License
 This repository is licensed under the MIT License.
