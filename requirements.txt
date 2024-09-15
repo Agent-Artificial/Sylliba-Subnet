@@ -1,6 +1,7 @@
 rich
 pytest
 torch>=2
+torchaudio
 numpy
 setuptools
 proto-plus
@@ -11,3 +12,5 @@ bittensor
 nltk
 scikit-learn
 librosa
+transformers
+pydub
