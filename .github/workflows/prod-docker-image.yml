@@ -71,7 +71,7 @@ jobs:
 #         deployment_server: ${{ fromJson(needs.variables.outputs.deployment_servers) }}
 
 #     steps:
-#       #- uses: actions/checkout@v3
+#       #- uses: actions/checkout@v4
 
 #       - name: Docker stop old container
 #         run: |
