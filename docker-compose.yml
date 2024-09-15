@@ -1,0 +1,24 @@
+services:
+  miner:
+    build: 
+      context: .
+    env_file:
+      - .env
+    ports:
+      - 7777:7777
+    volumes:
+      - ${HOME}/.bittensor:/root/.bittensor
+    command:
+      - neurons/miner.py
+      - --logging.debug
+
+  # validator:
+  #   build: 
+  #     context: .
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - 8888:8888
+  #   command:
+  #     - neruons/validator.py
+  #     - --logging.debug
