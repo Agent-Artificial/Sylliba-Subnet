@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     ports:
-      - 7777:7777
+      - ${BT_AXON_MINER_EXTERNAL_PORT}:${BT_AXON_MINER_EXTERNAL_PORT}
     volumes:
       - ${HOME}/.bittensor:/root/.bittensor
     command:
@@ -18,7 +18,7 @@ services:
   #   env_file:
   #     - .env
   #   ports:
-  #     - 8888:8888
+  #     - ${BT_AXON_VALIDATOR_EXTERNAL_PORT}:${BT_AXON_VALIDATOR_EXTERNAL_PORT}
   #   command:
   #     - neruons/validator.py
   #     - --logging.debug
