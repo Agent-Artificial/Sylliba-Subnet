@@ -132,6 +132,17 @@ You can run the following commands in your console to install the Sylliba Subnet
    docker compose -f docker-compose-validator.yml up -d 
    ```
 
+### Helpful Tips:
+
+To view your container's log:
+   ```bash
+   docker container logs -f sylliba-subnet-miner-1
+   ```
+   or
+   ```bash
+   docker container logs -f sylliba-subnet-validator-1
+   ```   
+   Type ctrl+c to exit
 
 
 ## Registering
