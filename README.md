@@ -91,6 +91,19 @@ Finally you can serve the miner or validator with the following command.
    python3 neurons/miner.py --logging.debug
    ```
 
+### Serving with pm2
+Finally you can serve the miner or validator with pm2 using following command. 
+
+1. **Running a validator:**
+   ```bash
+   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3 -- --logging.debug
+   ```
+
+2. **Running a miner:**
+   ```bash
+   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug
+   ```
+
 ## Option 2: Building a Docker Container
 
 This approach runs a miner or validator in a container built on your server (Windows (WSL), Linux or Mac).
