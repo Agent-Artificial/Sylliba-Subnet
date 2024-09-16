@@ -32,10 +32,15 @@ We welcome contributions from the community to help us improve Sylliba. Please f
 
 There are multiple ways to launch our miner or validator.  Choose what works best for you!
 
+**MINIMUM HARDWARE REQUIREMENTS:**
+Miner: 4 CPU Cores, 16GB RAM, 10GB Disk Space and at least an 8GB GPU
+Validator: 4 CPU Cores, 16GB RAM, 20GB Disk Space and at least an 10GB GPU 
 
 ## Option 1: Local Python Install
 
-This approach install directly on your Ubuntu server.
+This approach installs directly on your linux server.
+
+**SOFTWARE REQUIREMENTS:** Python3, venv, git, nvidia driver
 
 You can run the following commands in your console to install the Sylliba Subnet:
 
@@ -90,6 +95,8 @@ Finally you can serve the miner or validator with the following command.
 
 This approach runs a miner or validator in a container built on your server (Windows (WSL), Linux or Mac).
 
+**SOFTWARE REQUIREMENTS:** Docker, Docker Compose, git, nvidia driver and nvidia docker runtime
+
 You can run the following commands in your console to install the Sylliba Subnet:
 
 1. **Clone the repository:**
@@ -125,6 +132,17 @@ You can run the following commands in your console to install the Sylliba Subnet
    docker compose -f docker-compose-validator.yml up -d 
    ```
 
+### Helpful Tips:
+
+To view your container's log:
+   ```bash
+   docker container logs -f sylliba-subnet-miner-1
+   ```
+   or
+   ```bash
+   docker container logs -f sylliba-subnet-validator-1
+   ```   
+   Type ctrl+c to exit
 
 
 ## Registering
