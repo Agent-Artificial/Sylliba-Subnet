@@ -164,10 +164,26 @@ You can register a key for use with a miner or validator by executing following 
 
 ## Running Multiple Miners
 
-To run multiple miners you can run this command multiple times, once for each miner.
+### Using PM2
+To run multiple miners without docker you can run this command multiple times, once for each miner.
 
 ```bash
 pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug --axon.port [port for new miner] --axon.external_port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
+```
+
+### Using Docker
+Run multiple miners via Docker Compose.  
+
+1. Step 1
+Navigate to the ./docker-multi-miner folder
+
+2. Make a .env# for every miner you want.  Example, copy .env1.example to .env1, then .env2.example to env2.  All of the .env#.example are identical so make as many as you need with the specific miner information.
+
+3. Edit the docker-compose.yml file.  The one that is there has three miners.  To add more just copy one of them and paste below editing the name (i.e. mine4 to miner4) and the .env file (i.e. .env3 to .env4)
+
+4. Run this command to launch all of the miners in containers: 
+```bash
+docker compose up -d 
 ```
 
 ---
