@@ -11,5 +11,12 @@ services:
     command:
       - neurons/miner.py
       - --logging.debug
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]         
 
 

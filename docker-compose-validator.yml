@@ -11,3 +11,10 @@ services:
     command:
       - neruons/validator.py
       - --logging.debug
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]         
