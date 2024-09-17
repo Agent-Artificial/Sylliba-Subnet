@@ -174,8 +174,7 @@ pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --loggi
 ### Using Docker
 Run multiple miners via Docker Compose.  
 
-1. Step 1
-Navigate to the ./docker-multi-miner folder
+1. Navigate to the ./docker-multi-miner folder
 
 2. Make a .env# for every miner you want.  Example, copy .env1.example to .env1, then .env2.example to env2.  All of the .env#.example are identical so make as many as you need with the specific miner information.
 
