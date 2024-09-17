@@ -91,6 +91,7 @@ Finally you can serve the miner or validator with the following command.
    python3 neurons/miner.py --logging.debug
    ```
 
+
 ### Serving with pm2
 Finally you can serve the miner or validator with pm2 using following command. 
 
@@ -103,6 +104,9 @@ Finally you can serve the miner or validator with pm2 using following command.
    ```bash
    pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug
    ```
+
+
+Continue on to the Registering section down below
 
 ## Option 2: Building a Docker Container
 
@@ -172,6 +176,31 @@ You can register a key for use with a miner or validator by executing following 
    ```bash
    btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
    ```
+
+## Running Multiple Miners
+
+### Using PM2
+To run multiple miners without docker you can run this command multiple times, once for each miner.
+
+```bash
+pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug --axon.port [port for new miner] --axon.external_port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
+```
+
+### Using Docker
+Run multiple miners via Docker Compose.  
+
+1. Navigate to the ./docker-multi-miner folder
+
+2. Copy .env.example to .env.  This file is ONLY used for the ports in the docker-compose.yml.  Add lines for the amount of miners you are going to start
+
+3. Make a .env# for every miner you want.  Example, copy .env1.example to .env1, then .env2.example to env2.  All of the .env#.example are identical so make as many as you need with the specific miner information.
+
+4. Edit the docker-compose.yml file.  The one that is there has three miners.  To add more just copy one of them and paste below editing the name (i.e. mine4 to miner4) and the .env file (i.e. .env3 to .env4)
+
+5. Run this command to launch all of the miners in containers: 
+```bash
+docker compose up -d 
+```
 
 ---
 
