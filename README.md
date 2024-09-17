@@ -91,6 +91,8 @@ Finally you can serve the miner or validator with the following command.
    python3 neurons/miner.py --logging.debug
    ```
 
+Continue on to the Registering section down below
+
 ## Option 2: Building a Docker Container
 
 This approach runs a miner or validator in a container built on your server (Windows (WSL), Linux or Mac).
@@ -159,6 +161,14 @@ You can register a key for use with a miner or validator by executing following 
    ```bash
    btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
    ```
+
+## Running Multiple Miners
+
+To run multiple miners you can run this command multiple times, once for each miner.
+
+```bash
+pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug --axon.port [port for new miner] --axon.external_port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
+```
 
 ---
 
