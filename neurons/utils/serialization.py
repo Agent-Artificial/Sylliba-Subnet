@@ -9,7 +9,7 @@ def audio_encode(data):
     output = base64.b64encode(data).decode("utf-8")
     return output
 
-def audio_decode(data, content_type):
+def audio_decode(data):
     decoded_data = base64.b64decode(data)
     buffer = io.BytesIO(decoded_data)
     decoded_data = torch.load(buffer)
