@@ -197,7 +197,7 @@ class Validator(BaseValidatorNeuron):
         else:
             return reward_speech(miner_response, sample_output)
     
-    async def generate_query(self, target_language, source_language, task_string, topic):
+    async def generate_query_llama(self, target_language, source_language, task_string, topic):
         messages = [
             {
                 "role": "system",
@@ -274,7 +274,7 @@ class Validator(BaseValidatorNeuron):
                     "target_language": target_language
                 }
     
-    async def generate_query_openai(self, target_language, source_language, task_string, topic):
+    async def generate_query(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")
         token = os.getenv("INFERENCE_API_KEY")
         headers = {
