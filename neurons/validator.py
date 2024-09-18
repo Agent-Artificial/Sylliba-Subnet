@@ -47,7 +47,10 @@ import json
 load_dotenv()
 
 TASK_STRINGS = [
-    "speech2speech"
+    "text2text",
+    "text2speech",
+    "speech2text",
+    "speech2speech",
 ]
 
 TARGET_LANGUAGES = [
@@ -124,7 +127,7 @@ class Validator(BaseValidatorNeuron):
                 
     async def forward(self):
         source_language = "English"
-        target_language = "French"
+        target_language = random.choice(TARGET_LANGUAGES)
         task_string = random.choice(TASK_STRINGS)
         topic = random.choice(TOPICS)
         # Generating the query
