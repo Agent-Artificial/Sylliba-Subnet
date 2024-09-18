@@ -259,64 +259,6 @@ class Validator(BaseValidatorNeuron):
                     "source_language": source_language,
                     "target_language": target_language
                 }
-    
-    async def generate_query_openai(self, target_language, source_language, task_string, topic):
-        url = os.getenv("INFERENCE_URL")
-        token = os.getenv("INFERENCE_API_KEY")
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {token}'
-        }
-        body = {
-            "messages": [
-                {
-                    "role": "system",
-                    "content": f"\
-                    You are an expert story teller.\
-                    You can write short stories that capture the imagination, \
-                    end readers on an adventure and complete an alegorical thought all within 100 words. \
-                    Please write a short story about {topic}. \
-                    Keep the story short but be sure to use an alegory and complete the idea. \
-                    Write story in two languages, those are {source_language} and {target_language}.\
-                    Don't put any descriptions, just follow below format:\
-                    {source_language}: \n {target_language}:"
-                }
-            ],
-            "model": "gpt-4o"
-        }
-        response = requests.post(url, headers = headers, json = body, timeout=30)
-        bt.logging.info(f"openairesponse:{response.json()}")
-
-        text = response.json()["choices"][0]["message"]["content"]
-        input_data = text.split(f"{source_language}:")[1].split(f"{target_language}:")[0]
-        output_data = text.split(f"{target_language}:")[1]
-
-        if task_string.startswith("speech"):
-            input_data = await self.process(TranslationRequest(data = {
-                "input" : input_data,
-                "task_string": "text2speech",
-                "source_language": source_language,
-                "target_language": source_language
-            }))
-
-        if task_string.endswith("speech"):
-            output_data = await self.process(TranslationRequest(data = {
-                "input" : output_data,
-                "task_string": "text2speech",
-                "source_language": target_language,
-                "target_language": target_language
-            }), serialize = False)
-        
-        output = {"input": input_data[:100],"output": output_data[:100],"task_string": task_string,"source_language": source_language,"target_language": target_language}
-        bt.logging.info(f'Generated Trnaslation Request: {output}')
-        
-        return {
-                    "input": input_data,
-                    "output": output_data,
-                    "task_string": task_string,
-                    "source_language": source_language,
-                    "target_language": target_language
-                }
 
 
 
