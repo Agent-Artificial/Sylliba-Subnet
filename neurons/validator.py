@@ -78,6 +78,9 @@ TOPICS = [
 LLMS = [
     "modules.llms.llama"
 ]
+TTS = [
+    "modules.tts.seamless"
+]
 
 translation = Translation()
         
@@ -212,7 +215,7 @@ class Validator(BaseValidatorNeuron):
                 "content": f"""
                 You are an expert story teller.
                 You can write short stories that capture the imagination, 
-                end readers on an adventure and complete an alegorical thought all within 100 words. 
+                end readers on an adventure and complete an alegorical thought all within 100~200 words. 
                 Please write a short story about {topic} in {source_language}. 
                 Keep the story short but be sure to use an alegory and complete the idea."""
             }
@@ -237,21 +240,14 @@ class Validator(BaseValidatorNeuron):
         ]
         output_data = llm.process(messages)
 
+        tts_module = random.choice(TTS)
+        tts = import_module(tts_module)
+
         if task_string.startswith("speech"):
-            input_data = await self.process(TranslationRequest(data = {
-                "input" : input_data,
-                "task_string": "text2speech",
-                "source_language": source_language,
-                "target_language": source_language
-            }))
+            input_data = tts.process(input_data, source_language)
 
         if task_string.endswith("speech"):
-            output_data = await self.process(TranslationRequest(data = {
-                "input" : output_data,
-                "task_string": "text2speech",
-                "source_language": target_language,
-                "target_language": target_language
-            }), serialize = False)
+            output_data = tts.process(output_data, target_language)
         
         output = {"input": input_data[:100],"output": output_data[:100],"task_string": task_string,"source_language": source_language,"target_language": target_language}
         bt.logging.info(f'Generated Trnaslation Request: {output}')
