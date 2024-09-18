@@ -1,6 +1,5 @@
 from transformers import AutoProcessor, SeamlessM4Tv2Model, pipeline
 import torch
-import json
 
 from modules.translation.data_models import TARGET_LANGUAGES
 
