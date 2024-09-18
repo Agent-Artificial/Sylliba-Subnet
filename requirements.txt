@@ -11,3 +11,7 @@ bittensor
 nltk
 scikit-learn
 librosa
+IPython
+notebook
+accelerate
+bitsandbytes
