@@ -1,0 +1,60 @@
+services:
+  miner1:
+    build: 
+      context: ../
+    env_file:
+      - .env1
+    ports:
+      - ${BT_AXON_MINER1_EXTERNAL_PORT}:${BT_AXON_MINER1_PORT}
+    volumes:
+      - ${HOME}/.bittensor:/root/.bittensor
+    command:
+      - neurons/miner.py
+      - --logging.debug
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]   
+
+  miner2:
+    build: 
+      context: ../
+    env_file:
+      - .env2
+    ports:
+      - ${BT_AXON_MINER2_EXTERNAL_PORT}:${BT_AXON_MINER2_PORT}
+    volumes:
+      - ${HOME}/.bittensor:/root/.bittensor
+    command:
+      - neurons/miner.py
+      - --logging.debug
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]         
+
+  miner3:
+    build: 
+      context: ../
+    env_file:
+      - .env3
+    ports:
+      - ${BT_AXON_MINER3_EXTERNAL_PORT}:${BT_AXON_MINER3_PORT}
+    volumes:
+      - ${HOME}/.bittensor:/root/.bittensor
+    command:
+      - neurons/miner.py
+      - --logging.debug
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]         

@@ -1,0 +1,22 @@
+services:
+  miner:
+    build: 
+      context: .
+    env_file:
+      - .env
+    ports:
+      - ${BT_AXON_MINER_EXTERNAL_PORT}:${BT_AXON_MINER_EXTERNAL_PORT}
+    volumes:
+      - ${HOME}/.bittensor:/root/.bittensor
+    command:
+      - neurons/miner.py
+      - --logging.debug
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]         
+
+
