@@ -45,7 +45,7 @@ from sylliba.validator import reward_text, reward_speech
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import json
 
-from neurons.utils.serialization import synapse_encode, synapse_decode
+from neurons.utils.serialization import audio_encode, audio_decode
 
 load_dotenv()
 
@@ -145,7 +145,10 @@ class Validator(BaseValidatorNeuron):
         successful = []
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
 
-        miner_input_data = synapse_encode(sample_request['input'])
+        if task_string.startswith('speech'):
+            miner_input_data = audio_encode(sample_request['input'])
+        else:
+            miner_input_data = sample_request['input']
 
         translation_request = TranslationRequest(data = {
                     "input": miner_input_data,
@@ -171,7 +174,11 @@ class Validator(BaseValidatorNeuron):
                 # Getting the responses
                 for j in range(0, len(responses)):
                     if responses[j].miner_response is not None:
-                        miner_output_data = synapse_decode(responses[j].miner_response)
+                        if task_string.endswith('speech'):
+                            miner_output_data = audio_decode(responses[j].miner_response)
+                        else:
+                            miner_output_data = responses[j].miner_response
+                            
                         bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
                         
                         successful.append([miner_output_data, batch[j]])

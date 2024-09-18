@@ -16,6 +16,9 @@ from pydub import AudioSegment
 
 from .data_models import TARGET_LANGUAGES, TASK_STRINGS, TranslationRequest, TranslationConfig
 import bittensor as bt
+
+from neurons.utils.serialization import audio_encode, audio_decode
+
 translation_config = TranslationConfig()
 
 class Translation:
@@ -50,25 +53,7 @@ class Translation:
         self.source_language = None
         self.target_language = None
 
-    @lru_cache(maxsize=128)
-    def _get_language(self, language: str) -> str:
-        """
-        Function to retrieve the language from the target_languages dictionary.
-        
-        Parameters:
-            self: The Translation object.
-            language: A string representing the language to retrieve.
-        
-        Returns:
-            A string representing the language from the target_languages dictionary.
-        """
-        try:
-            return self.target_languages[language]
-        except KeyError as e:
-            logger.error(f"Invalid language: {language} {e}")
-            raise ValueError(f"Invalid language: {language}") from e
-
-    async def process(self, translation_request: TranslationRequest, serialize = True) -> Tuple[Union[str, None], Union[torch.Tensor, None]]:
+    async def process(self, translation_request: TranslationRequest) -> Tuple[Union[str, None], Union[torch.Tensor, None]]:
         """
         A function that processes a TranslationRequest object to perform translation tasks. 
         Retrieves input data, task string, source and target languages, preprocesses the input data, 
@@ -87,16 +72,12 @@ class Translation:
         """
         if "input" in translation_request.data:
             self.data_input = translation_request.data["input"]
-            bt.logging.info(f"data_input:{self.data_input[:100]}")
         if "task_string" in translation_request.data:
             self.task_string = translation_request.data["task_string"]
-            bt.logging.info(f"task_string:{self.task_string}")
         if "source_language" in translation_request.data:
             self.source_language = translation_request.data["source_language"].title()
-            bt.logging.info(f"source_language:{self.source_language}")
         if "target_language" in translation_request.data:
             self.target_language = translation_request.data["target_language"].title()
-            bt.logging.info(f"target_language:{self.target_language}")
         if not self.task_string:
             raise ValueError(f"Invalid task string: {translation_request.data}")
 
@@ -105,7 +86,9 @@ class Translation:
         if self.task_string.startswith("speech"):
             bt.logging.info("startswith(speech)")
             try:
-                self.data_input = self._preprocess(self.data_input)
+                self.data_input = audio_decode(self.data_input)
+                file_name = "./modules/translation/in/audio_request.wav"
+                self._tensor_to_wav(self.data_input, file_name)
             except Exception as e:
                 logger.error(f"Error preprocessing input: {e}")
                 raise ValueError(f"Error preprocessing input: {e}") from e
@@ -119,41 +102,13 @@ class Translation:
                 tgt_lang=self.target_languages[self.target_language]
             )
         bt.logging.info(f"output before audio processing:{output[:100]}")
-        
-        if serialize is False:
-            return output
-        
+                
         if self.task_string.endswith("speech"):
-            bt.logging.info("endswith(speech)")
-            output = self._process_audio_output(output)
-        else:
-            output = output.encode("utf-8")
-        # bt.logging.info(f"output after audio processing:{output[:100]}")  
-        generated_output = self._process_output(output)
+            output = audio_encode(output)
+            file_name = "./modules/translation/out/audio_output.wav"
+            self._tensor_to_wav(output, file_name)
         
-        return generated_output
-    
-    def _preprocess(self, input_data):
-        """
-        Preprocesses the input data by writing it to a file and returning the file path.
-
-        Args:
-            input_data (str): The base64 encoded audio data to be preprocessed.
-
-        Returns:
-            str: The file path of the preprocessed audio file.
-
-        Raises:
-            None
-        """
-        
-        file_name = "./modules/translation/in/audio_request.wav"
-        decoded_data = base64.b64decode(input_data)
-        buffer = io.BytesIO(decoded_data)
-        decoded_data = torch.load(buffer)
-        bt.logging.info(f'DECODED INPUT DATA: {decoded_data}')
-        self._tensor_to_wav(decoded_data, file_name)
-        return "./modules/translation/in/audio_request.wav"
+        return output
     
     def _process_text_inputs(self, input_data: str, src_lang: str) -> Dict[str, torch.Tensor]:
         """
@@ -261,30 +216,8 @@ class Translation:
         except Exception as e:
             logger.error(f"Error processing translation: {e}")
             raise
-        
-    def _process_audio_output(self, output: torch.Tensor) -> torch.Tensor:
-        """
-        Process the audio output tensor and return it as a bytes object.
 
-        Args:
-            output (torch.Tensor): The audio output tensor to be processed.
-
-        Returns:
-            torch.Tensor: The processed audio output as a bytes object.
-
-        Raises:
-            ValueError: If there is an error processing the audio output.
-        """
-        try:
-            self._tensor_to_wav(output, './modules/translation/out/audio_generated.wav')
-            buffer = io.BytesIO()
-            torch.save(output, buffer)
-        except Exception as e:
-            logger.error(f"Error processing audio output: {e}")
-            raise ValueError(f"Error processing audio output: {e}") from e
-        return buffer.getvalue()
-    
-    def wav_to_tensor(self, file_path: str):
+    def _wav_to_tensor(self, file_path: str):
         """
         Reads a WAV file and converts it into a PyTorch tensor.
 
@@ -356,28 +289,6 @@ class Translation:
             wav_file.writeframes(audio_data.tobytes())
 
         print(f"Audio saved as '{file_path}'")
-
-
-    def _process_output(self, output: str) -> str:
-        """
-        Process the final output to encode it in base64 and decode it to utf-8.
-
-        Args:
-            output (str): The final output to be processed.
-
-        Returns:
-            str: The processed output after encoding and decoding.
-        Raises:
-            ValueError: If there is an error processing the final output.
-        """
-        try:
-            output = base64.b64encode(output).decode("utf-8")
-        except Exception as e:
-            logger.error(f"Error processing final output: {e}")
-            raise ValueError(f"Error processing final output: {e}") from e
-        bt.logging.info(f"generateoutput : {output[:100]}")
-        return output
-
     
 def text2text(translation: Translation, miner_request: Optional[TranslationRequest] = None):
     """
