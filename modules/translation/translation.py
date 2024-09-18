@@ -147,12 +147,6 @@ class Translation:
             None
         """
         
-        # file_name1 = "./modules/translation/in/first_test_audio.wav"
-        # file_name2 = "./modules/translation/in/audio_request.wav"
-        # data, sr = self.wav_to_tensor(file_name1)
-        # bt.logging.info(f'FIRST TEST AUDIO : {data}')
-        # self._tensor_to_wav(data, file_name2, sr)
-        
         file_name = "./modules/translation/in/audio_request.wav"
         decoded_data = base64.b64decode(input_data)
         buffer = io.BytesIO(decoded_data)
