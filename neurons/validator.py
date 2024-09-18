@@ -198,15 +198,15 @@ class Validator(BaseValidatorNeuron):
         messages = [
             {
                 "role": "system",
-                "content": f"\
+                "content": f'\
                 You are an expert story teller.\
                 You can write short stories that capture the imagination, \
                 end readers on an adventure and complete an alegorical thought all within 100 words. \
                 Please write a short story about {topic}. \
                 Keep the story short but be sure to use an alegory and complete the idea. \
                 Write story in two languages, those are {source_language} and {target_language}.\
-                Return result in JSON format:\
-                {'{"{source_language}": "TEXT IN SOURCE LANGUAGE", "{target_language}": "TEXT IN TARGET LANGUAGE"}'}"
+                Return result in JSON format only, without any tags or decoration:\
+                {{"{source_language}": "TEXT IN SOURCE LANGUAGE", "{target_language}": "TEXT IN TARGET LANGUAGE"}}'
             }
         ]
 
@@ -236,13 +236,13 @@ class Validator(BaseValidatorNeuron):
         )
 
         response = get_pipeline(messages, max_length = 1000)
-        print(response[0]['generated_text'][1]['content'])
-
         text = response[0]['generated_text'][1]['content']
-        content = json.load(text)
+        print(f'text: {text}')
+        content = json.loads(text)
+        print(f'content: {content}')
         # input_data = text.split(f"{source_language}:")[1].split(f"{target_language}:")[0]
         # output_data = text.split(f"{target_language}:")[1]
-        input_data, output_data = text.split(f"\n\n")
+        input_data, output_data = content[source_language], content[target_language]
 
         if task_string.startswith("speech"):
             input_data = await self.process(TranslationRequest(data = {
