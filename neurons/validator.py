@@ -45,6 +45,8 @@ from sylliba.validator import reward_text, reward_speech
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import json
 
+from neurons.utils.serialization import synapse_encode, synapse_decode
+
 load_dotenv()
 
 TASK_STRINGS = [
@@ -138,22 +140,21 @@ class Validator(BaseValidatorNeuron):
         target_language = random.choice(TARGET_LANGUAGES)
         task_string = random.choice(TASK_STRINGS)
         topic = random.choice(TOPICS)
+
         # Generating the query
         successful = []
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
-        # bt.logging.info(f"sample_request: {sample_request}")
+
+        miner_input_data = synapse_encode(sample_request['input'])
+
         translation_request = TranslationRequest(data = {
-                    "input": sample_request['input'],
-                    "task_string": sample_request["task_string"],
-                    "source_language": sample_request["source_language"],
-                    "target_language": sample_request["target_language"]
+                    "input": miner_input_data,
+                    "task_string": task_string,
+                    "source_language": source_language,
+                    "target_language": target_language
                 })
-        # reference_set = await self.process(translation_request)
-        # Querying the miners
-        # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
-        # axons = self.metagraph.axons
+    
         axons = self.metagraph.axons
-        bt.logging.info(f"axons:{axons}")
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
@@ -167,22 +168,13 @@ class Validator(BaseValidatorNeuron):
                     deserialize=False,
                     timeout=300
                 )
-                for j in range(0, len(responses)):
-                    if responses[j].miner_response is not None:
-                        bt.logging.info(f"responses from miners {batch[j]}:{responses[j].miner_response[:100]}")
-                    else:
-                        bt.logging.info(f"responses from miners {batch[j]}:{responses[j].miner_response}")
                 # Getting the responses
                 for j in range(0, len(responses)):
                     if responses[j].miner_response is not None:
-        
-                        decoded_data = base64.b64decode(responses[j].miner_response)
-                        if translation_request.data['task_string'].endswith('speech'):
-                            buffer = io.BytesIO(decoded_data)
-                            decoded_data = torch.load(buffer)
-                        bt.logging.info(f'DECODED OUTPUT DATA: {decoded_data}')
+                        miner_output_data = synapse_decode(responses[j].miner_response)
+                        bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
                         
-                        successful.append([decoded_data, batch[j]])
+                        successful.append([miner_output_data, batch[j]])
                     else:
                         bt.logging.warning(f"Miner {batch[j]} failed to respond.")
         except Exception as e:
