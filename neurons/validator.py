@@ -203,25 +203,39 @@ class Validator(BaseValidatorNeuron):
             return reward_speech(miner_response, sample_output)
     
     async def generate_query(self, target_language, source_language, task_string, topic):
-        messages = [
-            {
-                "role": "system",
-                "content": f'\
-                You are an expert story teller.\
-                You can write short stories that capture the imagination, \
-                end readers on an adventure and complete an alegorical thought all within 100 words. \
-                Please write a short story about {topic}. \
-                Keep the story short but be sure to use an alegory and complete the idea. \
-                Write story in two languages, those are {source_language} and {target_language}.\
-                Return result in JSON format only, without any tags or decoration:\
-                {{"{source_language}": "TEXT IN SOURCE LANGUAGE", "{target_language}": "TEXT IN TARGET LANGUAGE"}}'
-            }
-        ]
-
         llm_module = random.choice(LLMS)
         llm = import_module(llm_module)
 
-        input_data, output_data = llm.process(messages, source_language, target_language)
+        messages = [
+            {
+                "role": "system",
+                "content": f"""
+                You are an expert story teller.
+                You can write short stories that capture the imagination, 
+                end readers on an adventure and complete an alegorical thought all within 100 words. 
+                Please write a short story about {topic} in {source_language}. 
+                Keep the story short but be sure to use an alegory and complete the idea."""
+            }
+        ]
+
+        input_data = llm.process(messages)
+
+        messages = [
+            {
+                "role": "system",
+                "content": f"""
+                Provided text is written in {source_language}.
+                Please translate into {target_language}
+                Don't put any tags, description or decorators.
+                Write only translated text in raw text format.
+                """
+            }, 
+            {
+                "role": "user",
+                "content": input_data
+            }
+        ]
+        output_data = llm.process(messages)
 
         if task_string.startswith("speech"):
             input_data = await self.process(TranslationRequest(data = {
