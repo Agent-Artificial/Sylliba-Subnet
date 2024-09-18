@@ -41,10 +41,16 @@ from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
 
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
+import json
+
 load_dotenv()
 
 TASK_STRINGS = [
-    "speech2speech"
+    "text2text",
+    "text2speech",
+    "speech2text",
+    "speech2speech",
 ]
 
 TARGET_LANGUAGES = [
@@ -121,7 +127,7 @@ class Validator(BaseValidatorNeuron):
                 
     async def forward(self):
         source_language = "English"
-        target_language = "French"
+        target_language = random.choice(TARGET_LANGUAGES)
         task_string = random.choice(TASK_STRINGS)
         topic = random.choice(TOPICS)
         # Generating the query
@@ -192,6 +198,83 @@ class Validator(BaseValidatorNeuron):
             return reward_speech(miner_response, sample_output)
     
     async def generate_query(self, target_language, source_language, task_string, topic):
+        messages = [
+            {
+                "role": "system",
+                "content": f'\
+                You are an expert story teller.\
+                You can write short stories that capture the imagination, \
+                end readers on an adventure and complete an alegorical thought all within 100 words. \
+                Please write a short story about {topic}. \
+                Keep the story short but be sure to use an alegory and complete the idea. \
+                Write story in two languages, those are {source_language} and {target_language}.\
+                Return result in JSON format only, without any tags or decoration:\
+                {{"{source_language}": "TEXT IN SOURCE LANGUAGE", "{target_language}": "TEXT IN TARGET LANGUAGE"}}'
+            }
+        ]
+
+        model_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+        
+        quant_config = BitsAndBytesConfig(
+            load_in_4bit=True,           # This flag is now part of BitsAndBytesConfig
+            bnb_4bit_use_double_quant=True,  # Optional, for double quantization
+            bnb_4bit_quant_type="nf4",   # Choose between 'fp4' or 'nf4' (Non-negative quantization)
+        )
+
+        # Load the model in 4-bit precision
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            quantization_config=quant_config,  # 4-bit Quantization config
+            torch_dtype=torch.bfloat16,        # Mixed precision (optional, use bfloat16 for efficiency)
+            device_map="auto",                 # Automatically map to available GPUs
+        )
+
+        # Load the tokenizer
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+        get_pipeline = pipeline(
+            "text-generation",
+            model=model,
+            tokenizer=tokenizer,
+        )
+
+        response = get_pipeline(messages, max_length = 1000)
+        text = response[0]['generated_text'][1]['content']
+        print(f'text: {text}')
+        content = json.loads(text)
+        print(f'content: {content}')
+        # input_data = text.split(f"{source_language}:")[1].split(f"{target_language}:")[0]
+        # output_data = text.split(f"{target_language}:")[1]
+        input_data, output_data = content[source_language], content[target_language]
+
+        if task_string.startswith("speech"):
+            input_data = await self.process(TranslationRequest(data = {
+                "input" : input_data,
+                "task_string": "text2speech",
+                "source_language": source_language,
+                "target_language": source_language
+            }))
+
+        if task_string.endswith("speech"):
+            output_data = await self.process(TranslationRequest(data = {
+                "input" : output_data,
+                "task_string": "text2speech",
+                "source_language": target_language,
+                "target_language": target_language
+            }), serialize = False)
+        
+        output = {"input": input_data[:100],"output": output_data[:100],"task_string": task_string,"source_language": source_language,"target_language": target_language}
+        bt.logging.info(f'Generated Trnaslation Request: {output}')
+        
+        return {
+                    "input": input_data,
+                    "output": output_data,
+                    "task_string": task_string,
+                    "source_language": source_language,
+                    "target_language": target_language
+                }
+    
+    async def generate_query_openai(self, target_language, source_language, task_string, topic):
         url = os.getenv("INFERENCE_URL")
         token = os.getenv("INFERENCE_API_KEY")
         headers = {
