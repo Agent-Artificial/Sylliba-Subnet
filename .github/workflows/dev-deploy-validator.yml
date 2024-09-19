@@ -1,4 +1,4 @@
-name: (Production) Release Docker Image
+name: (Development) Deploy Dev Validator to Testnet
 
 on: 
   push:
