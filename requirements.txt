@@ -29,3 +29,4 @@ IPython
 notebook
 accelerate
 bitsandbytes
+pydub
