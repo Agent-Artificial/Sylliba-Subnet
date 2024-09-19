@@ -191,9 +191,7 @@ class Translation:
             task_str = kwargs['task_str']
             src_lang = kwargs['src_lang']
             tgt_lang = kwargs['tgt_lang']
-            
-            print(f"\n\n\n\n --------------------------------------------- {kwargs}\n\n\n\n")
-            
+                        
             if task_str.startswith('s2'):
                 input_data = self._process_audio_input(input_data, src_lang)
             else:
