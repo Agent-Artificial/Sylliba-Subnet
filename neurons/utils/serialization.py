@@ -19,8 +19,8 @@ if __name__ == '__main__':
     wave_data = torch.tensor([1, 2, 3, 4, 5])
     content_type = 'speech'
 
-    encoded_data = audio_encode(wave_data, content_type)
+    encoded_data = audio_encode(wave_data)
     print(encoded_data)
 
-    decoded_data = audio_encode(encoded_data, content_type)
+    decoded_data = audio_encode(encoded_data)
     print(decoded_data)
