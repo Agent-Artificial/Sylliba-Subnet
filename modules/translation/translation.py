@@ -104,9 +104,9 @@ class Translation:
         bt.logging.info(f"output before audio processing:{output[:100]}")
                 
         if self.task_string.endswith("speech"):
-            output = audio_encode(output)
             file_name = "./modules/translation/out/audio_output.wav"
             self._tensor_to_wav(output, file_name)
+            output = audio_encode(output)
         
         return output
     
@@ -124,7 +124,7 @@ class Translation:
         """
         return self.processor(text=input_data, src_lang=src_lang, return_tensors="pt")
 
-    def _process_audio_input(self, input_data: str, src_lang: str) -> Dict[str, torch.Tensor]:
+    def _process_audio_input(self, input_data: torch.Tensor, src_lang: str) -> Dict[str, torch.Tensor]:
         """
         Processes the audio input data and returns a dictionary of tensors.
 
@@ -135,10 +135,10 @@ class Translation:
         Returns:
             Dict[str, torch.Tensor]: A dictionary containing the processed tensors.
         """
-        waveform, sample_rate = torchaudio.load(input_data)
-        if sample_rate != 16000:
-            waveform = torchaudio.functional.resample(waveform, sample_rate, 16000)
-        return self.processor(audios=waveform.squeeze(), src_lang=src_lang, sampling_rate=16000, return_tensors="pt")
+        # waveform, sample_rate = torchaudio.load(input_data)
+        # if sample_rate != 16000:
+        #     waveform = torchaudio.functional.resample(waveform, sample_rate, 16000)
+        return self.processor(audios=input_data.to('cpu').squeeze(), src_lang=src_lang, sampling_rate=16000, return_tensors="pt")
 
     def _generate_audio(self, input_data: Dict[str, torch.Tensor], tgt_lang: str) -> torch.Tensor:
         """
@@ -192,14 +192,13 @@ class Translation:
             src_lang = kwargs['src_lang']
             tgt_lang = kwargs['tgt_lang']
             
+            print(f"\n\n\n\n --------------------------------------------- {kwargs}\n\n\n\n")
+            
             if task_str.startswith('s2'):
                 input_data = self._process_audio_input(input_data, src_lang)
             else:
                 input_data = self._process_text_inputs(input_data, src_lang)
                 
-            logger.debug(str(input_data)[:30])
-            logger.debug(type(input_data))
-            logger.debug(kwargs)
             output = None
             try:
                 if self.task_string.endswith("speech"):
@@ -209,8 +208,6 @@ class Translation:
             except AttributeError as e:
                 logger.error(f"Error processing translation: {e}")
                 raise ValueError(f"Error processing translation: {e}") from e
-            logger.debug(output)
-            logger.debug(type(output))
             return output
         
         except Exception as e:
