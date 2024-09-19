@@ -33,6 +33,7 @@ We welcome contributions from the community to help us improve Sylliba. Please f
 There are multiple ways to launch our miner or validator.  Choose what works best for you!
 
 **MINIMUM HARDWARE REQUIREMENTS:**
+
 Miner: 4 CPU Cores, 16GB RAM, 10GB Disk Space and at least an 8GB GPU
 Validator: 4 CPU Cores, 16GB RAM, 20GB Disk Space and at least an 10GB GPU 
 
@@ -195,7 +196,7 @@ Run multiple miners via Docker Compose.
 
 3. Make a .env# for every miner you want.  Example, copy .env1.example to .env1, then .env2.example to env2.  All of the .env#.example are identical so make as many as you need with the specific miner information.
 
-4. Edit the docker-compose.yml file.  The one that is there has three miners.  To add more just copy one of them and paste below editing the name (i.e. mine4 to miner4) and the .env file (i.e. .env3 to .env4)
+4. Edit the docker-compose.yml file.  The one that is there has three miners.  To add more just copy one of them and paste below editing the name (i.e. miner3 to miner4) and the .env file (i.e. .env3 to .env4)
 
 5. Run this command to launch all of the miners in containers: 
 ```bash
