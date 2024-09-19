@@ -6,6 +6,9 @@ FROM ubuntu:22.04
 RUN apt-get update && \
     apt-get install -y sudo git git-lfs nano python3.11 python3-pip software-properties-common build-essential wget curl build-essential gcc make
 
+# Required by subnet:
+RUN apt-get install -y ffmpeg
+
 # Copy repo into /app folder
 COPY . /app
 
