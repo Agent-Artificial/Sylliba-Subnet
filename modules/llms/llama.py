@@ -17,7 +17,6 @@ def process(messages):
         model_id,
         quantization_config=quant_config,  # 4-bit Quantization config
         torch_dtype=torch.bfloat16,        # Mixed precision (optional, use bfloat16 for efficiency)
-        device_map="auto",                 # Automatically map to available GPUs
     ).to(device)
 
     # Load the tokenizer

@@ -162,11 +162,11 @@ class Validator(BaseValidatorNeuron):
             translation_request=translation_request,
         )
         try:
-            for i in range(5):
-                batch = self.get_batch(self.batch_size)
-                bt.logging.info(f"batch:{batch}")
+            # for i in range(5):
+                # batch = self.get_batch(self.batch_size)
+                # bt.logging.info(f"batch:{batch}")
                 responses = await self.dendrite(
-                    axons=[axons[i] for i in batch],
+                    axons=axons,
                     synapse=synapse,
                     deserialize=False,
                     timeout=300
@@ -181,9 +181,9 @@ class Validator(BaseValidatorNeuron):
                             
                         bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
                         
-                        successful.append([miner_output_data, batch[j]])
+                        successful.append([miner_output_data, j])
                     else:
-                        bt.logging.warning(f"Miner {batch[j]} failed to respond.")
+                        bt.logging.warning(f"Miner {j} failed to respond.")
         except Exception as e:
             bt.logging.error(f"Failed to query miners with exception: {e}")
         # Rewarding the miners
@@ -248,7 +248,7 @@ class Validator(BaseValidatorNeuron):
         if task_string.endswith("speech"):
             output_data = tts.process(output_data, target_language)
         
-        output = {"input": input_data[:100],"output": output_data[:100],"task_string": task_string,"source_language": source_language,"target_language": target_language}
+        output = {"input": input_data,"output": output_data,"task_string": task_string,"source_language": source_language,"target_language": target_language}
         bt.logging.info(f'Generated Trnaslation Request: {output}')
         
         return {
