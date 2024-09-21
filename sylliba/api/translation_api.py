@@ -15,6 +15,8 @@ import copy
 from neurons.config import validator_config
 from sylliba.utils.config import check_config, add_args, config
 
+import random
+
 from neurons.utils.serialization import audio_decode
 
 class TranslationInput(BaseModel):
@@ -65,7 +67,7 @@ class APIServer:
                 "target_language": translationInput.target_language
             })
             
-            axons = [self.metagraph.axons[8]]
+            axons = self.metagraph.axons
             responses = await self.subnet_api(
                 axons=axons,
                 translation_request=translation_request,
@@ -81,7 +83,7 @@ class APIServer:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
                     result.append(response.miner_response)
-            return result
+            return random.choice(result)
             
     
     def start(self):
