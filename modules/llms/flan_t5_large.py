@@ -16,9 +16,8 @@ def process(messages):
     input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to("cuda")
 
     outputs = model.generate(input_ids, max_length=1000)
-    translated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)  # The output translation
+    return tokenizer.decode(outputs[0], skip_special_tokens=True)  # The output translation
 
-    return translated_text
 
 if __name__ == '__main__':
     text = """Sylliba is a revolutionary translation module designed to bridge the gap in communication across diverse languages. With the capability to translate many languages, Sylliba supports both audio and text for inputs and outputs, making it a versatile tool for global interactions.

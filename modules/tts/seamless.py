@@ -17,9 +17,7 @@ def process(messages, source_language):
     input_data = processor(text=messages, src_lang=src_lang, return_tensors="pt")
 
     input_data = {k: v.to(device) for k, v in input_data.items()}
-    output_data = model.generate(**input_data, tgt_lang=src_lang)[0]
-
-    return output_data
+    return model.generate(**input_data, tgt_lang=src_lang)[0]
 
 if __name__ == '__main__':
     text = """Sylliba is a revolutionary translation module designed to bridge the gap in communication across diverse languages. With the capability to translate many languages, Sylliba supports both audio and text for inputs and outputs, making it a versatile tool for global interactions.

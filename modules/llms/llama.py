@@ -1,8 +1,8 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import torch
-import json
+from typing import List, Dict, Any
 
-def process(messages):
+def process(messages: List[Dict[str, Any]]):
     model_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -12,12 +12,13 @@ def process(messages):
         bnb_4bit_quant_type="nf4",   # Choose between 'fp4' or 'nf4' (Non-negative quantization)
     )
 
-    # Load the model in 4-bit precision
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        quantization_config=quant_config,  # 4-bit Quantization config
-        torch_dtype=torch.bfloat16,        # Mixed precision (optional, use bfloat16 for efficiency)
-    ).to(device)
+    if not hasattr(AutoModelForCausalLM, 'cached_model'):
+        AutoModelForCausalLM.cached_model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            quantization_config=quant_config,  # 4-bit Quantization config
+            torch_dtype=torch.bfloat16,        # Mixed precision (optional, use bfloat16 for efficiency)
+        ).to(device)
+    model = AutoModelForCausalLM.cached_model
 
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -29,8 +30,7 @@ def process(messages):
     )
 
     response = get_pipeline(messages, max_length = 1000)
-    text = response[0]['generated_text'][-1]['content']
-    return text
+    return response[0]['generated_text'][-1]['content']
 
 if __name__ == '__main__':
     text = """Sylliba is a revolutionary translation module designed to bridge the gap in communication across diverse languages. With the capability to translate many languages, Sylliba supports both audio and text for inputs and outputs, making it a versatile tool for global interactions.
