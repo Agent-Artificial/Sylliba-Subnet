@@ -26,7 +26,7 @@ As our first step into the Bittensor ecosystem, Sylliba connects to the network 
 Explore Sylliba and experience the future of translation here."""
     
     source_language = "English"
-    target_language = "English"
+    target_language = "French"
 
     messages = [
         {
