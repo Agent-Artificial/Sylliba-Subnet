@@ -206,7 +206,7 @@ class Validator(BaseValidatorNeuron):
             scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
         return sum(scores) / len(scores)
     
-    async def generate_query(self, target_language, source_language, task_string, topic):
+    async def generate_query(self, target_language: str, source_language: str, task_string: str, topic: str):
         llm_module = random.choice(LLMS)
         llm = import_module(llm_module)
 

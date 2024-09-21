@@ -212,7 +212,7 @@ class Translation:
             logger.error(f"Error processing translation: {e}")
             raise
 
-    def _wav_to_tensor(self, file_path: str):
+    def _wav_to_tensor(self, file_path: str) -> torch.Tensor:
         """
         Reads a WAV file and converts it into a PyTorch tensor.
 
