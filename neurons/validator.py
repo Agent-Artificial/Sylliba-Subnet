@@ -42,6 +42,8 @@ from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
 
+from typing import List
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import json
 
@@ -210,7 +212,7 @@ class Validator(BaseValidatorNeuron):
             scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
         return sum(scores) / len(scores)
     
-    def generate_input_data(llm, topic, source_language):
+    def generate_input_data(llm, topic: str, source_language: str):
         messages = [{"role": "system", "content": f"""
                 You are an expert story teller.
                 You can write short stories that capture the imagination, 
@@ -219,7 +221,7 @@ class Validator(BaseValidatorNeuron):
                 Keep the story short but be sure to use an alegory and complete the idea."""}]
         return llm.process(messages)
 
-    def generate_output_data(llm, input_data, source_language, target_language):
+    def generate_output_data(llm, input_data: str, source_language: str, target_language: str):
         messages = [
             {"role": "system", "content": f"""
                 Provided text is written in {source_language}.
@@ -231,7 +233,7 @@ class Validator(BaseValidatorNeuron):
         ]
         return llm.process(messages)
     
-    def select_random_module(modules):
+    def select_random_module(modules: List[str]):
         return import_module(random.choice(modules))
     
     async def generate_query(self, target_language: str, source_language: str, task_string: str, topic: str):
