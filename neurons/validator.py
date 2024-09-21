@@ -77,11 +77,11 @@ TOPICS = [
     "Parallel universe discovery"
 ]
 
-LLMS = [
+LLMS : list[str] = [
     "modules.llms.llama",
     "modules.llms.flan_t5_large"
 ]
-TTS = [
+TTS : list[str] = [
     "modules.tts.seamless"
 ]
 
