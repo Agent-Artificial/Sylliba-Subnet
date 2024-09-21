@@ -78,7 +78,8 @@ TOPICS = [
 ]
 
 LLMS = [
-    "modules.llms.llama"
+    "modules.llms.llama",
+    "modules.llms.flan_t5_large"
 ]
 TTS = [
     "modules.tts.seamless"
@@ -198,11 +199,12 @@ class Validator(BaseValidatorNeuron):
         if self.now % 10 == 0:
             self.set_weights()
         
-    def process_validator_output(self, miner_response, sample_output, task_string):
+    def process_validator_output(self, miner_response, sample_outputs, task_string):
         if task_string.endswith('text'):
-            return reward_text(miner_response, sample_output)
+            scores = [reward_text(miner_response, sample_output) for sample_output in sample_outputs]
         else:
-            return reward_speech(miner_response, sample_output)
+            scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
+        return sum(scores) / len(scores)
     
     async def generate_query(self, target_language, source_language, task_string, topic):
         llm_module = random.choice(LLMS)
@@ -237,23 +239,30 @@ class Validator(BaseValidatorNeuron):
                 "content": input_data
             }
         ]
-        output_data = llm.process(messages)
-
+        
         tts_module = random.choice(TTS)
         tts = import_module(tts_module)
 
         if task_string.startswith("speech"):
             input_data = tts.process(input_data, source_language)
 
-        if task_string.endswith("speech"):
-            output_data = tts.process(output_data, target_language)
+        outputs = []
+
+        for llm_module in LLMS:
+            llm = import_module(llm_module)
+            
+            output_data = llm.process(messages)
+
+            if task_string.endswith("speech"):
+                output_data = tts.process(output_data, target_language)
+            outputs.append(output_data)
         
-        output = {"input": input_data,"output": output_data,"task_string": task_string,"source_language": source_language,"target_language": target_language}
+        output = {"input": input_data,"output": outputs,"task_string": task_string,"source_language": source_language,"target_language": target_language}
         bt.logging.info(f'Generated Trnaslation Request: {output}')
         
         return {
                     "input": input_data,
-                    "output": output_data,
+                    "output": outputs,
                     "task_string": task_string,
                     "source_language": source_language,
                     "target_language": target_language
