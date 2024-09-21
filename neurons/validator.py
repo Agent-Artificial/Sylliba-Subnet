@@ -28,6 +28,7 @@ import bittensor as bt
 import base64
 import io
 import torch
+from importlib import import_module
 
 # import base validator class which takes care of most of the boilerplate
 from sylliba.base.validator import BaseValidatorNeuron
@@ -43,6 +44,8 @@ from sylliba.validator import reward_text, reward_speech
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import json
+
+from neurons.utils.serialization import audio_encode, audio_decode
 
 load_dotenv()
 
@@ -72,6 +75,14 @@ TOPICS = [
     "Memory-erasing technology",
     "Haunted antique shop",
     "Parallel universe discovery"
+]
+
+LLMS : list[str] = [
+    "modules.llms.llama",
+    "modules.llms.flan_t5_large"
+]
+TTS : list[str] = [
+    "modules.tts.seamless"
 ]
 
 translation = Translation()
@@ -130,53 +141,54 @@ class Validator(BaseValidatorNeuron):
         target_language = random.choice(TARGET_LANGUAGES)
         task_string = random.choice(TASK_STRINGS)
         topic = random.choice(TOPICS)
+
         # Generating the query
         successful = []
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
-        # bt.logging.info(f"sample_request: {sample_request}")
+
+        if task_string.startswith('speech'):
+            try:
+                miner_input_data = audio_encode(sample_request['input'])
+            except Exception as e:
+                bt.logging.error(f"Error encoding audio: {str(e)}")
+                miner_input_data = None
+        else:
+            miner_input_data = sample_request['input']
+
         translation_request = TranslationRequest(data = {
-                    "input": sample_request['input'],
-                    "task_string": sample_request["task_string"],
-                    "source_language": sample_request["source_language"],
-                    "target_language": sample_request["target_language"]
+                    "input": miner_input_data,
+                    "task_string": task_string,
+                    "source_language": source_language,
+                    "target_language": target_language
                 })
-        # reference_set = await self.process(translation_request)
-        # Querying the miners
-        # axons = [axon for axon in self.metagraph.axons if axon.uid in self.validated] 
-        # axons = self.metagraph.axons
+    
         axons = self.metagraph.axons
-        bt.logging.info(f"axons:{axons}")
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
         try:
-            for i in range(5):
-                batch = self.get_batch(self.batch_size)
-                bt.logging.info(f"batch:{batch}")
+            # for i in range(5):
+                # batch = self.get_batch(self.batch_size)
+                # bt.logging.info(f"batch:{batch}")
                 responses = await self.dendrite(
-                    axons=[axons[i] for i in batch],
+                    axons=axons,
                     synapse=synapse,
                     deserialize=False,
                     timeout=300
                 )
-                for j in range(0, len(responses)):
-                    if responses[j].miner_response is not None:
-                        bt.logging.info(f"responses from miners {batch[j]}:{responses[j].miner_response[:100]}")
-                    else:
-                        bt.logging.info(f"responses from miners {batch[j]}:{responses[j].miner_response}")
                 # Getting the responses
                 for j in range(0, len(responses)):
                     if responses[j].miner_response is not None:
-        
-                        decoded_data = base64.b64decode(responses[j].miner_response)
-                        if translation_request.data['task_string'].endswith('speech'):
-                            buffer = io.BytesIO(decoded_data)
-                            decoded_data = torch.load(buffer)
-                        bt.logging.info(f'DECODED OUTPUT DATA: {decoded_data}')
+                        if task_string.endswith('speech'):
+                            miner_output_data = audio_decode(responses[j].miner_response)
+                        else:
+                            miner_output_data = responses[j].miner_response
+                            
+                        bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
                         
-                        successful.append([decoded_data, batch[j]])
+                        successful.append([miner_output_data, j])
                     else:
-                        bt.logging.warning(f"Miner {batch[j]} failed to respond.")
+                        bt.logging.warning(f"Miner {j} failed to respond.")
         except Exception as e:
             bt.logging.error(f"Failed to query miners with exception: {e}")
         # Rewarding the miners
@@ -191,142 +203,59 @@ class Validator(BaseValidatorNeuron):
         if self.now % 10 == 0:
             self.set_weights()
         
-    def process_validator_output(self, miner_response, sample_output, task_string):
+    def process_validator_output(self, miner_response, sample_outputs, task_string):
         if task_string.endswith('text'):
-            return reward_text(miner_response, sample_output)
+            scores = [reward_text(miner_response, sample_output) for sample_output in sample_outputs]
         else:
-            return reward_speech(miner_response, sample_output)
+            scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
+        return sum(scores) / len(scores)
     
-    async def generate_query_llama(self, target_language, source_language, task_string, topic):
+    def generate_input_data(llm, topic, source_language):
+        messages = [{"role": "system", "content": f"""
+                You are an expert story teller.
+                You can write short stories that capture the imagination, 
+                end readers on an adventure and complete an alegorical thought all within 100~200 words. 
+                Please write a short story about {topic} in {source_language}. 
+                Keep the story short but be sure to use an alegory and complete the idea."""}]
+        return llm.process(messages)
+
+    def generate_output_data(llm, input_data, source_language, target_language):
         messages = [
-            {
-                "role": "system",
-                "content": f'\
-                You are an expert story teller.\
-                You can write short stories that capture the imagination, \
-                end readers on an adventure and complete an alegorical thought all within 100 words. \
-                Please write a short story about {topic}. \
-                Keep the story short but be sure to use an alegory and complete the idea. \
-                Write story in two languages, those are {source_language} and {target_language}.\
-                Return result in JSON format only, without any tags or decoration:\
-                {{"{source_language}": "TEXT IN SOURCE LANGUAGE", "{target_language}": "TEXT IN TARGET LANGUAGE"}}'
-            }
+            {"role": "system", "content": f"""
+                Provided text is written in {source_language}.
+                Please translate into {target_language}
+                Don't put any tags, description or decorators.
+                Write only translated text in raw text format.
+                """},
+            {"role": "user", "content": input_data}
         ]
-
-        model_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
-        
-        quant_config = BitsAndBytesConfig(
-            load_in_4bit=True,           # This flag is now part of BitsAndBytesConfig
-            bnb_4bit_use_double_quant=True,  # Optional, for double quantization
-            bnb_4bit_quant_type="nf4",   # Choose between 'fp4' or 'nf4' (Non-negative quantization)
-        )
-
-        # Load the model in 4-bit precision
-        model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            quantization_config=quant_config,  # 4-bit Quantization config
-            torch_dtype=torch.bfloat16,        # Mixed precision (optional, use bfloat16 for efficiency)
-            device_map="auto",                 # Automatically map to available GPUs
-        )
-
-        # Load the tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-
-        get_pipeline = pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-        )
-
-        response = get_pipeline(messages, max_length = 1000)
-        text = response[0]['generated_text'][1]['content']
-        print(f'text: {text}')
-        content = json.loads(text)
-        print(f'content: {content}')
-        # input_data = text.split(f"{source_language}:")[1].split(f"{target_language}:")[0]
-        # output_data = text.split(f"{target_language}:")[1]
-        input_data, output_data = content[source_language], content[target_language]
-
-        if task_string.startswith("speech"):
-            input_data = await self.process(TranslationRequest(data = {
-                "input" : input_data,
-                "task_string": "text2speech",
-                "source_language": source_language,
-                "target_language": source_language
-            }))
-
-        if task_string.endswith("speech"):
-            output_data = await self.process(TranslationRequest(data = {
-                "input" : output_data,
-                "task_string": "text2speech",
-                "source_language": target_language,
-                "target_language": target_language
-            }), serialize = False)
-        
-        output = {"input": input_data[:100],"output": output_data[:100],"task_string": task_string,"source_language": source_language,"target_language": target_language}
-        bt.logging.info(f'Generated Trnaslation Request: {output}')
-        
-        return {
-                    "input": input_data,
-                    "output": output_data,
-                    "task_string": task_string,
-                    "source_language": source_language,
-                    "target_language": target_language
-                }
+        return llm.process(messages)
     
-    async def generate_query(self, target_language, source_language, task_string, topic):
-        url = os.getenv("INFERENCE_URL")
-        token = os.getenv("INFERENCE_API_KEY")
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {token}'
-        }
-        body = {
-            "messages": [
-                {
-                    "role": "system",
-                    "content": f"\
-                    You are an expert story teller.\
-                    You can write short stories that capture the imagination, \
-                    end readers on an adventure and complete an alegorical thought all within 100 words. \
-                    Please write a short story about {topic}. \
-                    Keep the story short but be sure to use an alegory and complete the idea. \
-                    Write story in two languages, those are {source_language} and {target_language}.\
-                    Don't put any descriptions, just follow below format:\
-                    {source_language}: \n {target_language}:"
-                }
-            ],
-            "model": "gpt-4o"
-        }
-        response = requests.post(url, headers = headers, json = body, timeout=30)
-        bt.logging.info(f"openairesponse:{response.json()}")
+    def select_random_module(modules):
+        return import_module(random.choice(modules))
+    
+    async def generate_query(self, target_language: str, source_language: str, task_string: str, topic: str):
+        llm = self.select_random_module(LLMS)
+        tts = self.select_random_module(TTS)
 
-        text = response.json()["choices"][0]["message"]["content"]
-        input_data = text.split(f"{source_language}:")[1].split(f"{target_language}:")[0]
-        output_data = text.split(f"{target_language}:")[1]
-
+        input_data = self.generate_input_data(llm, topic, source_language)
         if task_string.startswith("speech"):
-            input_data = await self.process(TranslationRequest(data = {
-                "input" : input_data,
-                "task_string": "text2speech",
-                "source_language": source_language,
-                "target_language": source_language
-            }))
+            input_data = tts.process(input_data, source_language)
 
-        if task_string.endswith("speech"):
-            output_data = await self.process(TranslationRequest(data = {
-                "input" : output_data,
-                "task_string": "text2speech",
-                "source_language": target_language,
-                "target_language": target_language
-            }), serialize = False)
-        
-        output = {"input": input_data[:100],"output": output_data[:100],"task_string": task_string,"source_language": source_language,"target_language": target_language}
-        bt.logging.info(f'Generated Trnaslation Request: {output}')
-        
+        outputs = []
+
+        for llm_module in LLMS:
+            llm = import_module(llm_module)
+            
+            output_data = self.generate_output_data(llm, input_data, source_language, target_language)
+
+            if task_string.endswith("speech"):
+                output_data = tts.process(output_data, target_language)
+            outputs.append(output_data)
+                
         return {
                     "input": input_data,
-                    "output": output_data,
+                    "output": outputs,
                     "task_string": task_string,
                     "source_language": source_language,
                     "target_language": target_language
