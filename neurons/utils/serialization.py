@@ -3,12 +3,30 @@ import io
 import torch
 
 def audio_encode(data):
+    """
+    Encode audio data.
+
+    Args:
+        data: The audio data to encode.
+
+    Returns:
+        The encoded audio data.
+    """
     buffer = io.BytesIO()
     torch.save(data, buffer)
     data = buffer.getvalue()
     return base64.b64encode(data).decode("utf-8")
 
 def audio_decode(data):
+    """
+    Decode audio data.
+
+    Args:
+        data: The audio data to be decoded.
+
+    Returns:
+        The decoded audio data.
+    """
     decoded_data = base64.b64decode(data)
     buffer = io.BytesIO(decoded_data)
     decoded_data = torch.load(buffer)

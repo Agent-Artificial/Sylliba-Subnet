@@ -3,6 +3,15 @@ import torch
 from typing import List, Dict, Any
 
 def process(messages: List[Dict[str, Any]]):
+    """
+    Process a list of messages.
+
+    Args:
+        messages (list): A list of message objects to process.
+
+    Returns:
+        The processed result.
+    """
     model_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
