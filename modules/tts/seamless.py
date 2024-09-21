@@ -4,6 +4,16 @@ import torch
 from modules.translation.data_models import TARGET_LANGUAGES
 
 def process(messages, source_language):
+    """
+    Process messages for text-to-speech conversion.
+
+    Args:
+        messages (list): List of messages to process.
+        source_language (str): The source language of the messages.
+
+    Returns:
+        Processed data for text-to-speech conversion.
+    """
     # Model ID for Seamless M4T V2 Large
     model_id = "facebook/seamless-M4T-V2-large"
 

@@ -42,6 +42,8 @@ from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
 
+from typing import List
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import json
 
@@ -147,7 +149,11 @@ class Validator(BaseValidatorNeuron):
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
 
         if task_string.startswith('speech'):
-            miner_input_data = audio_encode(sample_request['input'])
+            try:
+                miner_input_data = audio_encode(sample_request['input'])
+            except Exception as e:
+                bt.logging.error(f"Error encoding audio: {str(e)}")
+                miner_input_data = None
         else:
             miner_input_data = sample_request['input']
 
@@ -206,43 +212,35 @@ class Validator(BaseValidatorNeuron):
             scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
         return sum(scores) / len(scores)
     
-    async def generate_query(self, target_language: str, source_language: str, task_string: str, topic: str):
-        llm_module = random.choice(LLMS)
-        llm = import_module(llm_module)
-
-        messages = [
-            {
-                "role": "system",
-                "content": f"""
+    def generate_input_data(llm, topic: str, source_language: str):
+        messages = [{"role": "system", "content": f"""
                 You are an expert story teller.
                 You can write short stories that capture the imagination, 
                 end readers on an adventure and complete an alegorical thought all within 100~200 words. 
                 Please write a short story about {topic} in {source_language}. 
-                Keep the story short but be sure to use an alegory and complete the idea."""
-            }
-        ]
+                Keep the story short but be sure to use an alegory and complete the idea."""}]
+        return llm.process(messages)
 
-        input_data = llm.process(messages)
-
+    def generate_output_data(llm, input_data: str, source_language: str, target_language: str):
         messages = [
-            {
-                "role": "system",
-                "content": f"""
+            {"role": "system", "content": f"""
                 Provided text is written in {source_language}.
                 Please translate into {target_language}
                 Don't put any tags, description or decorators.
                 Write only translated text in raw text format.
-                """
-            }, 
-            {
-                "role": "user",
-                "content": input_data
-            }
+                """},
+            {"role": "user", "content": input_data}
         ]
-        
-        tts_module = random.choice(TTS)
-        tts = import_module(tts_module)
+        return llm.process(messages)
+    
+    def select_random_module(modules: List[str]):
+        return import_module(random.choice(modules))
+    
+    async def generate_query(self, target_language: str, source_language: str, task_string: str, topic: str):
+        llm = self.select_random_module(LLMS)
+        tts = self.select_random_module(TTS)
 
+        input_data = self.generate_input_data(llm, topic, source_language)
         if task_string.startswith("speech"):
             input_data = tts.process(input_data, source_language)
 
@@ -251,15 +249,12 @@ class Validator(BaseValidatorNeuron):
         for llm_module in LLMS:
             llm = import_module(llm_module)
             
-            output_data = llm.process(messages)
+            output_data = self.generate_output_data(llm, input_data, source_language, target_language)
 
             if task_string.endswith("speech"):
                 output_data = tts.process(output_data, target_language)
             outputs.append(output_data)
-        
-        output = {"input": input_data,"output": outputs,"task_string": task_string,"source_language": source_language,"target_language": target_language}
-        bt.logging.info(f'Generated Trnaslation Request: {output}')
-        
+                
         return {
                     "input": input_data,
                     "output": outputs,

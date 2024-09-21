@@ -3,6 +3,15 @@ import torch
 import json
 
 def process(messages):
+    """
+    Process a list of messages.
+
+    Args:
+        messages (list): A list of message objects to process.
+
+    Returns:
+        The processed result.
+    """
     model_id = "google/flan-t5-large"  # Using Flan-T5 model for Seq2Seq tasks
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
