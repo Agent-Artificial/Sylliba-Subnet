@@ -63,7 +63,7 @@ class APIServer:
                 "target_language": translationInput.target_language
             })
             
-            axons = [self.metagraph.axons[8]]
+            axons = self.metagraph.axons
             responses= await self.subnet_api(
                 axons=axons,
                 translation_request=translation_request,
