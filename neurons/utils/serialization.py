@@ -6,8 +6,7 @@ def audio_encode(data):
     buffer = io.BytesIO()
     torch.save(data, buffer)
     data = buffer.getvalue()
-    output = base64.b64encode(data).decode("utf-8")
-    return output
+    return base64.b64encode(data).decode("utf-8")
 
 def audio_decode(data):
     decoded_data = base64.b64decode(data)
