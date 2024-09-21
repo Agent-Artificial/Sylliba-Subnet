@@ -12,7 +12,7 @@ def miner_config():
         "wallet": {
             "name": os.getenv("BT_MINER_COLDKEY"),
             "hotkey": os.getenv("BT_MINER_HOTKEY"),
-            "path": os.getenv("BT_WALLET_PATH"),
+            "path": os.getenv("BT_WALLET_PATH", '~/.bittensor/wallets'),
         },
         "neuron": {
             "name": os.getenv("BT_MINER_COLDKEY"),
@@ -23,11 +23,11 @@ def miner_config():
             "dont_save_events": False,
         },
         "subtensor": {
-            "network": os.getenv("BT_NETWORK"),
+            "network": os.getenv("BT_NETWORK", 'test'),
             "chain_endpoint": "",
             "mock": False,
         },
-        "netuid": int(os.getenv("BT_NETUID")),
+        "netuid": int(os.getenv("BT_NETUID", 197)),
         "wandb": {
             "off": True,
             "offline": False,
@@ -41,24 +41,24 @@ def miner_config():
             "mock": False,
         },
         "axon":{
-            "port": int(os.getenv('BT_AXON_MINER_PORT')),
-            "ip": os.getenv('BT_AXON_MINER_IP'),
-            "external_port": int(os.getenv('BT_AXON_MINER_EXTERNAL_PORT')),
-            "external_ip": os.getenv('BT_AXON_MINER_EXTERNAL_IP'),
-            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS')),
+            "port": int(os.getenv('BT_AXON_MINER_PORT', 9197)),
+            "ip": os.getenv('BT_AXON_MINER_IP', '0.0.0.0'),
+            "external_port": int(os.getenv('BT_AXON_MINER_EXTERNAL_PORT', 9197)),
+            "external_ip": os.getenv('BT_AXON_MINER_EXTERNAL_IP', '0.0.0.0'),
+            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS', 5)),
         },
     }
 
 
 def validator_config():
     return {
-        "netuid": int(os.getenv("BT_NETUID")),
+        "netuid": int(os.getenv("BT_NETUID", 197)),
         "axon":{
-            "port": int(os.getenv('BT_AXON_VALIDATOR_PORT')),
-            "ip": os.getenv('BT_AXON_VALIDATOR_IP'),
-            "external_port": int(os.getenv('BT_AXON_VALIDATOR_EXTERNAL_PORT')),
-            "external_ip": os.getenv('BT_AXON_VALIDATOR_EXTERNAL_IP'),
-            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS')),
+            "port": int(os.getenv('BT_AXON_VALIDATOR_PORT', 9198)),
+            "ip": os.getenv('BT_AXON_VALIDATOR_IP', '0.0.0.0'),
+            "external_port": int(os.getenv('BT_AXON_VALIDATOR_EXTERNAL_PORT', 9198)),
+            "external_ip": os.getenv('BT_AXON_VALIDATOR_EXTERNAL_IP', '0.0.0.0'),
+            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS', 5)),
         },
             
         "logging": {
@@ -67,7 +67,7 @@ def validator_config():
         "wallet": {
             "name": os.getenv("BT_VALIDATOR_COLDKEY"),
             "hotkey": os.getenv("BT_VALIDATOR_HOTKEY"),
-            "path": os.getenv("BT_WALLET_PATH"),
+            "path": os.getenv("BT_WALLET_PATH", '~/.bittensor/wallets'),
         },
         "neuron": {
             "name": os.getenv("BT_VALIDATOR_COLDKEY"),
@@ -86,7 +86,7 @@ def validator_config():
         },
         "subtensor": {
             "chain_endpoint": "",
-            "network": os.getenv("BT_NETWORK"),
+            "network": os.getenv("BT_NETWORK", 'test'),
             "mock": False,
         },
         "wandb": {
@@ -99,8 +99,8 @@ def validator_config():
         "blacklist": {
             "force_validator_permit": False,
             "allow_non_registered": False,
-            "netuid": int(os.getenv("BT_NETUID")),
+            "netuid": int(os.getenv("BT_NETUID", 197)),
             "mock": False,
         },
-        "api_port": int(os.getenv("SUBNET_API_PORT")),
+        "api_port": int(os.getenv("SUBNET_API_PORT", 8080)),
     }

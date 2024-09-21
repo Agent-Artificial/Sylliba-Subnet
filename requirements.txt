@@ -13,7 +13,6 @@ nltk
 scikit-learn
 librosa
 transformers
-pydubrich
 pytest
 torch>=2
 numpy
@@ -30,3 +29,5 @@ IPython
 notebook
 accelerate
 bitsandbytes
+pydub
+sentencepiece
