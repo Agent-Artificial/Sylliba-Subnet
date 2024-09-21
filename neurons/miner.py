@@ -30,7 +30,6 @@ import bittensor as bt
 import sylliba
 # import base miner class which takes care of most of the boilerplate
 from sylliba.base.miner import BaseMinerNeuron
-from modules.install_module import install_module
 from neurons.config import miner_config
 
 
