@@ -69,6 +69,7 @@ jobs:
           --name ${{needs.variables.outputs.microservice}}-${{needs.variables.outputs.microservice_env}} 
           --restart always
           -p ${{needs.variables.outputs.microservice_port}}:${{needs.variables.outputs.microservice_port}}
+          -v /home/ubuntu/.bittensor:/root/.bittensor
           -e APP_VERSION=$GITHUB_REF_NAME
           -e environment=${{needs.variables.outputs.microservice_env}}
           -e BT_NETWORK="test"
