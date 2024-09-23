@@ -82,6 +82,7 @@ jobs:
           -e BT_MINER_COLDKEY=sylliba-test
           -e BT_MINER_HOTKEY=sylliba-test-miner
           -e BT_WALLET_PATH="~/.bittensor/wallets"
+          -e HF_TOKEN=${{secrets.HUGGINGFACE_API_TOKEN}}
           -e PYTHONPATH=.
           --gpus all          
           --add-host host.docker.internal:host-gateway
