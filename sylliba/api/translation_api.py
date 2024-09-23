@@ -73,7 +73,7 @@ class APIServer:
                 translation_request=translation_request,
                 timeout=300
             )
-            bt.logging.info(f"responses{responses}")
+            bt.logging.info(f"responses from {axons}: {responses}")
             result = []
             for response in responses:
                 if response.miner_response is not None:
