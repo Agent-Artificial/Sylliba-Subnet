@@ -83,5 +83,6 @@ jobs:
           -e BT_MINER_HOTKEY=sylliba-test-miner
           -e BT_WALLET_PATH="~/.bittensor/wallets"
           -e PYTHONPATH=.
+          --gpus all          
           --add-host host.docker.internal:host-gateway
           -d ${{needs.variables.outputs.microservice}}-${{needs.variables.outputs.microservice_env}}:${{needs.variables.outputs.image_tag}} neurons/miner.py --logging.debug
