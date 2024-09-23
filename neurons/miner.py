@@ -54,7 +54,6 @@ class Miner(BaseMinerNeuron):
     def install_module(self, module_path, module_name):
         if not module_path.exists():
             module_path.parent.mkdir(parents=True, exist_ok=True)
-        install_module(module_name)
         self.module = import_module(module_name)
 
     async def forward(

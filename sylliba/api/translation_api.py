@@ -83,6 +83,8 @@ class APIServer:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
                     result.append(response.miner_response)
+            if(len(result) == 0):
+                return "No miner available!"
             return random.choice(result)
             
     
