@@ -80,7 +80,7 @@ jobs:
           -e BT_AXON_MINER_EXTERNAL_IP="${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}"
           -e BT_AXON_MAX_WORERS=5
           -e BT_MINER_COLDKEY=sylliba-test
-          -e BT_MINER_HOTKEY=sylliba-test-hot
+          -e BT_MINER_HOTKEY=sylliba-test-miner
           -e BT_WALLET_PATH="~/.bittensor/wallets"
           -e PYTHONPATH=.
           --add-host host.docker.internal:host-gateway
