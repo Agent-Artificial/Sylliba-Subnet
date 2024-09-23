@@ -78,7 +78,7 @@ TOPICS = [
 ]
 
 LLMS : list[str] = [
-    "modules.llms.llama",
+    # "modules.llms.llama",
     "modules.llms.flan_t5_large"
 ]
 TTS : list[str] = [
@@ -250,7 +250,7 @@ class Validator(BaseValidatorNeuron):
             if task_string.endswith("speech"):
                 output_data = tts.process(output_data, target_language)
             outputs.append(output_data)
-            
+
         if task_string.startswith("speech"):
             input_data = tts.process(input_data, source_language)
         return {
