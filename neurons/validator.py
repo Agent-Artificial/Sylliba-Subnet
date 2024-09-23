@@ -239,8 +239,6 @@ class Validator(BaseValidatorNeuron):
         tts = self.select_random_module(TTS)
 
         input_data = self.generate_input_data(llm, topic, source_language)
-        if task_string.startswith("speech"):
-            input_data = tts.process(input_data, source_language)
 
         outputs = []
 
@@ -252,7 +250,9 @@ class Validator(BaseValidatorNeuron):
             if task_string.endswith("speech"):
                 output_data = tts.process(output_data, target_language)
             outputs.append(output_data)
-                
+            
+        if task_string.startswith("speech"):
+            input_data = tts.process(input_data, source_language)
         return {
                     "input": input_data,
                     "output": outputs,
