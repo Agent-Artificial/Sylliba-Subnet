@@ -38,6 +38,7 @@ class Miner(BaseMinerNeuron):
     def __init__(self, config=miner_config(), module_name="translation"):
         super(Miner, self).__init__(config=config)
         logger.info(config)
+        logger.info(self.axon.info())
         self.module_configs = self.get_module_configs()
         self.module_config = self.module_configs[module_name]
         self.module_name = module_name

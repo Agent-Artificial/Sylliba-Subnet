@@ -78,7 +78,7 @@ jobs:
           -e BT_AXON_MINER_IP="0.0.0.0"
           -e BT_AXON_MINER_EXTERNAL_PORT=${{needs.variables.outputs.microservice_port}}
           -e BT_AXON_MINER_EXTERNAL_IP="${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}"
-          -e BT_AXON_MAX_WORERS=5
+          -e BT_AXON_MAX_WORKERS=5
           -e BT_MINER_COLDKEY=sylliba-test
           -e BT_MINER_HOTKEY=sylliba-test-miner
           -e BT_WALLET_PATH="~/.bittensor/wallets"

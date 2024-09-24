@@ -45,7 +45,7 @@ def miner_config():
             "ip": os.getenv('BT_AXON_MINER_IP', '0.0.0.0'),
             "external_port": int(os.getenv('BT_AXON_MINER_EXTERNAL_PORT', 9197)),
             "external_ip": os.getenv('BT_AXON_MINER_EXTERNAL_IP', '0.0.0.0'),
-            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS', 5)),
+            "max_workers": int(os.getenv('BT_AXON_MAX_WORKERS', 5)),
         },
     }
 
@@ -58,7 +58,7 @@ def validator_config():
             "ip": os.getenv('BT_AXON_VALIDATOR_IP', '0.0.0.0'),
             "external_port": int(os.getenv('BT_AXON_VALIDATOR_EXTERNAL_PORT', 9198)),
             "external_ip": os.getenv('BT_AXON_VALIDATOR_EXTERNAL_IP', '0.0.0.0'),
-            "max_workers": int(os.getenv('BT_AXON_MAX_WORERS', 5)),
+            "max_workers": int(os.getenv('BT_AXON_MAX_WORKERS', 5)),
         },
             
         "logging": {
