@@ -2,7 +2,8 @@ import os
 import asyncio
 import bittensor as bt
 from typing import List, Dict, Tuple, Union, Any, Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.responses import StreamingResponse
 import uvicorn
 from sylliba.utils.misc import ttl_metagraph
 from pydantic import BaseModel
@@ -17,7 +18,8 @@ from sylliba.utils.config import check_config, add_args, config
 
 import random
 
-from neurons.utils.serialization import audio_decode
+from neurons.utils.serialization import audio_decode, audio_encode
+from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 
 class TranslationInput(BaseModel):
     input: str
@@ -57,14 +59,18 @@ class APIServer:
         self.subnet_api = SubnetAPI(wallet=self.wallet)
 
 
-        @self.app.post("/api/translation/")
-        async def get_translation(translationInput: TranslationInput):
+        @self.app.post("/api/translation")
+        async def get_translation(task_string: str = Form(...), source_language: str = Form(...), target_language: str = Form(...), input: Union[UploadFile, str] = File(None)):
+            if task_string.startswith('speech'):
+                input_file = await input.read()
+                input, sample_rate = await _wav_to_tensor(io.BytesIO(input_file))
+                input = audio_encode(input)
             
             translation_request = TranslationRequest(data = {
-                "input": translationInput.input,
-                "task_string": translationInput.task_string,
-                "source_language": translationInput.source_language,
-                "target_language": translationInput.target_language
+                "input": input,
+                "task_string": task_string,
+                "source_language": source_language,
+                "target_language": target_language
             })
             
             axons = self.metagraph.axons
@@ -78,6 +84,10 @@ class APIServer:
                 if response.miner_response is not None:
                     if translation_request.data['task_string'].endswith('speech'):
                         miner_output_data = audio_decode(response.miner_response)
+                        wav_file = _tensor_to_wav(miner_output_data)
+                        miner_output_data = StreamingResponse(wav_file, media_type="audio/wav", headers={
+                            "Content-Disposition": "attachment; filename=output.wav"
+                        })
                     else:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')

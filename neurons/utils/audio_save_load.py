@@ -1,8 +1,11 @@
 import numpy as np
 import torch
 import wave
+from fastapi import File
+from typing import Union
+import io
 
-def _wav_to_tensor(file_path: str) -> torch.Tensor:
+async def _wav_to_tensor(file: Union[str, File]) -> torch.Tensor:
     """
     Reads a WAV file and converts it into a PyTorch tensor.
 
@@ -14,7 +17,7 @@ def _wav_to_tensor(file_path: str) -> torch.Tensor:
     int: The sample rate of the audio.
     """
     # Open the wav file
-    with wave.open(file_path, 'rb') as wav_file:
+    with wave.open(file, 'rb') as wav_file:
         # Extract audio parameters
         sample_rate = wav_file.getframerate()
         num_frames = wav_file.getnframes()
@@ -47,7 +50,7 @@ def _wav_to_tensor(file_path: str) -> torch.Tensor:
 
     return audio_tensor, sample_rate
 
-def _tensor_to_wav(tensor: torch.Tensor, file_path: str, sample_rate: int = 16000):
+def _tensor_to_wav(tensor: torch.Tensor, file_path: str = None, sample_rate: int = 16000):
     """
     Converts a PyTorch tensor to a WAV file.
 
@@ -63,6 +66,9 @@ def _tensor_to_wav(tensor: torch.Tensor, file_path: str, sample_rate: int = 1600
     audio_data = np.clip(audio_data * 2**15, -2**15, 2**15 - 1).astype(np.int16)
 
     # Open a wav file in write mode
+    if file_path is None:
+        file_path = io.BytesIO()
+
     with wave.open(file_path, 'wb') as wav_file:
         n_channels = 1  # Mono audio
         sampwidth = 2  # 2 bytes = 16-bit audio
@@ -73,4 +79,6 @@ def _tensor_to_wav(tensor: torch.Tensor, file_path: str, sample_rate: int = 1600
         # Convert NumPy array to int16 and write to the wave file
         wav_file.writeframes(audio_data.tobytes())
 
-    print(f"Audio saved as '{file_path}'")
+    if file_path:
+        print(f"Audio saved as '{file_path}'")
+    return file_path
