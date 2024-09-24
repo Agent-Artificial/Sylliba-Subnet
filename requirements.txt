@@ -31,3 +31,4 @@ accelerate
 bitsandbytes
 pydub
 sentencepiece
+huggingface
