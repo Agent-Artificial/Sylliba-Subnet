@@ -9,7 +9,7 @@ services:
     volumes:
       - ${HOME}/.bittensor:/root/.bittensor      
     command:
-      - neruons/validator.py
+      - neurons/validator.py
       - --logging.debug
     deploy:
       resources:
