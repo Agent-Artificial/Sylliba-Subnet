@@ -1,0 +1,129 @@
+---
+name: (Development) Deploy Dev Branch to Testnet
+
+on: 
+  push:
+    branches:
+      - dev
+
+  workflow_dispatch:
+
+
+jobs:
+    Variables:
+        runs-on: ubuntu-latest
+        outputs:
+            BT_NETWORK: test
+            BT_NETUID: 197
+            BT_AXON_MAX_WORKERS: 5
+            BT_WALLET_PATH: "~/.bittensor/wallets"
+            SUBNET_API_PORT: 20002
+
+            ## Miner Section ##
+            # Leave as 0.0.0.0 unless you know what you're doing
+            BT_AXON_MINER_IP: "0.0.0.0"
+            BT_AXON_MINER_PORT: 20003
+            BT_AXON_MINER_EXTERNAL_IP: ${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}
+            BT_AXON_MINER_EXTERNAL_PORT: 20003
+            BT_MINER_COLDKEY: "sylliba-test"
+            BT_MINER_HOTKEY: "sylliba-test-miner"
+
+            ## Validator Section ##
+            # Leave as 0.0.0.0 unless you know what you're doing
+            BT_AXON_VALIDATOR_IP: "0.0.0.0"
+            BT_AXON_VALIDATOR_PORT: 20001
+            BT_AXON_VALIDATOR_EXTERNAL_PORT: 20001
+            BT_AXON_VALIDATOR_EXTERNAL_IP: ${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}
+            BT_VALIDATOR_COLDKEY: "sylliba-test"
+            BT_VALIDATOR_HOTKEY: "sylliba-test-hot"
+
+            # Allows using the Sylliba module, please do not edit.
+            PYTHONPATH: "."
+
+            # Pipeline Specific Variables
+            image_tag: ${{steps.vars.outputs.image_tag}}
+            microservice: sylliba
+            context_dir: "."
+            microservice_path: "."
+            deployment_servers: '["sylliba"]'
+            microservice_env: dev
+            branch: 'dev'
+            image_registry: ghcr.io/${{ github.repository_owner }}
+    
+        steps:
+          - name: Create Timestamp Variable for image tag
+            id: vars
+            #Edit variables down here for values
+            run: |
+              echo "image_tag=$(date +'%Y-%m-%d--%H-%M-%S')" >> "$GITHUB_OUTPUT"
+    
+    Debug:
+        needs: Variables
+        runs-on: ubuntu-latest
+        steps:
+          - name: Debug information
+            run: |
+                echo "=== Variables ==="
+                echo "image_tag: ${{ needs.variables.outputs.image_tag }}"
+                echo "microservice: ${{ needs.variables.outputs.microservice }}"
+                echo "microservice_path: ${{ needs.variables.outputs.microservice_path }}"
+                echo "microservice_env: ${{ needs.variables.outputs.microservice_env }}"
+                echo "context_dir: ${{ needs.variables.outputs.context_dir }}"
+                echo "image_registry: ${{ needs.variables.outputs.image_registry }}"
+                echo "deployment_servers: ${{ needs.variables.outputs.deployment_servers }}"
+                echo "branch: ${{ needs.variables.outputs.branch }}"                
+
+                echo "BT_NETWORK: ${{ needs.variables.outputs.BT_NETWORK }}"
+                echo "BT_NETUID: ${{ needs.variables.outputs.BT_NETUID }}"
+                echo "BT_AXON_MAX_WORKERS: ${{ needs.variables.outputs.BT_AXON_MAX_WORKERS }}"
+                echo "BT_WALLET_PATH: ${{ needs.variables.outputs.BT_WALLET_PATH }}"
+                echo "SUBNET_API_PORT: ${{ needs.variables.outputs.SUBNET_API_PORT }}"
+                echo "BT_AXON_MINER_IP: ${{ needs.variables.outputs.BT_AXON_MINER_IP }}"
+                echo "BT_AXON_MINER_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_PORT }}"
+                echo "BT_AXON_VALIDATOR_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_IP }}"
+                echo "BT_AXON_VALIDATOR_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_PORT }}"
+                echo "PYTHONPATH: ${{ needs.variables.outputs.PYTHONPATH }}"
+
+    Create-Docker-Image:
+        needs: [Debug, Variables]
+        uses: ./.github/workflows/build-push-docker-image.yml
+        with:
+            image_tag: ${{ needs.variables.outputs.image_tag }}
+            microservice: ${{needs.variables.outputs.microservice}}
+            microservice_path: ${{needs.variables.outputs.microservice_path}}
+            context_dir: ${{needs.variables.outputs.microservice_path}}
+            microservice_env: ${{needs.variables.outputs.microservice_env}}
+            image_registry: ${{needs.variables.outputs.image_registry}}
+
+    Deploy-Miner:
+        needs: [Variables, Create-Docker-Image]
+        uses: ./.github/workflows/deploy-miner.yml
+        with:
+            image_tag: ${{ needs.variables.outputs.image_tag }}
+            microservice: ${{ needs.variables.outputs.microservice }}
+            microservice_path: ${{ needs.variables.outputs.microservice_path }}
+            microservice_env: ${{ needs.variables.outputs.microservice_env }}
+            context_dir: ${{ needs.variables.outputs.context_dir }}
+            image_registry: ${{ needs.variables.outputs.image_registry }}
+            deployment_servers: ${{ needs.variables.outputs.deployment_servers }}
+            branch: ${{ needs.variables.outputs.branch }}
+
+            BT_NETWORK: ${{ needs.variables.outputs.BT_NETWORK }}
+            BT_NETUID: ${{ needs.variables.outputs.BT_NETUID }}
+            BT_AXON_MAX_WORKERS: ${{ needs.variables.outputs.BT_AXON_MAX_WORKERS }}
+            BT_WALLET_PATH: ${{ needs.variables.outputs.BT_WALLET_PATH }}
+            SUBNET_API_PORT: ${{ needs.variables.outputs.SUBNET_API_PORT }}
+            BT_MINER_COLDKEY: ${{ needs.variables.outputs.BT_MINER_COLDKEY }}
+            BT_MINER_HOTKEY: ${{ needs.variables.outputs.BT_MINER_HOTKEY }}
+            BT_AXON_MINER_IP: ${{ needs.variables.outputs.BT_AXON_MINER_IP }}
+            BT_AXON_MINER_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_PORT }}
+            BT_AXON_MINER_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_MINER_EXTERNAL_IP }}
+            BT_AXON_MINER_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_EXTERNAL_PORT }}
+            BT_VALIDATOR_COLDKEY: ${{ needs.variables.outputs.BT_VALIDATOR_COLDKEY }}
+            BT_VALIDATOR_HOTKEY: ${{ needs.variables.outputs.BT_VALIDATOR_HOTKEY }}
+            BT_AXON_VALIDATOR_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_IP }}
+            BT_AXON_VALIDATOR_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_PORT }}
+            BT_AXON_VALIDATOR_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_PORT }}
+            BT_AXON_VALIDATOR_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_IP }}   
+            PYTHONPATH: ${{ needs.variables.outputs.PYTHONPATH }}
+
