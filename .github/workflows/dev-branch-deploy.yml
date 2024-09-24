@@ -23,7 +23,7 @@ jobs:
             # Leave as 0.0.0.0 unless you know what you're doing
             BT_AXON_MINER_IP: "0.0.0.0"
             BT_AXON_MINER_PORT: 20003
-            BT_AXON_MINER_EXTERNAL_IP: ${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}
+            BT_AXON_MINER_EXTERNAL_IP: ${{steps.vars.outputs.BT_AXON_MINER_EXTERNAL_IP}}
             BT_AXON_MINER_EXTERNAL_PORT: 20003
             BT_MINER_COLDKEY: "sylliba-test"
             BT_MINER_HOTKEY: "sylliba-test-miner"
@@ -33,7 +33,7 @@ jobs:
             BT_AXON_VALIDATOR_IP: "0.0.0.0"
             BT_AXON_VALIDATOR_PORT: 20001
             BT_AXON_VALIDATOR_EXTERNAL_PORT: 20001
-            BT_AXON_VALIDATOR_EXTERNAL_IP: ${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}
+            BT_AXON_VALIDATOR_EXTERNAL_IP: ${{steps.vars.outputs.BT_AXON_VALIDATOR_EXTERNAL_IP}}
             BT_VALIDATOR_COLDKEY: "sylliba-test"
             BT_VALIDATOR_HOTKEY: "sylliba-test-hot"
 
@@ -56,6 +56,8 @@ jobs:
             #Edit variables down here for values
             run: |
               echo "image_tag=$(date +'%Y-%m-%d--%H-%M-%S')" >> "$GITHUB_OUTPUT"
+              echo "BT_AXON_MINER_EXTERNAL_IP=${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}" >> "$GITHUB_OUTPUT"
+              echo "BT_AXON_VALIDATOR_EXTERNAL_IP=${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}" >> "$GITHUB_OUTPUT"
     
     Debug:
         needs: Variables
@@ -118,11 +120,11 @@ jobs:
             BT_MINER_HOTKEY: ${{ needs.variables.outputs.BT_MINER_HOTKEY }}
             BT_AXON_MINER_IP: ${{ needs.variables.outputs.BT_AXON_MINER_IP }}
             BT_AXON_MINER_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_PORT }}
-            BT_AXON_MINER_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_MINER_EXTERNAL_IP }}
+            BT_AXON_MINER_EXTERNAL_IP: ${{ secrets.DEV_SYLLIBA_VALIDATOR_IP }}
             BT_AXON_MINER_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_EXTERNAL_PORT }}
             BT_VALIDATOR_COLDKEY: ${{ needs.variables.outputs.BT_VALIDATOR_COLDKEY }}
             BT_VALIDATOR_HOTKEY: ${{ needs.variables.outputs.BT_VALIDATOR_HOTKEY }}
-            BT_AXON_VALIDATOR_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_IP }}
+            BT_AXON_VALIDATOR_IP: ${{ secrets.DEV_SYLLIBA_VALIDATOR_IP }}
             BT_AXON_VALIDATOR_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_PORT }}
             BT_AXON_VALIDATOR_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_PORT }}
             BT_AXON_VALIDATOR_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_IP }}   
