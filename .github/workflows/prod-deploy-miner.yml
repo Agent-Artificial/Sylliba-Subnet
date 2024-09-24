@@ -1,0 +1,85 @@
+name: (Production) Deploy Prod Miner to Finney
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  Variables:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{steps.vars.outputs.image_tag}}
+      microservice: sylliba-miner
+      microservice_port: 20013
+      context_dir: "."
+      microservice_path: "."
+      deployment_servers: '["sylliba"]'
+      microservice_env: prod
+      branch: 'main'
+      image_registry: ghcr.io/${{ github.repository_owner }}
+
+    steps:
+      - name: Create Timestamp Variable for image tag
+        id: vars
+        #Edit variables down here for values
+        run: |
+          echo "image_tag=$(date +'%Y-%m-%d--%H-%M-%S')" >> "$GITHUB_OUTPUT"
+
+  Debug:
+    needs: Variables
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug information
+        run: |
+          echo "=== Variables ==="
+          echo "Time Var: ${{ needs.variables.outputs.image_tag }}"
+          echo "Variable: ${{ needs.variables.outputs.microservice }}"
+          echo "Variable: ${{ needs.variables.outputs.microservice_path }}"
+          echo "Variable: ${{ needs.variables.outputs.microservice_port }}"
+          echo "Variable: ${{ needs.variables.outputs.microservice_env }}"
+          echo "Variable: ${{ needs.variables.outputs.context_dir }}"
+          echo "Variable: ${{ needs.variables.outputs.image_registry }}"
+
+  Deploy-Microservice:
+    needs: [Debug, Variables]
+    runs-on: [self-hosted, "${{ matrix.deployment_server }}" ]
+    strategy:
+      matrix:
+        deployment_server: ${{ fromJson(needs.variables.outputs.deployment_servers) }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.variables.outputs.branch }}      
+
+      - name: Docker Build new container
+        run: |
+          docker build -t ${{needs.variables.outputs.microservice}}-${{needs.variables.outputs.microservice_env}}:${{needs.variables.outputs.image_tag}} .
+
+      - name: Docker stop old container
+        run: |
+          docker container rm -f ${{needs.variables.outputs.microservice}}-${{needs.variables.outputs.microservice_env}} || $true
+
+      - name: Docker start new container
+        run: >-
+          docker run
+          --name ${{needs.variables.outputs.microservice}}-${{needs.variables.outputs.microservice_env}} 
+          --restart always
+          -p ${{needs.variables.outputs.microservice_port}}:${{needs.variables.outputs.microservice_port}}
+          -v /home/ubuntu/.bittensor:/root/.bittensor
+          -e APP_VERSION=$GITHUB_REF_NAME
+          -e environment=${{needs.variables.outputs.microservice_env}}
+          -e BT_NETWORK="finney"
+          -e BT_NETUID=49
+          -e BT_AXON_MINER_PORT=${{needs.variables.outputs.microservice_port}}
+          -e BT_AXON_MINER_IP="0.0.0.0"
+          -e BT_AXON_MINER_EXTERNAL_PORT=${{needs.variables.outputs.microservice_port}}
+          -e BT_AXON_MINER_EXTERNAL_IP="${{secrets.DEV_SYLLIBA_VALIDATOR_IP}}"
+          -e BT_AXON_MAX_WORERS=5
+          -e BT_MINER_COLDKEY=sylliba-main
+          -e BT_MINER_HOTKEY=sylliba-main-miner-hot
+          -e BT_WALLET_PATH="~/.bittensor/wallets"
+          -e HF_TOKEN=${{secrets.HUGGINGFACE_API_TOKEN}}
+          -e PYTHONPATH=.
+          --gpus all          
+          --add-host host.docker.internal:host-gateway
+          -d ${{needs.variables.outputs.microservice}}-${{needs.variables.outputs.microservice_env}}:${{needs.variables.outputs.image_tag}} neurons/miner.py --logging.debug
