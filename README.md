@@ -84,12 +84,12 @@ Finally you can serve the miner or validator with the following command.
 
 1. **Running a validator:**
    ```bash
-   python3 neurons/validator.py --logging.debug
+   python3 neurons/validator.py
    ```
 
 2. **Running a miner:**
    ```bash
-   python3 neurons/miner.py --logging.debug
+   python3 neurons/miner.py
    ```
 
 
@@ -98,12 +98,12 @@ Finally you can serve the miner or validator with pm2 using following command.
 
 1. **Running a validator:**
    ```bash
-   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3 -- --logging.debug
+   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3
    ```
 
 2. **Running a miner:**
    ```bash
-   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug
+   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3
    ```
 
 
