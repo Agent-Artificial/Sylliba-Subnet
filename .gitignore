@@ -163,5 +163,5 @@ testing/
 
 # Editors
 .vscode/settings.json
-modules/translation/in/audio_request.wav
-modules/translation/out/audio_output.wav
+modules/translation/audio_request.wav
+modules/translation/audio_output.wav

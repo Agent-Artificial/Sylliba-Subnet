@@ -88,7 +88,7 @@ class Translation:
             bt.logging.info("startswith(speech)")
             try:
                 self.data_input = audio_decode(self.data_input)
-                file_name = "./modules/translation/in/audio_request.wav"
+                file_name = "./modules/translation/audio_request.wav"
                 _tensor_to_wav(self.data_input, file_name)
             except Exception as e:
                 logger.error(f"Error preprocessing input: {e}")
@@ -105,7 +105,7 @@ class Translation:
         bt.logging.info(f"output before audio processing:{output[:100]}")
                 
         if self.task_string.endswith("speech"):
-            file_name = "./modules/translation/out/audio_output.wav"
+            file_name = "./modules/translation/audio_output.wav"
             _tensor_to_wav(output, file_name)
             output = audio_encode(output)
         
@@ -265,7 +265,7 @@ def speech2text(translation: Translation, miner_request: Optional[TranslationReq
         The processed text output.
     """
     translation_request = miner_request or TranslationRequest(
-        data={"input": "./modules/translation/in/audio_request.wav", "task_string": "speech2text", "source_language": "English", "target_language": "French"}
+        data={"input": "./modules/translation/audio_request.wav", "task_string": "speech2text", "source_language": "English", "target_language": "French"}
     )
     return translation.process(translation_request)
 
@@ -282,7 +282,7 @@ def speech2speech(translation: Translation, miner_request: Optional[TranslationR
         The processed speech output.
     """
     translation_request = miner_request or TranslationRequest(
-        data={"input": "./modules/translation/in/audio_request.wav", "task_string": "speech2speech", "source_language": "English", "target_language": "French"}
+        data={"input": "./modules/translation/audio_request.wav", "task_string": "speech2speech", "source_language": "English", "target_language": "French"}
     )
     return translation.process(translation_request)
 

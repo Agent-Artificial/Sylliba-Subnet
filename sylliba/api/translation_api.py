@@ -84,14 +84,15 @@ class APIServer:
                 if response.miner_response is not None:
                     if translation_request.data['task_string'].endswith('speech'):
                         miner_output_data = audio_decode(response.miner_response)
-                        wav_file = _tensor_to_wav(miner_output_data)
+                        file_name = "./modules/translation/audio_request.wav"
+                        wav_file = _tensor_to_wav(miner_output_data, file_name)
                         miner_output_data = StreamingResponse(wav_file, media_type="audio/wav", headers={
                             "Content-Disposition": "attachment; filename=output.wav"
                         })
                     else:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
-                    result.append(response.miner_response)
+                    result.append(miner_output_data)
             if(len(result) == 0):
                 return "No miner available!"
             return random.choice(result)
