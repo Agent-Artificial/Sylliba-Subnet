@@ -33,11 +33,11 @@ def audio_decode(data):
     return decoded_data
 
 if __name__ == '__main__':
-    wave_data = torch.tensor([1, 2, 3, 4, 5])
+    wave_data = torch.tensor([0, 2, 3, 4, 5])
     content_type = 'speech'
 
     encoded_data = audio_encode(wave_data)
     print(encoded_data)
 
-    decoded_data = audio_encode(encoded_data)
+    decoded_data = audio_decode(encoded_data)
     print(decoded_data)
