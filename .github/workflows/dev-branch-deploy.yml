@@ -32,8 +32,8 @@ jobs:
             # Leave as 0.0.0.0 unless you know what you're doing
             BT_AXON_VALIDATOR_IP: "0.0.0.0"
             BT_AXON_VALIDATOR_PORT: 20001
-            BT_AXON_VALIDATOR_EXTERNAL_PORT: 20001
             BT_AXON_VALIDATOR_EXTERNAL_IP: "72.220.238.73"
+            BT_AXON_VALIDATOR_EXTERNAL_PORT: 20001
             BT_VALIDATOR_COLDKEY: "sylliba-test"
             BT_VALIDATOR_HOTKEY: "sylliba-test-hot"
 
@@ -124,7 +124,7 @@ jobs:
             BT_VALIDATOR_HOTKEY: ${{ needs.variables.outputs.BT_VALIDATOR_HOTKEY }}
             BT_AXON_VALIDATOR_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_IP }}
             BT_AXON_VALIDATOR_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_PORT }}
-            BT_AXON_VALIDATOR_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_PORT }}
             BT_AXON_VALIDATOR_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_IP }}   
+            BT_AXON_VALIDATOR_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_PORT }}
             PYTHONPATH: ${{ needs.variables.outputs.PYTHONPATH }}
 

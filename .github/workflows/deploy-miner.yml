@@ -126,7 +126,7 @@ jobs:
           docker run
           --name ${{inputs.microservice}}-miner-${{inputs.microservice_env}}
           --restart always
-          -p ${{inputs.BT_AXON_MINER_EXTERNAL_IP}}:${{inputs.BT_AXON_MINER_EXTERNAL_IP}}
+          -p ${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}:${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}
           -v /home/ubuntu/.bittensor:/root/.bittensor
           -e APP_VERSION=$GITHUB_REF_NAME
           -e environment=${{inputs.microservice_env}}
