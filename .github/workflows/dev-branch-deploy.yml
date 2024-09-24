@@ -89,6 +89,7 @@ jobs:
         uses: ./.github/workflows/build-push-docker-image.yml
         with:
             image_tag: ${{ needs.variables.outputs.image_tag }}
+            branch: ${{ needs.variables.outputs.branch }}
             microservice: ${{needs.variables.outputs.microservice}}
             microservice_path: ${{needs.variables.outputs.microservice_path}}
             context_dir: ${{needs.variables.outputs.microservice_path}}
