@@ -81,6 +81,7 @@
               echo "Variable: ${{ inputs.microservice_env }}"
 
       build_push_docker_image:
+        needs: [Debug]
         name: Build and Push Docker Image
         runs-on: [self-hosted, "${{ matrix.deployment_server }}" ]
         strategy:
@@ -130,17 +131,17 @@
               pwd
               ls -la
     
-          # - name: Docker Build new container
-          #   run: |
-          #     docker build -t ${{needs.variables.outputs.microservice}}-${{needs.variables.outputs.microservice_env}}:${{needs.variables.outputs.image_tag}} .
+          - name: Docker Build new container
+            run: |
+              docker build -t ${{ env.image_name }}:${{ env.image_tag }} .
 
-          - name: Build image and push to registry
-            uses: docker/build-push-action@v5
-            with:
-              build-args: ${{ env.build_args }}
-              context: ${{ env.context_dir }}
-              file: ${{ env.microservice_path }}//${{ env.docker_file }}
-              no-cache: true
-              pull: true
-              push: ${{ env.push }}
-              tags: "${{ env.image_name }}:latest,${{ env.image_name }}:${{ env.image_tag }}"
+          # - name: Build image and push to registry
+          #   uses: docker/build-push-action@v5
+          #   with:
+          #     build-args: ${{ env.build_args }}
+          #     context: ${{ env.context_dir }}
+          #     file: ${{ env.microservice_path }}//${{ env.docker_file }}
+          #     no-cache: false
+          #     pull: true
+          #     push: ${{ env.push }}
+          #     tags: "${{ env.image_name }}:latest,${{ env.image_name }}:${{ env.image_tag }}"
