@@ -82,7 +82,7 @@ class APIServer:
                 "target_language": target_language
             })
             
-            axons = self.metagraph.axons
+            axons = self.metagraph.axons[8:9]
             responses = await self.subnet_api(
                 axons=axons,
                 translation_request=translation_request,
@@ -94,10 +94,11 @@ class APIServer:
                     if translation_request.data['task_string'].endswith('speech'):
                         miner_output_data = audio_decode(response.miner_response)
                         wav_file = _tensor_to_wav(miner_output_data)
+                        wav_file.seek(0)
                         miner_output_data = StreamingResponse(wav_file, media_type="audio/wav", headers={
                             "Content-Disposition": "attachment; filename=output.wav"
                         })
-                        print(wav_file)
+
                     else:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
