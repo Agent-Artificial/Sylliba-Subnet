@@ -37,6 +37,7 @@ from sylliba.validator import forward
 from neurons.config import validator_config
 from sylliba.protocol import ValidatorRequest
 from sylliba.protocol import TranslateRequest
+from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
@@ -105,14 +106,6 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info("load_state()")
         self.now = time.time()
         self.load_state()
-
-    async def process(self, synapse_query, serialize = True):
-        # bt.logging.info(f"synapse_query:{synapse_query}")
-        try:
-            return await translation.process(synapse_query, serialize)
-        except Exception as e:
-            bt.logging.error(f"Error processing translation request {e}. \n{synapse_query}")
-            return ""
 
     def get_batch(self, batchsize):
         batch = []
