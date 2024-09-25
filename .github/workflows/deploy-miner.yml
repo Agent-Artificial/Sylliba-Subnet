@@ -150,4 +150,4 @@ jobs:
           -e PYTHONPATH=${{inputs.PYTHONPATH}}
           --gpus all
           --add-host host.docker.internal:host-gateway
-          -d ${{env.REPO}}/${{ inputs.microservice }}-miner-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/miner.py --logging.debug
+          -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/miner.py --logging.debug
