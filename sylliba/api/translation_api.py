@@ -18,6 +18,8 @@ from sylliba.utils.config import check_config, add_args, config
 
 import random
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from neurons.utils.serialization import audio_decode, audio_encode
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 
@@ -58,6 +60,14 @@ class APIServer:
         self.app = FastAPI(title="subnet-api")
         self.subnet_api = SubnetAPI(wallet=self.wallet)
 
+        # Allow CORS for frontend
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],  # Adjust this to your frontend's domain if needed, like ['http://localhost:3000']
+            allow_credentials=True,
+            allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+            allow_headers=["*"],  # Allow all headers
+        )
 
         @self.app.post("/api/translation")
         async def get_translation(task_string: str = Form(...), source_language: str = Form(...), target_language: str = Form(...), input: Union[UploadFile, str] = File(None)):
@@ -84,11 +94,11 @@ class APIServer:
                 if response.miner_response is not None:
                     if translation_request.data['task_string'].endswith('speech'):
                         miner_output_data = audio_decode(response.miner_response)
-                        file_name = "./modules/translation/audio_request.wav"
-                        wav_file = _tensor_to_wav(miner_output_data, file_name)
+                        wav_file = _tensor_to_wav(miner_output_data)
                         miner_output_data = StreamingResponse(wav_file, media_type="audio/wav", headers={
                             "Content-Disposition": "attachment; filename=output.wav"
                         })
+                        print(wav_file)
                     else:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')

@@ -2,6 +2,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 from typing import List, Dict, Any
 
+from neurons.validator import MODELS
+
 def process(messages: List[Dict[str, Any]]):
     """
     Process a list of messages.
@@ -12,25 +14,7 @@ def process(messages: List[Dict[str, Any]]):
     Returns:
         The processed result.
     """
-    model_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    quant_config = BitsAndBytesConfig(
-        load_in_4bit=True,           # This flag is now part of BitsAndBytesConfig
-        bnb_4bit_use_double_quant=True,  # Optional, for double quantization
-        bnb_4bit_quant_type="nf4",   # Choose between 'fp4' or 'nf4' (Non-negative quantization)
-    )
-
-    if not hasattr(AutoModelForCausalLM, 'cached_model'):
-        AutoModelForCausalLM.cached_model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            quantization_config=quant_config,  # 4-bit Quantization config
-            torch_dtype=torch.bfloat16,        # Mixed precision (optional, use bfloat16 for efficiency)
-        ).to(device)
-    model = AutoModelForCausalLM.cached_model
-
-    # Load the tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    model, tokenizer = MODELS['llama']
 
     get_pipeline = pipeline(
         "text-generation",

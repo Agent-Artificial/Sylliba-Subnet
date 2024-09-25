@@ -32,7 +32,7 @@ class SubnetAPI(SubnetsAPI):
     def prepare_synapse(
         self, translation_request: TranslationRequest
     ) -> TranslateRequest:
-        bt.logging.info(f"translation_request{translation_request}")
+        # bt.logging.info(f"translation_request{translation_request}")
         return TranslateRequest(
             translation_request=translation_request
             )
@@ -40,6 +40,6 @@ class SubnetAPI(SubnetsAPI):
     def process_responses(
         self, responses: List[Union["bt.Synapse", Any]]
     ) -> List[int]:
-        bt.logging.info(f"responses:{responses}")
+        # bt.logging.info(f"responses:{responses}")
         return responses
     

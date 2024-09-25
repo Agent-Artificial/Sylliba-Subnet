@@ -2,6 +2,8 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 import torch
 import json
 
+from neurons.validator import MODELS
+
 def process(messages):
     """
     Process a list of messages.
@@ -12,14 +14,8 @@ def process(messages):
     Returns:
         The processed result.
     """
-    model_id = "google/flan-t5-large"  # Using Flan-T5 model for Seq2Seq tasks
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     # Load the model
-    model = T5ForConditionalGeneration.from_pretrained(model_id).to(device)
-
-    # Load the tokenizer
-    tokenizer = T5Tokenizer.from_pretrained(model_id)
+    model, tokenizer = MODELS['flan_t5_large']
 
     input_text = '\n'.join([message['content'] for message in messages])
     input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to("cuda")

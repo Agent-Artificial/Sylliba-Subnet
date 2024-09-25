@@ -42,11 +42,10 @@ from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
-
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import json
 
 from neurons.utils.serialization import audio_encode, audio_decode
+from neurons.utils.model_load import load_flan_t5_large, load_llama
 
 load_dotenv()
 
@@ -82,12 +81,14 @@ LLMS : list[str] = [
     # "modules.llms.llama",
     "modules.llms.flan_t5_large"
 ]
+
 TTS : list[str] = [
     "modules.tts.seamless"
 ]
 
+MODELS: dict = {}
+
 translation = Translation()
-        
 
 class Validator(BaseValidatorNeuron):
     """
@@ -108,7 +109,10 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info("load_state()")
         self.now = time.time()
         self.load_state()
-        
+
+        MODELS['flan_t5_large'] = load_flan_t5_large()
+        # MODELS['llama'] = load_llama()
+
     async def process(self, synapse_query, serialize = True):
         # bt.logging.info(f"synapse_query:{synapse_query}")
         try:
