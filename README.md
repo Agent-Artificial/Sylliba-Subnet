@@ -167,13 +167,13 @@ To view your container's log:
 You can register a key for use with a miner or validator by executing following commands. Registering lets the block chain and the validator know that you are are going to be available to provide the service on the chain.
 
 1. **Registering a validator:**
-   Use ```--subtensor.network finney and --netuid #``` for mainnet if you wish to deploy there
+   Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
    ```bash
    btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_VALIDATOR_COLDKEY --wallet.hotkey YOUR_VALIDATOR_HOTKEY
    ```
 
 2. **Registering a miner:**
-   Use ```--subtensor.network finney and --netuid #``` for mainnet if you wish to deploy there
+   Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
    ```bash
    btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
    ```
