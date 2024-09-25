@@ -46,7 +46,9 @@ class Translation:
             - target_language (None): The target language for translation.
         """
         self.translation_config = translation_config
-        
+
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         if 'seamless' not in MODELS:
             MODELS['seamless'] = load_seamless()
         self.model, self.processor = MODELS['seamless']
