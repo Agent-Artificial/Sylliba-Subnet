@@ -16,7 +16,7 @@ jobs:
             BT_NETWORK: finney
             BT_NETUID: 49
             BT_AXON_MAX_WORKERS: 5
-            BT_WALLET_PATH: "~/.bittensor/wallets"
+            BT_WALLET_PATH: "/root/.bittensor/wallets"
             SUBNET_API_PORT: 30002
 
             ## Miner Section ##
