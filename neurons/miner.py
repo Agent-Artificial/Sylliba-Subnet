@@ -38,6 +38,7 @@ class Miner(BaseMinerNeuron):
     def __init__(self, config=miner_config(), module_name="translation"):
         super(Miner, self).__init__(config=config)
         logger.info(config)
+        logger.info(self.axon.info())
         self.module_configs = self.get_module_configs()
         self.module_config = self.module_configs[module_name]
         self.module_name = module_name
@@ -54,7 +55,6 @@ class Miner(BaseMinerNeuron):
     def install_module(self, module_path, module_name):
         if not module_path.exists():
             module_path.parent.mkdir(parents=True, exist_ok=True)
-        install_module(module_name)
         self.module = import_module(module_name)
 
     async def forward(

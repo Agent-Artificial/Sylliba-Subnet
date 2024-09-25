@@ -37,14 +37,10 @@ from sylliba.validator import forward
 from neurons.config import validator_config
 from sylliba.protocol import ValidatorRequest
 from sylliba.protocol import TranslateRequest
-from modules.translation.translation import Translation
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
-
-from typing import List
-
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
+from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 import json
 
 from neurons.utils.serialization import audio_encode, audio_decode
@@ -80,15 +76,16 @@ TOPICS = [
 ]
 
 LLMS : list[str] = [
-    "modules.llms.llama",
+    # "modules.llms.llama",
     "modules.llms.flan_t5_large"
 ]
+
 TTS : list[str] = [
     "modules.tts.seamless"
 ]
 
-translation = Translation()
-        
+MODELS: dict = {
+}
 
 class Validator(BaseValidatorNeuron):
     """
@@ -109,14 +106,6 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info("load_state()")
         self.now = time.time()
         self.load_state()
-        
-    async def process(self, synapse_query, serialize = True):
-        # bt.logging.info(f"synapse_query:{synapse_query}")
-        try:
-            return await translation.process(synapse_query, serialize)
-        except Exception as e:
-            bt.logging.error(f"Error processing translation request {e}. \n{synapse_query}")
-            return ""
 
     def get_batch(self, batchsize):
         batch = []
@@ -212,7 +201,7 @@ class Validator(BaseValidatorNeuron):
             scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
         return sum(scores) / len(scores)
     
-    def generate_input_data(llm, topic: str, source_language: str):
+    def generate_input_data(self, llm, topic, source_language):
         messages = [{"role": "system", "content": f"""
                 You are an expert story teller.
                 You can write short stories that capture the imagination, 
@@ -221,7 +210,7 @@ class Validator(BaseValidatorNeuron):
                 Keep the story short but be sure to use an alegory and complete the idea."""}]
         return llm.process(messages)
 
-    def generate_output_data(llm, input_data: str, source_language: str, target_language: str):
+    def generate_output_data(self, llm, input_data, source_language, target_language):
         messages = [
             {"role": "system", "content": f"""
                 Provided text is written in {source_language}.
@@ -233,7 +222,7 @@ class Validator(BaseValidatorNeuron):
         ]
         return llm.process(messages)
     
-    def select_random_module(modules: List[str]):
+    def select_random_module(self, modules):
         return import_module(random.choice(modules))
     
     async def generate_query(self, target_language: str, source_language: str, task_string: str, topic: str):
@@ -241,8 +230,6 @@ class Validator(BaseValidatorNeuron):
         tts = self.select_random_module(TTS)
 
         input_data = self.generate_input_data(llm, topic, source_language)
-        if task_string.startswith("speech"):
-            input_data = tts.process(input_data, source_language)
 
         outputs = []
 
@@ -254,7 +241,9 @@ class Validator(BaseValidatorNeuron):
             if task_string.endswith("speech"):
                 output_data = tts.process(output_data, target_language)
             outputs.append(output_data)
-                
+
+        if task_string.startswith("speech"):
+            input_data = tts.process(input_data, source_language)
         return {
                     "input": input_data,
                     "output": outputs,

@@ -598,6 +598,7 @@ class TranslationConfig(BaseModel):
         if model_name_or_card == "facebook/seamless-M4T-V2-large"
         else "vocoder_36langs"
     )
+    # TODO: cuda:0 forces limiting torch to only the first GPU.  Refactor to use "all"
     device: Any = torch.device(device="cuda:0")
     text_tokenizer: str = model_name_or_card
     apply_mintox: bool = (True,)

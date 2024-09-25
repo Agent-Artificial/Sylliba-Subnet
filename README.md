@@ -84,12 +84,12 @@ Finally you can serve the miner or validator with the following command.
 
 1. **Running a validator:**
    ```bash
-   python3 neurons/validator.py --logging.debug
+   python3 neurons/validator.py
    ```
 
 2. **Running a miner:**
    ```bash
-   python3 neurons/miner.py --logging.debug
+   python3 neurons/miner.py
    ```
 
 
@@ -98,12 +98,12 @@ Finally you can serve the miner or validator with pm2 using following command.
 
 1. **Running a validator:**
    ```bash
-   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3 -- --logging.debug
+   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3
    ```
 
 2. **Running a miner:**
    ```bash
-   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug
+   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3
    ```
 
 
@@ -167,13 +167,13 @@ To view your container's log:
 You can register a key for use with a miner or validator by executing following commands. Registering lets the block chain and the validator know that you are are going to be available to provide the service on the chain.
 
 1. **Registering a validator:**
-   Use ```--subtensor.network finney and --netuid #``` for mainnet if you wish to deploy there
+   Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
    ```bash
    btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_VALIDATOR_COLDKEY --wallet.hotkey YOUR_VALIDATOR_HOTKEY
    ```
 
 2. **Registering a miner:**
-   Use ```--subtensor.network finney and --netuid #``` for mainnet if you wish to deploy there
+   Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
    ```bash
    btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
    ```
