@@ -117,6 +117,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}          
 
+      - name: Convert Docker Registry Repo to lowercase
+        run: |
+          echo "REPO=${${{ inputs.image_registry }}.toLowerCase()}" >> ${GITHUB_ENV}
+
       - name: Docker stop old container
         run: |
           docker container rm -f ${{inputs.microservice}}-miner-${{inputs.microservice_env}} || $true
@@ -143,4 +147,4 @@ jobs:
           -e PYTHONPATH=${{inputs.PYTHONPATH}}
           --gpus all
           --add-host host.docker.internal:host-gateway
-          -d ${{ inputs.image_registry }}/${{ inputs.microservice }}-miner-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/miner.py --logging.debug
+          -d ${{env.REPO}}/${{ inputs.microservice }}-miner-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/miner.py --logging.debug
