@@ -16,7 +16,7 @@ jobs:
             BT_NETWORK: test
             BT_NETUID: 197
             BT_AXON_MAX_WORKERS: 5
-            BT_WALLET_PATH: "~/.bittensor/wallets"
+            BT_WALLET_PATH: "/root/.bittensor/wallets"
             SUBNET_API_PORT: 20002
 
             ## Miner Section ##
