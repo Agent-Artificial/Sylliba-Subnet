@@ -122,7 +122,7 @@ jobs:
           docker run
           --name ${{inputs.microservice}}-validator-${{inputs.microservice_env}}
           --restart always
-          -p ${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}:${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}
+          -p ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_PORT}}:${{inputs.BT_AXON_VALIDATOR_EXTERNAL_PORT}}
           -v /home/ubuntu/.bittensor:/ubuntu/.bittensor:ro
           -e APP_VERSION=$GITHUB_REF_NAME
           -e environment=${{inputs.microservice_env}}
