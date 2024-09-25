@@ -45,7 +45,6 @@ from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 import json
 
 from neurons.utils.serialization import audio_encode, audio_decode
-from neurons.utils.model_load import load_flan_t5_large, load_llama
 
 load_dotenv()
 
@@ -87,7 +86,6 @@ TTS : list[str] = [
 ]
 
 MODELS: dict = {
-    'flan_t5_large': None,
 }
 
 translation = Translation()
