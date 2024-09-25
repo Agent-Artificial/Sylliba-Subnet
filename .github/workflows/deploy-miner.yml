@@ -118,8 +118,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}          
 
       - name: Convert Docker Registry Repo to lowercase
-        run: |
-          echo "REPO=${${{ inputs.image_registry }}.toLowerCase()}" >> ${GITHUB_ENV}
+        env:
+          image_registry: ${{ inputs.image_registry }}      
+        run: echo "REPO=$(echo $image_registry | tr '[:upper:]' '[:lower:]')" | tee -a $GITHUB_ENV
 
       - name: Docker stop old container
         run: |
