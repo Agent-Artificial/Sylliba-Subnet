@@ -17,6 +17,8 @@ def process(messages, source_language):
         Processed data for text-to-speech conversion.
     """
     # Model ID for Seamless M4T V2 Large
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     if 'seamless' not in MODELS:
         MODELS['seamless'] = load_seamless()
     model, processor = MODELS['seamless']
