@@ -115,15 +115,15 @@ jobs:
 
       - name: Docker stop old container
         run: |
-          docker container rm -f ${{inputs.microservice}}-miner-${{inputs.microservice_env}} || $true
+          docker container rm -f ${{inputs.microservice}}-subnet-api-${{inputs.microservice_env}} || $true
 
       - name: Docker start new container
         run: >-
           docker run
-          --name ${{inputs.microservice}}-miner-${{inputs.microservice_env}}
+          --name ${{inputs.microservice}}-subnet-api-${{inputs.microservice_env}}
           --restart always
           -p ${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}:${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}
-          -v /home/ubuntu/.bittensor:/root/.bittensor:ro
+          -v /home/ubuntu/.bittensor:/ubuntu/.bittensor:ro
           -e APP_VERSION=$GITHUB_REF_NAME
           -e environment=${{inputs.microservice_env}}
           -e BT_NETWORK=${{inputs.BT_NETWORK}}
