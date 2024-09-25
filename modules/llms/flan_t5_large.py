@@ -3,6 +3,7 @@ import torch
 import json
 
 from neurons.validator import MODELS
+from neurons.utils.model_load import load_flan_t5_large
 
 def process(messages):
     """
@@ -15,6 +16,8 @@ def process(messages):
         The processed result.
     """
     # Load the model
+    if 'flan_t5_large' not in MODELS:
+        MODELS['flan_t5_large'] = load_flan_t5_large()
     model, tokenizer = MODELS['flan_t5_large']
 
     input_text = '\n'.join([message['content'] for message in messages])

@@ -7,6 +7,9 @@ def load_flan_t5_large():
     model_id = "google/flan-t5-large"  # Using Flan-T5 model for Seq2Seq tasks
     model = T5ForConditionalGeneration.from_pretrained(model_id).to(device)
     tokenizer = T5Tokenizer.from_pretrained(model_id)
+
+    print('flan_t5_model loaded successfully')
+
     return model, tokenizer
 
 def load_llama():
@@ -27,5 +30,7 @@ def load_llama():
         ).to(device)
     model = AutoModelForCausalLM.cached_model
     tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    print('llama loaded successfully')
 
     return model, tokenizer

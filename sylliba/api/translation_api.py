@@ -29,7 +29,6 @@ class TranslationInput(BaseModel):
     source_language: str
     target_language: str
 
-
 class APIServer:
 
     @classmethod

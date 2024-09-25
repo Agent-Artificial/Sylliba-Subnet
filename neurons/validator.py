@@ -86,7 +86,9 @@ TTS : list[str] = [
     "modules.tts.seamless"
 ]
 
-MODELS: dict = {}
+MODELS: dict = {
+    'flan_t5_large': None,
+}
 
 translation = Translation()
 
@@ -109,9 +111,6 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info("load_state()")
         self.now = time.time()
         self.load_state()
-
-        MODELS['flan_t5_large'] = load_flan_t5_large()
-        # MODELS['llama'] = load_llama()
 
     async def process(self, synapse_query, serialize = True):
         # bt.logging.info(f"synapse_query:{synapse_query}")

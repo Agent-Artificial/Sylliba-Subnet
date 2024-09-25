@@ -3,6 +3,7 @@ import torch
 from typing import List, Dict, Any
 
 from neurons.validator import MODELS
+from neurons.utils.model_load import load_llama
 
 def process(messages: List[Dict[str, Any]]):
     """
@@ -14,6 +15,8 @@ def process(messages: List[Dict[str, Any]]):
     Returns:
         The processed result.
     """
+    if 'llama' not in MODELS:
+        MODELS['llama'] = load_llama()
     model, tokenizer = MODELS['llama']
 
     get_pipeline = pipeline(
