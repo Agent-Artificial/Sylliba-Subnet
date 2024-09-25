@@ -96,8 +96,21 @@ jobs:
             microservice_env: ${{needs.variables.outputs.microservice_env}}
             image_registry: ${{needs.variables.outputs.image_registry}}
 
+    Create-Local-Docker-Image:
+        needs: [Debug, Variables]
+        uses: ./.github/workflows/build-local-docker-image.yml
+        with:
+            image_tag: ${{ needs.variables.outputs.image_tag }}
+            branch: ${{ needs.variables.outputs.branch }}
+            microservice: ${{needs.variables.outputs.microservice}}
+            microservice_path: ${{needs.variables.outputs.microservice_path}}
+            context_dir: ${{needs.variables.outputs.microservice_path}}
+            microservice_env: ${{needs.variables.outputs.microservice_env}}
+            image_registry: ${{needs.variables.outputs.image_registry}}
+            deployment_servers: ${{ needs.variables.outputs.deployment_servers }}
+
     Deploy-Miner:
-        needs: [Variables, Create-Docker-Image]
+        needs: [Variables, Create-Local-Docker-Image]
         uses: ./.github/workflows/deploy-miner.yml
         with:
             image_tag: ${{ needs.variables.outputs.image_tag }}

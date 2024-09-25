@@ -1,0 +1,146 @@
+---
+  on:
+      workflow_call:
+        inputs:
+          deployment_servers:
+            required: true
+            type: string
+            description: newline-delimited list of deployment servers
+          build_args:
+            required: false
+            type: string
+            default: ""
+            description: newline-delimited list of Docker build args (as "key=value")
+          context_dir:
+            required: false
+            type: string
+            default: "."
+            description: context directory which is passed to docker build
+          docker_file:
+            required: false
+            type: string
+            default: Dockerfile
+            description: override Dockerfile name
+          image_prefix:
+            required: false
+            type: string
+            default: ""
+            description: prefix for image name
+          image_registry:
+            required: false
+            type: string
+            default: ghcr.io/${{ github.repository_owner }}
+            description: Docker/OCI registry to host the image (hostname and optional path)
+          image_tag:
+            required: true
+            type: string
+            description: image tag (e.g. build date, commit, version, variant)
+          microservice:
+            required: true
+            type: string
+            description: name of the application
+          microservice_env:
+            required: true
+            type: string
+            description: name of the environment (e.g. dev, test, prod)
+          microservice_path:
+            required: true
+            type: string
+            default: "."
+            description: path within the caller's Git repo which contains the Dockerfile
+          push:
+            required: false
+            type: boolean
+            default: true
+            description: whether to push the built image to GHCR (true) or simply build it (false)
+          branch:
+            required: false
+            type: string
+            default: main
+            description: the branch deploy
+        outputs:
+          image_name:
+            value: ${{ jobs.build_push_docker_image.outputs.image_name }}
+            description: the full name of the image, including registry but excluding tag
+
+  jobs:
+      Debug:
+        runs-on: [self-hosted, "${{ matrix.deployment_server }}" ]
+        strategy:
+          matrix:
+            deployment_server: ${{ fromJson(inputs.deployment_servers) }}
+        steps:
+          - name: Debug information
+            run: |
+              echo "=== Variables ==="
+              echo "Variable: ${{ inputs.build_args }}"
+              echo "Variable: ${{ inputs.context_dir }}"
+              echo "Variable: ${{ inputs.docker_file }}"
+              echo "Variable: ${{ inputs.image_prefix }}"
+              echo "Variable: ${{ inputs.microservice }}"
+              echo "Variable: ${{ inputs.microservice_env }}"
+
+      build_push_docker_image:
+        name: Build and Push Docker Image
+        runs-on: [self-hosted, "${{ matrix.deployment_server }}" ]
+        strategy:
+          matrix:
+            deployment_server: ${{ fromJson(inputs.deployment_servers) }}
+        env:
+          build_args: ${{ inputs.build_args }}
+          context_dir: ${{ inputs.context_dir }}
+          docker_file: ${{ inputs.docker_file }}
+          image_name: ${{ inputs.image_registry }}/${{ inputs.image_prefix }}${{ inputs.microservice }}-${{ inputs.microservice_env }}
+          image_tag: ${{ inputs.image_tag }}
+          microservice: ${{ inputs.microservice }}
+          microservice_path: ${{ inputs.microservice_path }}
+          microservice_env: ${{ inputs.microservice_env }}
+          push: ${{ inputs.push }}
+        outputs:
+          image_name: ${{ env.image_name }}
+        steps:
+          - uses: actions/checkout@v4
+            with:
+              ref: ${{ inputs.branch }}
+              #submodules: 'true'
+
+          - name: Set registry_host and convert image_name to lower
+            env:
+              image_registry: ${{ inputs.image_registry }}
+              image_prefix: ${{inputs.image_prefix}}
+              microservice: ${{inputs.microservice}}
+              microservice_env: ${{inputs.microservice_env}}
+            run: |
+              echo "Grab just the docker registry host"
+              registry_host="${image_registry%%/*}"
+              echo "registry_host=${registry_host}" | tee -a $GITHUB_ENV
+              echo "Converting the GitHub org to lower case (required for GHCR)"
+              #echo "image_registry=$(echo $image_registry | tr '[:upper:]' '[:lower:]')" | tee -a $GITHUB_ENV
+              echo "image_name=$(echo $image_registry | tr '[:upper:]' '[:lower:]')/${image_prefix}${microservice}-${microservice_env}" | tee -a $GITHUB_ENV
+    
+          - name: debug
+            run: |
+              echo "=== Variables ==="
+              echo registry_host: ${{env.registry_host}}
+              echo image_name: ${{env.image_name}}
+              echo image_tag: ${{env.image_tag}}
+              echo complete image name: ${{ env.image_name }}:${{ env.image_tag }}
+              echo Dockerfile Path: ${{ env.microservice_path }}/${{ env.docker_file }}
+              echo "where am I"
+              pwd
+              ls -la
+    
+          # - name: Docker Build new container
+          #   run: |
+          #     docker build -t ${{needs.variables.outputs.microservice}}-${{needs.variables.outputs.microservice_env}}:${{needs.variables.outputs.image_tag}} .
+
+          - name: Build image and push to registry
+            uses: docker/build-push-action@v5
+            with:
+              build-args: ${{ env.build_args }}
+              context: ${{ env.context_dir }}
+              file: ${{ env.microservice_path }}//${{ env.docker_file }}
+              no-cache: true
+              pull: true
+              push: ${{ env.push }}
+              tags: "${{ env.image_name }}:latest,${{ env.image_name }}:${{ env.image_tag }}"
