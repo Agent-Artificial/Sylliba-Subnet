@@ -1,6 +1,8 @@
 from transformers import AutoProcessor, SeamlessM4Tv2Model, pipeline
 import torch
 
+from neurons.validator import MODELS
+from neurons.utils.model_load import load_seamless
 from modules.translation.data_models import TARGET_LANGUAGES
 
 def process(messages, source_language):
@@ -15,12 +17,9 @@ def process(messages, source_language):
         Processed data for text-to-speech conversion.
     """
     # Model ID for Seamless M4T V2 Large
-    model_id = "facebook/seamless-M4T-V2-large"
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    processor = AutoProcessor.from_pretrained(model_id)
-    model = SeamlessM4Tv2Model.from_pretrained(model_id).to(device)
+    if 'seamless' not in MODELS:
+        MODELS['seamless'] = load_seamless()
+    model, processor = MODELS['seamless']
 
     src_lang = TARGET_LANGUAGES[source_language]
 

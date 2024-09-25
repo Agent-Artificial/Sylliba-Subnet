@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline, T5Tokenizer, T5ForConditionalGeneration
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline, T5Tokenizer, T5ForConditionalGeneration, AutoProcessor, SeamlessM4Tv2Model
 import torch
 
 def load_flan_t5_large():
@@ -34,3 +34,13 @@ def load_llama():
     print('llama loaded successfully')
 
     return model, tokenizer
+
+def load_seamless():
+    model_id = "facebook/seamless-M4T-V2-large"
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    processor = AutoProcessor.from_pretrained(model_id)
+    model = SeamlessM4Tv2Model.from_pretrained(model_id).to(device)
+
+    return model, processor

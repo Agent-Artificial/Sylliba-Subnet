@@ -22,6 +22,9 @@ from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 
 translation_config = TranslationConfig()
 
+from neurons.validator import MODELS
+from neurons.utils.model_load import load_seamless
+
 class Translation:
     def __init__(self):
         """
@@ -43,10 +46,11 @@ class Translation:
             - target_language (None): The target language for translation.
         """
         self.translation_config = translation_config
-        self.processor = AutoProcessor.from_pretrained(translation_config.model_name_or_card)
-        self.model = SeamlessM4Tv2Model.from_pretrained(translation_config.model_name_or_card)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)
+        
+        if 'seamless' not in MODELS:
+            MODELS['seamless'] = load_seamless()
+        self.model, self.processor = MODELS['seamless']
+
         self.target_languages: Dict[str, str] = TARGET_LANGUAGES
         self.task_strings: Dict[str, str] = TASK_STRINGS
         self.data_input = None
