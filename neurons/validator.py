@@ -37,8 +37,6 @@ from sylliba.validator import forward
 from neurons.config import validator_config
 from sylliba.protocol import ValidatorRequest
 from sylliba.protocol import TranslateRequest
-from modules.translation.translation import Translation
-from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
@@ -87,8 +85,6 @@ TTS : list[str] = [
 
 MODELS: dict = {
 }
-
-translation = Translation()
 
 class Validator(BaseValidatorNeuron):
     """
