@@ -82,7 +82,7 @@
 
       build_push_docker_image:
         needs: [Debug]
-        name: Build and Push Docker Image
+        name: Build Local Docker Image
         runs-on: [self-hosted, "${{ matrix.deployment_server }}" ]
         strategy:
           matrix:

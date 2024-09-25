@@ -108,6 +108,39 @@ jobs:
             microservice_env: ${{needs.variables.outputs.microservice_env}}
             image_registry: ${{needs.variables.outputs.image_registry}}
             deployment_servers: ${{ needs.variables.outputs.deployment_servers }}
+            push: false
+
+    Deploy-Validator:
+        needs: [Variables, Create-Local-Docker-Image]
+        uses: ./.github/workflows/deploy-validator.yml
+        with:
+            image_tag: ${{ needs.variables.outputs.image_tag }}
+            microservice: ${{ needs.variables.outputs.microservice }}
+            microservice_path: ${{ needs.variables.outputs.microservice_path }}
+            microservice_env: ${{ needs.variables.outputs.microservice_env }}
+            context_dir: ${{ needs.variables.outputs.context_dir }}
+            image_registry: ${{ needs.variables.outputs.image_registry }}
+            deployment_servers: ${{ needs.variables.outputs.deployment_servers }}
+            branch: ${{ needs.variables.outputs.branch }}
+
+            BT_NETWORK: ${{ needs.variables.outputs.BT_NETWORK }}
+            BT_NETUID: ${{ needs.variables.outputs.BT_NETUID }}
+            BT_AXON_MAX_WORKERS: ${{ needs.variables.outputs.BT_AXON_MAX_WORKERS }}
+            BT_WALLET_PATH: ${{ needs.variables.outputs.BT_WALLET_PATH }}
+            SUBNET_API_PORT: ${{ needs.variables.outputs.SUBNET_API_PORT }}
+            BT_MINER_COLDKEY: ${{ needs.variables.outputs.BT_MINER_COLDKEY }}
+            BT_MINER_HOTKEY: ${{ needs.variables.outputs.BT_MINER_HOTKEY }}
+            BT_AXON_MINER_IP: ${{ needs.variables.outputs.BT_AXON_MINER_IP }}
+            BT_AXON_MINER_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_PORT }}
+            BT_AXON_MINER_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_MINER_EXTERNAL_IP }}
+            BT_AXON_MINER_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_EXTERNAL_PORT }}
+            BT_VALIDATOR_COLDKEY: ${{ needs.variables.outputs.BT_VALIDATOR_COLDKEY }}
+            BT_VALIDATOR_HOTKEY: ${{ needs.variables.outputs.BT_VALIDATOR_HOTKEY }}
+            BT_AXON_VALIDATOR_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_IP }}
+            BT_AXON_VALIDATOR_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_PORT }}
+            BT_AXON_VALIDATOR_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_IP }}   
+            BT_AXON_VALIDATOR_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_PORT }}
+            PYTHONPATH: ${{ needs.variables.outputs.PYTHONPATH }}
 
     Deploy-Miner:
         needs: [Variables, Create-Local-Docker-Image]
@@ -141,3 +174,34 @@ jobs:
             BT_AXON_VALIDATOR_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_PORT }}
             PYTHONPATH: ${{ needs.variables.outputs.PYTHONPATH }}
 
+    Deploy-Subnet-API:
+        needs: [Variables, Create-Local-Docker-Image]
+        uses: ./.github/workflows/deploy-subnet-api.yml
+        with:
+            image_tag: ${{ needs.variables.outputs.image_tag }}
+            microservice: ${{ needs.variables.outputs.microservice }}
+            microservice_path: ${{ needs.variables.outputs.microservice_path }}
+            microservice_env: ${{ needs.variables.outputs.microservice_env }}
+            context_dir: ${{ needs.variables.outputs.context_dir }}
+            image_registry: ${{ needs.variables.outputs.image_registry }}
+            deployment_servers: ${{ needs.variables.outputs.deployment_servers }}
+            branch: ${{ needs.variables.outputs.branch }}
+
+            BT_NETWORK: ${{ needs.variables.outputs.BT_NETWORK }}
+            BT_NETUID: ${{ needs.variables.outputs.BT_NETUID }}
+            BT_AXON_MAX_WORKERS: ${{ needs.variables.outputs.BT_AXON_MAX_WORKERS }}
+            BT_WALLET_PATH: ${{ needs.variables.outputs.BT_WALLET_PATH }}
+            SUBNET_API_PORT: ${{ needs.variables.outputs.SUBNET_API_PORT }}
+            BT_MINER_COLDKEY: ${{ needs.variables.outputs.BT_MINER_COLDKEY }}
+            BT_MINER_HOTKEY: ${{ needs.variables.outputs.BT_MINER_HOTKEY }}
+            BT_AXON_MINER_IP: ${{ needs.variables.outputs.BT_AXON_MINER_IP }}
+            BT_AXON_MINER_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_PORT }}
+            BT_AXON_MINER_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_MINER_EXTERNAL_IP }}
+            BT_AXON_MINER_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_MINER_EXTERNAL_PORT }}
+            BT_VALIDATOR_COLDKEY: ${{ needs.variables.outputs.BT_VALIDATOR_COLDKEY }}
+            BT_VALIDATOR_HOTKEY: ${{ needs.variables.outputs.BT_VALIDATOR_HOTKEY }}
+            BT_AXON_VALIDATOR_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_IP }}
+            BT_AXON_VALIDATOR_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_PORT }}
+            BT_AXON_VALIDATOR_EXTERNAL_IP: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_IP }}   
+            BT_AXON_VALIDATOR_EXTERNAL_PORT: ${{ needs.variables.outputs.BT_AXON_VALIDATOR_EXTERNAL_PORT }}
+            PYTHONPATH: ${{ needs.variables.outputs.PYTHONPATH }}                    
