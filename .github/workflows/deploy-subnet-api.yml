@@ -1,4 +1,4 @@
-name: Deploy Miner
+name: Deploy Subnet API
 
 on: 
   workflow_call:
@@ -106,17 +106,6 @@ jobs:
         deployment_server: ${{ fromJson(inputs.deployment_servers) }}
 
     steps:
-      # - uses: actions/checkout@v4
-      #   with:
-      #     ref: ${{ inputs.branch }}
-          
-      # - name: Login to GHCR
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.actor }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}          
-
       - name: Convert Docker Registry Repo to lowercase
         env:
           image_registry: ${{ inputs.image_registry }}      
@@ -157,4 +146,4 @@ jobs:
           -e PYTHONPATH=${{inputs.PYTHONPATH}}
           --gpus all
           --add-host host.docker.internal:host-gateway
-          -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/miner.py --logging.debug
+          -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} api/run_subnet_api.py
