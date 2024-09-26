@@ -107,6 +107,8 @@ class APIServer:
             for i in range(len(axons)):
                 if healthcheck[i].response is True:
                     healthaxons.append(axons[i])
+        
+            bt.logging.info(f'Health Axons are {healthaxons}')
 
             responses = await self.subnet_api(
                 axons=healthaxons,

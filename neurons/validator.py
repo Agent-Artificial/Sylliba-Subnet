@@ -156,9 +156,10 @@ class Validator(BaseValidatorNeuron):
     
         axons = self.metagraph.axons
             
-        healthcheck = await self.subnet_api(
+        healthcheck = await self.dendrite(
             axons = axons,
             synapse = HealthCheck(),
+            deserialize=False,
             timeout = 5
         )
 
@@ -166,6 +167,8 @@ class Validator(BaseValidatorNeuron):
         for i in range(len(axons)):
             if healthcheck[i].response is True:
                 healthaxons.append(axons[i])
+        
+        bt.logging.info(f'Health Axons are {healthaxons}')
 
         synapse = TranslateRequest(
             translation_request=translation_request,
