@@ -137,6 +137,7 @@ class Validator(BaseValidatorNeuron):
         # Generating the query
         successful = []
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
+        bt.logging.debug(f"sample_request: {str(sample_request)}")
 
         if task_string.startswith('speech'):
             try:
