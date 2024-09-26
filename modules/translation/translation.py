@@ -292,9 +292,9 @@ def speech2speech(translation: Translation, miner_request: Optional[TranslationR
     )
     return translation.process(translation_request)
 
+translation = Translation()
 
 async def process(translation_request: TranslationRequest):
-    translation = Translation()
     result = None
     try:
         loop = asyncio.get_event_loop()
@@ -306,7 +306,6 @@ async def process(translation_request: TranslationRequest):
         new_loop.close()
     finally:
         return result  # type: ignore
-    
 
 if __name__ == "__main__":
     translation = Translation()
