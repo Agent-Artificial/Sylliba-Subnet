@@ -35,7 +35,7 @@ There are multiple ways to launch our miner or validator.  Choose what works bes
 **MINIMUM HARDWARE REQUIREMENTS:**
 
 Miner: 4 CPU Cores, 16GB RAM, 10GB Disk Space and at least an 8GB GPU
-Validator: 4 CPU Cores, 16GB RAM, 20GB Disk Space and at least an 10GB GPU 
+Validator: 4 CPU Cores, 16GB RAM, 20GB Disk Space and at least a 24GB GPU (better to have multiple GPUs and the requirement will grow) 
 
 ## Option 1: Local Python Install
 

@@ -10,7 +10,7 @@ services:
       - ${HOME}/.bittensor:/root/.bittensor      
     command:
       - neurons/validator.py
-      - --logging.debug
+      #- --logging.debug
     deploy:
       resources:
         reservations:
