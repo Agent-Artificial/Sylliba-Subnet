@@ -126,19 +126,9 @@ TARGET_LANGUAGES = {
     "Standard Malay": "zsm",
     "Zulu": "zul",
 }
-
-class TranslationData(BaseModel):
-    input: Any
-    task_string: str
-    source_language: Optional[str] = None
-    target_language: str
-    
     
 class TranslationRequest(BaseModel):
-    data: TranslationData
-    def __init__(self, data: TranslationData):
-        super().__init__()
-        self.data = data
+    data: dict
 
    
 __all__ = [
