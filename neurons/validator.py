@@ -133,6 +133,8 @@ class Validator(BaseValidatorNeuron):
         task_string = random.choice(TASK_STRINGS)
         topic = random.choice(TOPICS)
 
+        bt.logging.info('Start forward on Validator')
+
         # Generating the query
         successful = []
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)

@@ -69,17 +69,17 @@ class APIServer:
         )
 
         @self.app.post("/api/translation")
-        async def get_translation(task_string: str = Form(...), source_language: str = Form(...), target_language: str = Form(...), input: Union[UploadFile, str] = File(None)):
-            if task_string.startswith('speech'):
-                input_file = await input.read()
-                input, sample_rate = await _wav_to_tensor(io.BytesIO(input_file))
-                input = audio_encode(input)
+        async def get_translation(request: TranslationInput):
+            if request.task_string.startswith('speech'):
+                wav_data = audio_decode(request.input)
+                input, sample_rate = await _wav_to_tensor(io.BytesIO(wav_data))
+                request.input = audio_encode(input)
             
             translation_request = TranslationRequest(data = {
-                "input": input,
-                "task_string": task_string,
-                "source_language": source_language,
-                "target_language": target_language
+                "input": request.input,
+                "task_string": request.task_string,
+                "source_language": request.source_language,
+                "target_language": request.target_language
             })
             
             axons = self.metagraph.axons[8:9]
@@ -94,11 +94,7 @@ class APIServer:
                     if translation_request.data['task_string'].endswith('speech'):
                         miner_output_data = audio_decode(response.miner_response)
                         wav_file = _tensor_to_wav(miner_output_data)
-                        wav_file.seek(0)
-                        miner_output_data = StreamingResponse(wav_file, media_type="audio/wav", headers={
-                            "Content-Disposition": "attachment; filename=output.wav"
-                        })
-
+                        miner_output_data = audio_encode(wav_file)
                     else:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
