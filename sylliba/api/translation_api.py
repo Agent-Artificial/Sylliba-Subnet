@@ -16,6 +16,7 @@ from sylliba.api.subnet_api import SubnetAPI
 import copy
 from neurons.config import validator_config
 from sylliba.utils.config import check_config, add_args, config
+from sylliba.protocol import TranslateRequest, HealthCheck
 
 import random
 
@@ -93,11 +94,23 @@ class APIServer:
                 "source_language": request.source_language,
                 "target_language": request.target_language
             })
+            translation_synapse = TranslateRequest(translation_request = translation_request)
             
             axons = self.metagraph.axons
+            healthcheck = await self.subnet_api(
+                axons = axons,
+                synapse = HealthCheck(),
+                timeout = 5
+            )
+
+            healthaxons = []
+            for i in range(len(axons)):
+                if healthcheck[i].response is True:
+                    healthaxons.append(axons[i])
+
             responses = await self.subnet_api(
-                axons=axons,
-                translation_request=translation_request,
+                axons=healthaxons,
+                synapse=translation_synapse,
                 timeout=30
             )
             result = []
