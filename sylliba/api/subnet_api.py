@@ -20,7 +20,7 @@
 import bittensor as bt
 from typing import List, Optional, Union, Any, Dict
 from sylliba.protocol import TranslateRequest, TranslationRequest
-from bittensor.subnets import SubnetsAPI
+from bittensor.utils.subnets import SubnetsAPI
 
 
 class SubnetAPI(SubnetsAPI):
@@ -40,4 +40,4 @@ class SubnetAPI(SubnetsAPI):
     ) -> List[int]:
         # bt.logging.info(f"responses:{responses}")
         return responses
-    
+
