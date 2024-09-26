@@ -25,6 +25,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from neurons.utils.serialization import audio_decode, audio_encode
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 
+from neurons.utils.get_healthy_axons import get_healthy_axons
+
 class TranslationInput(BaseModel):
     input: str
     task_string: str
@@ -97,21 +99,12 @@ class APIServer:
             translation_synapse = TranslateRequest(translation_request = translation_request)
             
             axons = self.metagraph.axons
-            healthcheck = await self.subnet_api(
-                axons = axons,
-                synapse = HealthCheck(),
-                timeout = 5
-            )
-
-            healthaxons = []
-            for i in range(len(axons)):
-                if healthcheck[i].response is True:
-                    healthaxons.append(axons[i])
+            healthy_axons = await get_healthy_axons(self, axons)
         
-            bt.logging.info(f'Health Axons are {healthaxons}')
+            bt.logging.info(f'Health Axons are {healthy_axons}')
 
             responses = await self.subnet_api(
-                axons=healthaxons,
+                axons=healthy_axons,
                 synapse=translation_synapse,
                 timeout=30
             )
