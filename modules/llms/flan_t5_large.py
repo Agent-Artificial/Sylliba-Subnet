@@ -33,21 +33,19 @@ As our first step into the Bittensor ecosystem, Sylliba connects to the network 
 Explore Sylliba and experience the future of translation here."""
     
     source_language = "English"
-    target_language = "French"
+    target_language = "English"
+    topic = 'Last day on earth'
 
     messages = [
         {
             "role": "system",
             "content": f"""
-            Provided text is written in {source_language}.
-            Please translate into {target_language}.
-            Don't put any tags, description, or decorators.
-            Write only translated text in raw text format.
+            You are an expert story teller.
+            You can write short stories that capture the imagination, 
+            end readers on an adventure and complete an alegorical thought all within 100~200 words. 
+            Please write a short story about {topic} in {source_language}. 
+            Keep the story short but be sure to use an alegory and complete the idea.
             """
-        }, 
-        {
-            "role": "user",
-            "content": text
         }
     ]
     

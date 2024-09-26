@@ -75,8 +75,8 @@ TOPICS = [
 ]
 
 LLMS : list[str] = [
-    # "modules.llms.llama",
-    "modules.llms.flan_t5_large"
+    "modules.llms.llama",
+    # "modules.llms.flan_t5_large"
 ]
 
 TTS : list[str] = [
@@ -234,7 +234,7 @@ class Validator(BaseValidatorNeuron):
         return import_module(random.choice(modules))
     
     async def generate_query(self, target_language: str, source_language: str, task_string: str, topic: str):
-        llm = self.select_random_module(LLMS)
+        llm = import_module(LLMS[0])
         tts = self.select_random_module(TTS)
 
         input_data = self.generate_input_data(llm, topic, source_language)
@@ -249,6 +249,9 @@ class Validator(BaseValidatorNeuron):
             if task_string.endswith("speech"):
                 output_data = tts.process(output_data, target_language)
             outputs.append(output_data)
+        
+        bt.logging.info(f'Generated Query Input Text: {input_data}')
+        bt.logging.info(f'Generated Query Sample Output Text: {outputs}')
 
         if task_string.startswith("speech"):
             input_data = tts.process(input_data, source_language)
