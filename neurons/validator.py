@@ -47,6 +47,9 @@ from neurons.utils.serialization import audio_encode, audio_decode
 load_dotenv()
 
 TASK_STRINGS = [
+    "text2text",
+    "text2speech",
+    "speech2text",
     "speech2speech",
 ]
 
