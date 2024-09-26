@@ -10,7 +10,6 @@ services:
       - ${HOME}/.bittensor:/root/.bittensor
     command:
       - neurons/miner.py
-      - --logging.debug
     deploy:
       resources:
         reservations:

@@ -2,7 +2,7 @@ import os
 import asyncio
 import bittensor as bt
 from typing import List, Dict, Tuple, Union, Any, Optional
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import StreamingResponse
 import uvicorn
 from sylliba.utils.misc import ttl_metagraph
@@ -11,10 +11,12 @@ from modules.translation.data_models import TranslationRequest
 import base64
 import io
 import torch
+import time
 from sylliba.api.subnet_api import SubnetAPI
 import copy
 from neurons.config import validator_config
 from sylliba.utils.config import check_config, add_args, config
+from sylliba.protocol import TranslateRequest, HealthCheck
 
 import random
 
@@ -22,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from neurons.utils.serialization import audio_decode, audio_encode
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
+
 
 class TranslationInput(BaseModel):
     input: str
@@ -68,25 +71,46 @@ class APIServer:
             allow_headers=["*"],  # Allow all headers
         )
 
+        # Middleware to measure response time
+        @self.app.middleware("http")
+        async def add_response_time_header(request: Request, call_next):
+            start_time = time.time()
+            response = await call_next(request)
+            duration = time.time() - start_time
+            bt.logging.info(f'Response time; {duration}s')
+            response.headers['X-Response-Time'] = f"{duration:.4f} seconds"
+            return response
+
         @self.app.post("/api/translation")
-        async def get_translation(task_string: str = Form(...), source_language: str = Form(...), target_language: str = Form(...), input: Union[UploadFile, str] = File(None)):
-            if task_string.startswith('speech'):
-                input_file = await input.read()
-                input, sample_rate = await _wav_to_tensor(io.BytesIO(input_file))
-                input = audio_encode(input)
+        async def get_translation(request: TranslationInput):
+            bt.logging.info('request received')
+            if request.task_string.startswith('speech'):
+                wav_data = audio_decode(request.input)
+                input, sample_rate = await _wav_to_tensor(io.BytesIO(wav_data))
+                request.input = audio_encode(input)
             
             translation_request = TranslationRequest(data = {
-                "input": input,
-                "task_string": task_string,
-                "source_language": source_language,
-                "target_language": target_language
+                "input": request.input,
+                "task_string": request.task_string,
+                "source_language": request.source_language,
+                "target_language": request.target_language
             })
+            translation_synapse = TranslateRequest(translation_request = translation_request)
             
-            axons = self.metagraph.axons[8:9]
-            responses = await self.subnet_api(
+            axons = self.metagraph.axons
+            healthcheck = await self.subnet_api(
                 axons=axons,
-                translation_request=translation_request,
-                timeout=300
+                synapse=HealthCheck(),
+                timeout=5
+            )
+            healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
+        
+            bt.logging.info(f'Health Axons are {healthy_axons}')
+
+            responses = await self.subnet_api(
+                axons=healthy_axons,
+                synapse=translation_synapse,
+                timeout=30
             )
             result = []
             for response in responses:
@@ -94,11 +118,7 @@ class APIServer:
                     if translation_request.data['task_string'].endswith('speech'):
                         miner_output_data = audio_decode(response.miner_response)
                         wav_file = _tensor_to_wav(miner_output_data)
-                        wav_file.seek(0)
-                        miner_output_data = StreamingResponse(wav_file, media_type="audio/wav", headers={
-                            "Content-Disposition": "attachment; filename=output.wav"
-                        })
-
+                        miner_output_data = audio_encode(wav_file)
                     else:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')

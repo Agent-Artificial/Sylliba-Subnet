@@ -50,7 +50,9 @@ class ValidatorRequest(BaseModel):
     source_language: str
     target_language: str
         
-    
+class HealthCheck(bt.Synapse):
+    response: bool = False
+
 class TranslateRequest(bt.Synapse):
     """
     Base class for Synapse communication object for translating text.

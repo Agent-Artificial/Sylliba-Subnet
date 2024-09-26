@@ -140,8 +140,8 @@ class BaseValidatorNeuron(BaseNeuron):
         bt.logging.info(f"Validator starting at block: {self.block}")
 
         # This loop maintains the validator's operations until intentionally stopped.
-        try:
-            while True:
+        while True:
+            try:
                 bt.logging.info(f"step({self.step}) block({self.block})")
 
                 # Run multiple forwards concurrently.
@@ -156,16 +156,17 @@ class BaseValidatorNeuron(BaseNeuron):
 
                 self.step += 1
 
-        # If someone intentionally stops the validator, it'll safely terminate operations.
-        except KeyboardInterrupt:
-            self.axon.stop()
-            bt.logging.success("Validator killed by keyboard interrupt.")
-            exit()
+            # If someone intentionally stops the validator, it'll safely terminate operations.
+            except KeyboardInterrupt:
+                self.axon.stop()
+                bt.logging.success("Validator killed by keyboard interrupt.")
+                exit()
 
-        # In case of unforeseen errors, the validator will log the error and continue operations.
-        except Exception as err:
-            bt.logging.error(f"Error during validation: {str(err)}")
-            bt.logging.debug(str(print_exception(type(err), err, err.__traceback__)))
+            # In case of unforeseen errors, the validator will log the error and continue operations.
+            except Exception as err:
+                bt.logging.error(f"Error during validation: {str(err)}")
+                bt.logging.debug(str(print_exception(type(err), err, err.__traceback__)))
+                continue
 
     def run_in_background_thread(self):
         """
@@ -238,8 +239,8 @@ class BaseValidatorNeuron(BaseNeuron):
         # Compute raw_weights safely
         raw_weights = self.scores / norm
 
-        bt.logging.debug("raw_weights", raw_weights)
-        bt.logging.debug("raw_weight_uids", str(self.metagraph.uids.tolist()))
+        bt.logging.debug(f"raw_weights: {str(raw_weights)}")
+        bt.logging.debug(f"raw_weight_uids: {str(self.metagraph.uids.tolist())}")
         # Process the raw weights to final_weights via subtensor limitations.
         (
             processed_weight_uids,
@@ -251,8 +252,8 @@ class BaseValidatorNeuron(BaseNeuron):
             subtensor=self.subtensor,
             metagraph=self.metagraph,
         )
-        bt.logging.debug("processed_weights", processed_weights)
-        bt.logging.debug("processed_weight_uids", processed_weight_uids)
+        bt.logging.debug(f"processed_weights: {str(processed_weights)}")
+        bt.logging.debug(f"processed_weight_uids: {str(processed_weight_uids)}")
 
         # Convert to uint16 weights and uids.
         (
@@ -261,8 +262,8 @@ class BaseValidatorNeuron(BaseNeuron):
         ) = convert_weights_and_uids_for_emit(
             uids=processed_weight_uids, weights=processed_weights
         )
-        bt.logging.debug("uint_weights", uint_weights)
-        bt.logging.debug("uint_uids", uint_uids)
+        bt.logging.debug(f"uint_weights: {str(uint_weights)}")
+        bt.logging.debug(f"uint_uids: {str(uint_uids)}")
 
         # Set the weights on chain via our subtensor connection.
         result, msg = self.subtensor.set_weights(

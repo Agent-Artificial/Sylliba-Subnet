@@ -35,8 +35,7 @@ from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from sylliba.validator import forward
 from neurons.config import validator_config
-from sylliba.protocol import ValidatorRequest
-from sylliba.protocol import TranslateRequest
+from sylliba.protocol import TranslateRequest, HealthCheck
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
@@ -133,9 +132,12 @@ class Validator(BaseValidatorNeuron):
         task_string = random.choice(TASK_STRINGS)
         topic = random.choice(TOPICS)
 
+        bt.logging.info('Start forward on Validator')
+
         # Generating the query
         successful = []
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
+        bt.logging.debug(f"sample_request: {str(sample_request)}")
 
         if task_string.startswith('speech'):
             try:
@@ -154,32 +156,39 @@ class Validator(BaseValidatorNeuron):
                 })
     
         axons = self.metagraph.axons
+        healthcheck = await self.dendrite(
+                axons=axons,
+                synapse=HealthCheck(),
+                deserialize=False,
+                timeout=5
+            )
+        healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
+        
+        bt.logging.info(f'Health Axons are {healthy_axons}')
+
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
         try:
-            # for i in range(5):
-                # batch = self.get_batch(self.batch_size)
-                # bt.logging.info(f"batch:{batch}")
-                responses = await self.dendrite(
-                    axons=axons,
-                    synapse=synapse,
-                    deserialize=False,
-                    timeout=300
-                )
-                # Getting the responses
-                for j in range(0, len(responses)):
-                    if responses[j].miner_response is not None:
-                        if task_string.endswith('speech'):
-                            miner_output_data = audio_decode(responses[j].miner_response)
-                        else:
-                            miner_output_data = responses[j].miner_response
-                            
-                        bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
-                        
-                        successful.append([miner_output_data, j])
+            responses = await self.dendrite(
+                axons=healthy_axons,
+                synapse=synapse,
+                deserialize=False,
+                timeout=300
+            )
+            # Getting the responses
+            for j in range(0, len(responses)):
+                if responses[j].miner_response is not None:
+                    if task_string.endswith('speech'):
+                        miner_output_data = audio_decode(responses[j].miner_response)
                     else:
-                        bt.logging.warning(f"Miner {j} failed to respond.")
+                        miner_output_data = responses[j].miner_response
+                        
+                    bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
+                    
+                    successful.append([miner_output_data, j])
+                else:
+                    bt.logging.warning(f"Miner {j} failed to respond.")
         except Exception as e:
             bt.logging.error(f"Failed to query miners with exception: {e}")
         # Rewarding the miners

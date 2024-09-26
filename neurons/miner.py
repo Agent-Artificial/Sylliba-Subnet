@@ -39,31 +39,20 @@ class Miner(BaseMinerNeuron):
         super(Miner, self).__init__(config=config)
         logger.info(config)
         logger.info(self.axon.info())
-        self.module_configs = self.get_module_configs()
-        self.module_config = self.module_configs[module_name]
-        self.module_name = module_name
-        self.module_url = self.module_config["url"]
-        self.module_endpoint = self.module_config["endpoint"]
-        self.module_full_url = f"{self.module_config['url']}{self.module_config['endpoint']}"
-        self.module_path = Path(self.module_config["path"])
         self.module = import_module('modules.translation.translation')
-        
-    def get_module_configs(self):
-        with open("modules/data/module_registar.json", "r") as f:
-            return json.load(f)
-
-    def install_module(self, module_path, module_name):
-        if not module_path.exists():
-            module_path.parent.mkdir(parents=True, exist_ok=True)
-        self.module = import_module(module_name)
+        self.axon.attach(forward_fn=self.healthcheck)
 
     async def forward(
         self, synapse: sylliba.protocol.TranslateRequest
     ) -> sylliba.protocol.TranslateRequest:
-        # bt.logging.info(f'synapse received : {synapse}')
+        bt.logging.info(f'synapse received')
         response = await self.module.process(synapse.translation_request)
         synapse.miner_response = response
         bt.logging.info(f"synapse.miner_response : {synapse.miner_response[:100]}")
+        return synapse
+
+    async def healthcheck(self, synapse: sylliba.protocol.HealthCheck):
+        synapse.response = True
         return synapse
 
     async def blacklist(
