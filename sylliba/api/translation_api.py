@@ -2,7 +2,7 @@ import os
 import asyncio
 import bittensor as bt
 from typing import List, Dict, Tuple, Union, Any, Optional
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import StreamingResponse
 import uvicorn
 from sylliba.utils.misc import ttl_metagraph
@@ -11,6 +11,7 @@ from modules.translation.data_models import TranslationRequest
 import base64
 import io
 import torch
+import time
 from sylliba.api.subnet_api import SubnetAPI
 import copy
 from neurons.config import validator_config
@@ -68,8 +69,19 @@ class APIServer:
             allow_headers=["*"],  # Allow all headers
         )
 
+        # Middleware to measure response time
+        @self.app.middleware("http")
+        async def add_response_time_header(request: Request, call_next):
+            start_time = time.time()
+            response = await call_next(request)
+            duration = time.time() - start_time
+            bt.logging.info(f'Response time; {duration}s')
+            response.headers['X-Response-Time'] = f"{duration:.4f} seconds"
+            return response
+
         @self.app.post("/api/translation")
         async def get_translation(request: TranslationInput):
+            bt.logging.info('request received')
             if request.task_string.startswith('speech'):
                 wav_data = audio_decode(request.input)
                 input, sample_rate = await _wav_to_tensor(io.BytesIO(wav_data))
@@ -86,7 +98,7 @@ class APIServer:
             responses = await self.subnet_api(
                 axons=axons,
                 translation_request=translation_request,
-                timeout=300
+                timeout=30
             )
             result = []
             for response in responses:
