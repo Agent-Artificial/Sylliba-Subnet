@@ -8,7 +8,7 @@ proto-plus
 jinja2
 loguru
 python-dotenv
-bittensor
+bittensor==7.4.0
 nltk
 scikit-learn
 librosa
