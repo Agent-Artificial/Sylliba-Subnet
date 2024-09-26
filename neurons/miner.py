@@ -40,6 +40,7 @@ class Miner(BaseMinerNeuron):
         logger.info(config)
         logger.info(self.axon.info())
         self.module = import_module('modules.translation.translation')
+        self.axon.attach(forward_fn=self.healthcheck)
 
     async def forward(
         self, synapse: sylliba.protocol.TranslateRequest
@@ -48,6 +49,10 @@ class Miner(BaseMinerNeuron):
         response = await self.module.process(synapse.translation_request)
         synapse.miner_response = response
         bt.logging.info(f"synapse.miner_response : {synapse.miner_response[:100]}")
+        return synapse
+
+    async def healthcheck(self, synapse: sylliba.protocol.HealthCheck):
+        synapse.response = True
         return synapse
 
     async def blacklist(
