@@ -20,7 +20,7 @@
 import bittensor as bt
 from typing import List, Optional, Union, Any, Dict
 from sylliba.protocol import TranslateRequest, TranslationRequest
-from bittensor.utils.subnets import SubnetsAPI
+from bittensor.subnets import SubnetsAPI
 
 
 class SubnetAPI(SubnetsAPI):
