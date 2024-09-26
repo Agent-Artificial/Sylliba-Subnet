@@ -25,7 +25,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from neurons.utils.serialization import audio_decode, audio_encode
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 
-from neurons.utils.get_healthy_axons import get_healthy_axons
 
 class TranslationInput(BaseModel):
     input: str
