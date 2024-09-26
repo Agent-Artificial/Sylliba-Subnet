@@ -35,8 +35,7 @@ from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from sylliba.validator import forward
 from neurons.config import validator_config
-from sylliba.protocol import ValidatorRequest
-from sylliba.protocol import TranslateRequest
+from sylliba.protocol import TranslateRequest, HealthCheck
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
@@ -156,6 +155,18 @@ class Validator(BaseValidatorNeuron):
                 })
     
         axons = self.metagraph.axons
+            
+        healthcheck = await self.subnet_api(
+            axons = axons,
+            synapse = HealthCheck(),
+            timeout = 5
+        )
+
+        healthaxons = []
+        for i in range(len(axons)):
+            if healthcheck[i].response is True:
+                healthaxons.append(axons[i])
+
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
@@ -164,7 +175,7 @@ class Validator(BaseValidatorNeuron):
                 # batch = self.get_batch(self.batch_size)
                 # bt.logging.info(f"batch:{batch}")
                 responses = await self.dendrite(
-                    axons=axons,
+                    axons=healthaxons,
                     synapse=synapse,
                     deserialize=False,
                     timeout=300
