@@ -99,7 +99,12 @@ class APIServer:
             translation_synapse = TranslateRequest(translation_request = translation_request)
             
             axons = self.metagraph.axons
-            healthy_axons = await get_healthy_axons(self, axons)
+            healthcheck = await self.subnet_api(
+                axons=axons,
+                synapse=HealthCheck(),
+                timeout=5
+            )
+            healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
         
             bt.logging.info(f'Health Axons are {healthy_axons}')
 
