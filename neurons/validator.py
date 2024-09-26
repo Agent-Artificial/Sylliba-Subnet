@@ -43,6 +43,7 @@ from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 import json
 
 from neurons.utils.serialization import audio_encode, audio_decode
+from neurons.utils.get_healthy_axons import get_healthy_axons
 
 load_dotenv()
 
@@ -155,47 +156,33 @@ class Validator(BaseValidatorNeuron):
                 })
     
         axons = self.metagraph.axons
-            
-        healthcheck = await self.dendrite(
-            axons = axons,
-            synapse = HealthCheck(),
-            deserialize=False,
-            timeout = 5
-        )
-
-        healthaxons = []
-        for i in range(len(axons)):
-            if healthcheck[i].response is True:
-                healthaxons.append(axons[i])
+        healthy_axons = await get_healthy_axons(self, axons)
         
-        bt.logging.info(f'Health Axons are {healthaxons}')
+        bt.logging.info(f'Health Axons are {healthy_axons}')
 
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
         try:
-            # for i in range(5):
-                # batch = self.get_batch(self.batch_size)
-                # bt.logging.info(f"batch:{batch}")
-                responses = await self.dendrite(
-                    axons=healthaxons,
-                    synapse=synapse,
-                    deserialize=False,
-                    timeout=300
-                )
-                # Getting the responses
-                for j in range(0, len(responses)):
-                    if responses[j].miner_response is not None:
-                        if task_string.endswith('speech'):
-                            miner_output_data = audio_decode(responses[j].miner_response)
-                        else:
-                            miner_output_data = responses[j].miner_response
-                            
-                        bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
-                        
-                        successful.append([miner_output_data, j])
+            responses = await self.dendrite(
+                axons=healthy_axons,
+                synapse=synapse,
+                deserialize=False,
+                timeout=300
+            )
+            # Getting the responses
+            for j in range(0, len(responses)):
+                if responses[j].miner_response is not None:
+                    if task_string.endswith('speech'):
+                        miner_output_data = audio_decode(responses[j].miner_response)
                     else:
-                        bt.logging.warning(f"Miner {j} failed to respond.")
+                        miner_output_data = responses[j].miner_response
+                        
+                    bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
+                    
+                    successful.append([miner_output_data, j])
+                else:
+                    bt.logging.warning(f"Miner {j} failed to respond.")
         except Exception as e:
             bt.logging.error(f"Failed to query miners with exception: {e}")
         # Rewarding the miners
