@@ -1,9 +1,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline, T5Tokenizer, T5ForConditionalGeneration, AutoProcessor, SeamlessM4Tv2Model
 import torch
 
-def load_flan_t5_large():
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+def load_flan_t5_large(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     model_id = "google/flan-t5-large"  # Using Flan-T5 model for Seq2Seq tasks
     model = T5ForConditionalGeneration.from_pretrained(model_id).to(device)
     tokenizer = T5Tokenizer.from_pretrained(model_id)
@@ -12,9 +10,8 @@ def load_flan_t5_large():
 
     return model, tokenizer
 
-def load_llama():
+def load_llama(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     model_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     quant_config = BitsAndBytesConfig(
         load_in_4bit=True,           # This flag is now part of BitsAndBytesConfig
@@ -35,10 +32,8 @@ def load_llama():
 
     return model, tokenizer
 
-def load_seamless():
+def load_seamless(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     model_id = "facebook/seamless-M4T-V2-large"
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     processor = AutoProcessor.from_pretrained(model_id)
     model = SeamlessM4Tv2Model.from_pretrained(model_id).to(device)

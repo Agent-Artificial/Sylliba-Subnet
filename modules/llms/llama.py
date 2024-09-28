@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from neurons.validator import MODELS
 from neurons.utils.model_load import load_llama
 
-def process(messages: List[Dict[str, Any]]):
+def process(messages: List[Dict[str, Any]], device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     """
     Process a list of messages.
 
@@ -16,7 +16,7 @@ def process(messages: List[Dict[str, Any]]):
         The processed result.
     """
     if 'llama' not in MODELS:
-        MODELS['llama'] = load_llama()
+        MODELS['llama'] = load_llama(device)
     model, tokenizer = MODELS['llama']
 
     get_pipeline = pipeline(

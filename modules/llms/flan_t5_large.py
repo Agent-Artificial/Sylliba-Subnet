@@ -5,7 +5,7 @@ import json
 from neurons.validator import MODELS
 from neurons.utils.model_load import load_flan_t5_large
 
-def process(messages):
+def process(messages, device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     """
     Process a list of messages.
 
@@ -17,7 +17,7 @@ def process(messages):
     """
     # Load the model
     if 'flan_t5_large' not in MODELS:
-        MODELS['flan_t5_large'] = load_flan_t5_large()
+        MODELS['flan_t5_large'] = load_flan_t5_large(device)
     model, tokenizer = MODELS['flan_t5_large']
 
     input_text = '\n'.join([message['content'] for message in messages])

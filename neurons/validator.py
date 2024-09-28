@@ -234,16 +234,16 @@ class Validator(BaseValidatorNeuron):
             scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
         return sum(scores) / len(scores)
     
-    def generate_input_data(self, llm, topic, source_language):
+    def generate_input_data(self, llm, topic, source_language, device):
         messages = [{"role": "system", "content": f"""
                 You are an expert story teller.
                 You can write short stories that capture the imagination, 
                 end readers on an adventure and complete an alegorical thought all within 100~200 words. 
                 Please write a short story about {topic} in {source_language}. 
                 Keep the story short but be sure to use an alegory and complete the idea."""}]
-        return llm.process(messages)
+        return llm.process(messages, device)
 
-    def generate_output_data(self, llm, input_data, source_language, target_language):
+    def generate_output_data(self, llm, input_data, source_language, target_language, device):
         messages = [
             {"role": "system", "content": f"""
                 Provided text is written in {source_language}.
@@ -253,7 +253,7 @@ class Validator(BaseValidatorNeuron):
                 """},
             {"role": "user", "content": input_data}
         ]
-        return llm.process(messages)
+        return llm.process(messages, device)
     
     def select_random_module(self, modules):
         return import_module(random.choice(modules))
@@ -262,14 +262,14 @@ class Validator(BaseValidatorNeuron):
         llm = import_module(LLMS[0])
         tts = self.select_random_module(TTS)
 
-        input_data = self.generate_input_data(llm, topic, source_language)
+        input_data = self.generate_input_data(llm, topic, source_language, self.device)
 
         outputs = []
 
         for llm_module in LLMS:
             llm = import_module(llm_module)
             
-            output_data = self.generate_output_data(llm, input_data, source_language, target_language)
+            output_data = self.generate_output_data(llm, input_data, source_language, target_language, self.device)
 
             if task_string.endswith("speech"):
                 output_data = tts.process(output_data, target_language)

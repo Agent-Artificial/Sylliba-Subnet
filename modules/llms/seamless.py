@@ -3,7 +3,7 @@ import torch
 
 from modules.translation.data_models import TARGET_LANGUAGES
 
-def process(messages, source_language, target_language):
+def process(messages, source_language, target_language, device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     """
     Process messages for translation between languages.
 
@@ -17,8 +17,6 @@ def process(messages, source_language, target_language):
     """
     # Model ID for Seamless M4T V2 Large
     model_id = "facebook/seamless-M4T-V2-large"
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     processor = AutoProcessor.from_pretrained(model_id)
     model = SeamlessM4Tv2Model.from_pretrained(model_id).to(device)

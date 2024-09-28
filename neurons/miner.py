@@ -33,6 +33,8 @@ from sylliba.base.miner import BaseMinerNeuron
 import argparse
 import yaml
 
+from modules.translation.translation import Translation
+from modules.translation.data_models import TranslationRequest
 
 class Miner(BaseMinerNeuron):
     def get_config():
@@ -66,12 +68,13 @@ class Miner(BaseMinerNeuron):
         logger.info(self.axon.info())
         self.module = import_module('modules.translation.translation')
         self.axon.attach(forward_fn=self.healthcheck)
+        self.translation = Translation(self.config.neuron.device)
 
     async def forward(
         self, synapse: sylliba.protocol.TranslateRequest
     ) -> sylliba.protocol.TranslateRequest:
         bt.logging.info(f'synapse received')
-        response = await self.module.process(synapse.translation_request)
+        response = await self.translation.process(translation_request=synapse.translation_request)
         synapse.miner_response = response
         bt.logging.info(f"synapse.miner_response : {synapse.miner_response[:100]}")
         return synapse
