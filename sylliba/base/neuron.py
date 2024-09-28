@@ -73,6 +73,7 @@ class BaseNeuron(ABC):
         self.device = self.config.neuron.device
 
         # Log the configuration for reference.
+        bt.logging.info(type(self.config))
         bt.logging.info(self.config)
 
         # Build Bittensor objects

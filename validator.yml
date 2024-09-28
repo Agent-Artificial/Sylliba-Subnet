@@ -1,0 +1,31 @@
+alpha: 0.9
+netuid: 197
+axon:
+  __is_set: {}
+  port: 9198
+  ip: '[::]'
+  external_ip: null
+  external_port: null
+  max_workers: 10
+logging:
+  __is_set: {}
+  debug: false
+  logging_dir: ~/.bittensor/sylliba
+  record_log: false
+  trace: false
+wallet:
+  __is_set: {}
+  hotkey: validator1
+  name: sylliba
+  path: ~/.bittensor/wallets/
+subtensor:
+  __is_set: {}
+  _mock: false
+  chain_endpoint:
+  network: test
+api_port: 8080
+timeout: 120
+api_timeout: 120
+neuron:
+  __is_set: {}
+  device: 'cuda:1'

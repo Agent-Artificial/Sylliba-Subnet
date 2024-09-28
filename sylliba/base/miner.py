@@ -26,15 +26,11 @@ import bittensor as bt
 
 from sylliba.base.neuron import BaseNeuron
 from sylliba.utils.config import add_miner_args
-from neurons.config import miner_config
 
 from typing import Union
 from dotenv import load_dotenv
 
 load_dotenv()
-
-config = miner_config()
-
 
 class BaseMinerNeuron(BaseNeuron):
     """

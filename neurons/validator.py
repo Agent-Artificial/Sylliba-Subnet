@@ -34,13 +34,14 @@ from importlib import import_module
 from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from sylliba.validator import forward
-from neurons.config import validator_config
 from sylliba.protocol import TranslateRequest, HealthCheck
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 import json
+import argparse
+import yaml
 
 from neurons.utils.serialization import audio_encode, audio_decode
 
@@ -94,9 +95,33 @@ class Validator(BaseValidatorNeuron):
 
     This class provides reasonable default behavior for a validator such as keeping a moving average of the scores of the miners and using them to set weights at the end of each epoch. Additionally, the scores are reset for new hotkeys at the end of each epoch.
     """
+    def get_config():
+
+        parser = argparse.ArgumentParser()
+
+        parser.add_argument("--dev", action=argparse.BooleanOptionalAction)
+
+        bt.subtensor.add_args(parser)
+        bt.logging.add_args(parser)
+        bt.wallet.add_args(parser)
+
+        config = bt.config(parser)
+
+        dev = config.dev
+        if dev:
+            dev_config_path = "validator.yml"
+            if os.path.exists(dev_config_path):
+                with open(dev_config_path, 'r') as f:
+                    dev_config = yaml.safe_load(f.read())
+                config.update(dev_config)
+            else:
+                with open(dev_config_path, 'w') as f:
+                    yaml.safe_dump(config, f)
+        bt.logging.info(config)
+        return config
 
     def __init__(self, config=None):
-        super(Validator, self).__init__(config=validator_config())
+        super(Validator, self).__init__(config=Validator.get_config())
         self.total_miners = len(self.metagraph.uids)
         self.validated = set()
         self.batch_size = 3

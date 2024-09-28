@@ -1,0 +1,30 @@
+netuid: 197
+axon:
+  __is_set: {}
+  port: 9199
+  ip: '[::]'
+  external_ip: null
+  external_port: null
+  max_workers: 10
+logging:
+  __is_set: {}
+  debug: false
+  logging_dir: ~/.bittensor/sylliba
+  record_log: false
+  trace: false
+wallet:
+  __is_set: {}
+  hotkey: miner1
+  name: sylliba
+  path: ~/.bittensor/wallets/
+subtensor:
+  __is_set: {}
+  _mock: false
+  chain_endpoint:
+  network: test
+blacklist:
+  allow_non_registered: false
+  force_validator_permit: true
+neuron:
+  __is_set: {}
+  device: 'cuda:2'
