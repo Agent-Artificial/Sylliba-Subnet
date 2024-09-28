@@ -25,6 +25,3 @@ subtensor:
 blacklist:
   allow_non_registered: false
   force_validator_permit: true
-neuron:
-  __is_set: {}
-  device: 'cuda:2'

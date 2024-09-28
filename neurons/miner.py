@@ -68,7 +68,7 @@ class Miner(BaseMinerNeuron):
         logger.info(self.axon.info())
         self.module = import_module('modules.translation.translation')
         self.axon.attach(forward_fn=self.healthcheck)
-        self.translation = Translation(self.config.neuron.device)
+        self.translation = Translation(self.device)
 
     async def forward(
         self, synapse: sylliba.protocol.TranslateRequest
