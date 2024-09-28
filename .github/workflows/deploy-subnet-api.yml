@@ -3,6 +3,14 @@ name: Deploy Subnet API
 on: 
   workflow_call:
     inputs:
+      gpu_index_vali:
+        required: false
+        type: string
+        default: "all"
+      gpu_index_miner:
+        required: false
+        type: string
+        default: "all"      
       image_tag:
         required: false
         type: string

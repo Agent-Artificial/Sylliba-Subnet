@@ -23,7 +23,7 @@ jobs:
             # Leave as 0.0.0.0 unless you know what you're doing
             BT_AXON_MINER_IP: "0.0.0.0"
             BT_AXON_MINER_PORT: 30003
-            BT_AXON_MINER_EXTERNAL_IP: "72.220.238.73"
+            BT_AXON_MINER_EXTERNAL_IP: "204.12.218.18"
             BT_AXON_MINER_EXTERNAL_PORT: 30003
             BT_MINER_COLDKEY: "sylliba-cold"
             BT_MINER_HOTKEY: "sylliba-miner"
@@ -32,7 +32,7 @@ jobs:
             # Leave as 0.0.0.0 unless you know what you're doing
             BT_AXON_VALIDATOR_IP: "0.0.0.0"
             BT_AXON_VALIDATOR_PORT: 30001
-            BT_AXON_VALIDATOR_EXTERNAL_IP: "72.220.238.73"
+            BT_AXON_VALIDATOR_EXTERNAL_IP: "204.12.218.18"
             BT_AXON_VALIDATOR_EXTERNAL_PORT: 30001
             BT_VALIDATOR_COLDKEY: "sylliba-cold"
             BT_VALIDATOR_HOTKEY: "sylliba-vali"
@@ -41,11 +41,13 @@ jobs:
             PYTHONPATH: "."
 
             # Pipeline Specific Variables
+            gpu_index_vali: "0"
+            gpu_index_miner: "1"            
             image_tag: ${{steps.vars.outputs.image_tag}}
             microservice: sylliba
             context_dir: "."
             microservice_path: "."
-            deployment_servers: '["sylliba-mainnet"]'
+            deployment_servers: '["sylliba"]'
             microservice_env: prod
             branch: 'main'
             image_registry: ghcr.io/${{ github.repository_owner }}
@@ -64,6 +66,8 @@ jobs:
           - name: Debug information
             run: |
                 echo "=== Variables ==="
+                echo "gpu_index_vali: ${{ needs.variables.outputs.gpu_index_vali }}"
+                echo "gpu_index_miner: ${{ needs.variables.outputs.gpu_index_miner }}"                
                 echo "image_tag: ${{ needs.variables.outputs.image_tag }}"
                 echo "microservice: ${{ needs.variables.outputs.microservice }}"
                 echo "microservice_path: ${{ needs.variables.outputs.microservice_path }}"
@@ -114,6 +118,8 @@ jobs:
         needs: [Variables, Create-Local-Docker-Image]
         uses: ./.github/workflows/deploy-validator.yml
         with:
+            gpu_index_vali: ${{ needs.variables.outputs.gpu_index_vali }}
+            gpu_index_miner: ${{ needs.variables.outputs.gpu_index_miner }}                 
             image_tag: ${{ needs.variables.outputs.image_tag }}
             microservice: ${{ needs.variables.outputs.microservice }}
             microservice_path: ${{ needs.variables.outputs.microservice_path }}
@@ -146,6 +152,8 @@ jobs:
         needs: [Variables, Create-Local-Docker-Image]
         uses: ./.github/workflows/deploy-miner.yml
         with:
+            gpu_index_vali: ${{ needs.variables.outputs.gpu_index_vali }}
+            gpu_index_miner: ${{ needs.variables.outputs.gpu_index_miner }}                 
             image_tag: ${{ needs.variables.outputs.image_tag }}
             microservice: ${{ needs.variables.outputs.microservice }}
             microservice_path: ${{ needs.variables.outputs.microservice_path }}
@@ -178,6 +186,8 @@ jobs:
         needs: [Variables, Create-Local-Docker-Image]
         uses: ./.github/workflows/deploy-subnet-api.yml
         with:
+            gpu_index_vali: ${{ needs.variables.outputs.gpu_index_vali }}
+            gpu_index_miner: ${{ needs.variables.outputs.gpu_index_miner }}                 
             image_tag: ${{ needs.variables.outputs.image_tag }}
             microservice: ${{ needs.variables.outputs.microservice }}
             microservice_path: ${{ needs.variables.outputs.microservice_path }}
