@@ -163,6 +163,6 @@ jobs:
           -e BT_VALIDATOR_COLDKEY=${{inputs.BT_VALIDATOR_COLDKEY}}
           -e BT_VALIDATOR_HOTKEY=${{inputs.BT_VALIDATOR_HOTKEY}}          
           -e PYTHONPATH=${{inputs.PYTHONPATH}}
-          --gpus ${{inputs.gpu_index_miner}}
+          --gpus "device=${{inputs.gpu_index_vali}}"
           --add-host host.docker.internal:host-gateway
           -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/miner.py --logging.debug
