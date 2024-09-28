@@ -217,6 +217,7 @@ class Validator(BaseValidatorNeuron):
                 end readers on an adventure and complete an alegorical thought all within 100~200 words. 
                 Please write a short story about {topic} in {source_language}. 
                 Keep the story short but be sure to use an alegory and complete the idea."""}]
+        bt.logging.debug(f"generate_input_data:prompt:{messages}")
         return llm.process(messages)
 
     def generate_output_data(self, llm, input_data, source_language, target_language):
@@ -238,7 +239,10 @@ class Validator(BaseValidatorNeuron):
         llm = self.select_random_module(LLMS)
         tts = self.select_random_module(TTS)
 
+        bt.logging.debug(f"generate_query:llm:{llm}")
+        bt.logging.debug(f"generate_query:tts:{tts}")
         input_data = self.generate_input_data(llm, topic, source_language)
+        bt.logging.debug(f"generate_query:input_data:{input_data}")
 
         outputs = []
 
@@ -250,6 +254,8 @@ class Validator(BaseValidatorNeuron):
             if task_string.endswith("speech"):
                 output_data = tts.process(output_data, target_language)
             outputs.append(output_data)
+
+        bt.logging.debug(f"generate_query:outputs:{outputs}")
 
         if task_string.startswith("speech"):
             input_data = tts.process(input_data, source_language)
