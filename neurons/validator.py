@@ -17,17 +17,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import asyncio
 import time
-import os
-import requests
 import random
 # Bittensor
 import bittensor as bt
+import numpy as np
 
-import base64
-import io
-import torch
 from importlib import import_module
 
 # import base validator class which takes care of most of the boilerplate
@@ -135,7 +130,6 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info('Start forward on Validator')
 
         # Generating the query
-        successful = []
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
         bt.logging.debug(f"sample_request: {str(sample_request)}")
 
@@ -165,6 +159,7 @@ class Validator(BaseValidatorNeuron):
         healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
         
         bt.logging.info(f'Health Axons are {healthy_axons}')
+        results = []
 
         synapse = TranslateRequest(
             translation_request=translation_request,
@@ -176,39 +171,38 @@ class Validator(BaseValidatorNeuron):
                 deserialize=False,
                 timeout=300
             )
-            bt.logging.debug(f"Received responses: {responses}")
-            # Getting the responses
+            # Processing miner output into rewards
             for j in range(0, len(responses)):
                 if responses[j].miner_response is not None:
                     if task_string.endswith('speech'):
                         miner_output_data = audio_decode(responses[j].miner_response)
                     else:
                         miner_output_data = responses[j].miner_response
-                        
-                    bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
                     
-                    successful.append([miner_output_data, j])
+                    results.append(
+                        self.process_validator_output(
+                            miner_output_data,
+                            sample_request['output'],
+                            task_string
+                        )
+                    )
                 else:
-                    bt.logging.warning(f"Miner {j} failed to respond.")
+                    results.append(
+                        0
+                    )
         except Exception as e:
             bt.logging.error(f"Failed to query miners with exception: {e}")
-        # Rewarding the miners
-        bt.logging.info(f"successful:{successful}")
-        results = []
         
-        
-        for i in range(len(successful)):
-            # Appends the results in the form of [index in range of responses, processed validator output score]
-            results.append([successful[i][1], self.process_validator_output(successful[i][0], sample_request['output'], task_string)])
-        
-            # Updating the scores
-            self.update_scores(results[i][1], results[i][0])    
+        # Updating the scores
+        self.update_scores(np.ndarray(results), healthy_axons)    
             
         # Set weights
         self.now = time.time()
         if self.now % 10 == 0:
             self.set_weights()
         
+    # ? Regardless of the type, this is the "sum" of one and divided by 1?
+    # ? Is this so we can come up with more reward functions and add them?
     def process_validator_output(self, miner_response, sample_outputs, task_string):
         if task_string.endswith('text'):
             scores = [reward_text(miner_response, sample_output) for sample_output in sample_outputs]
