@@ -176,6 +176,7 @@ class Validator(BaseValidatorNeuron):
                 deserialize=False,
                 timeout=300
             )
+            bt.logging.debug(f"Received responses: {responses}")
             # Getting the responses
             for j in range(0, len(responses)):
                 if responses[j].miner_response is not None:
@@ -194,10 +195,15 @@ class Validator(BaseValidatorNeuron):
         # Rewarding the miners
         bt.logging.info(f"successful:{successful}")
         results = []
+        
+        
         for i in range(len(successful)):
+            # Appends the results in the form of [index in range of responses, processed validator output score]
             results.append([successful[i][1], self.process_validator_output(successful[i][0], sample_request['output'], task_string)])
+        
             # Updating the scores
-            self.update_scores(results[i][1], results[i][0])
+            self.update_scores(results[i][1], results[i][0])    
+            
         # Set weights
         self.now = time.time()
         if self.now % 10 == 0:
