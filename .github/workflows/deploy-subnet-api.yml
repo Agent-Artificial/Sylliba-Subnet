@@ -3,6 +3,14 @@ name: Deploy Subnet API
 on: 
   workflow_call:
     inputs:
+      gpu_index_vali:
+        required: false
+        type: string
+        default: "all"
+      gpu_index_miner:
+        required: false
+        type: string
+        default: "all"      
       image_tag:
         required: false
         type: string
@@ -122,6 +130,7 @@ jobs:
           docker run
           --name ${{inputs.microservice}}-subnet-api-${{inputs.microservice_env}}
           --restart always
+          --network web
           -p ${{inputs.SUBNET_API_PORT}}:${{inputs.SUBNET_API_PORT}}
           -v /home/ubuntu/.bittensor/wallets:/root/.bittensor/wallets
           -e APP_VERSION=$GITHUB_REF_NAME
@@ -146,4 +155,8 @@ jobs:
           -e PYTHONPATH=${{inputs.PYTHONPATH}}
           --gpus all
           --add-host host.docker.internal:host-gateway
+          --label "traefik.enable=true"
+          --label 'traefik.http.routers.sylliba-api-${{ inputs.microservice_env }}.rule=Host(`sylliba-api-${{ inputs.microservice_env }}.agentartificial.com`)'
+          --label "traefik.http.routers.sylliba-api-${{ inputs.microservice_env }}.entrypoints=websecure"
+          --label "traefik.http.routers.sylliba-api-${{ inputs.microservice_env }}.tls.certresolver=le"          
           -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} api/run_subnet_api.py

@@ -1,13 +1,15 @@
 
-# Use the official image as a parent image
-FROM ubuntu:22.04
+FROM python:3.10-bookworm
 
 # Update the image and install basics
 RUN apt-get update && \
-    apt-get install -y sudo git git-lfs nano python3.11 python3-pip software-properties-common build-essential wget curl build-essential gcc make
+    apt-get install -y sudo git git-lfs nano python3-pip software-properties-common build-essential wget curl build-essential gcc make
 
 # Required by subnet:
 RUN apt-get install -y ffmpeg
+
+# Added to speed up docker build using cache.  Makes our pipelines MUCH faster
+RUN pip3 install torch torchaudio
 
 # Copy repo into /app folder
 COPY . /app
