@@ -157,6 +157,7 @@ class Validator(BaseValidatorNeuron):
                 timeout=5
             )
         healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
+        healthy_axon_uids = [i for i, check in enumerate(healthcheck) if check.response is True]
         
         bt.logging.info(f'Health Axons are {healthy_axons}')
         results = []
@@ -194,7 +195,8 @@ class Validator(BaseValidatorNeuron):
             bt.logging.error(f"Failed to query miners with exception: {e}")
         
         # Updating the scores
-        self.update_scores(np.ndarray(results), healthy_axons)    
+        bt.logging.debug(f"Results: {results}")
+        self.update_scores(np.array(results), healthy_axon_uids)    
             
         # Set weights
         self.now = time.time()
