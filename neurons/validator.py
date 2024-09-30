@@ -168,7 +168,7 @@ class Validator(BaseValidatorNeuron):
         )
         try:
             responses = await self.dendrite(
-                axons=healthy_axons,
+                axons=axons, # Try all axons instead of just healthy ones
                 synapse=synapse,
                 deserialize=False,
                 timeout=300
@@ -189,6 +189,7 @@ class Validator(BaseValidatorNeuron):
                         ) * 1000) # 'numpy.float64' object cannot be interpreted as integer
                     )
                 else:
+                    bt.logging.info(f'This axon did not respond to translation request: {responses[j]}')
                     results.append(
                         0
                     )
@@ -196,9 +197,11 @@ class Validator(BaseValidatorNeuron):
             bt.logging.error(f"Failed to query miners with exception: {e}")
         
         # Updating the scores
-        bt.logging.debug(f"Results: {results}")
-        self.update_scores(np.array(results), healthy_axon_uids)    
-            
+
+        axons_uids = [i for i in axons]
+        bt.logging.debug(f"Sent to update_scores function: \n {results} \n Axon UIDs: {axons_uids}")
+        self.update_scores(np.array(results), axons_uids)    
+
         # Set weights
         self.now = time.time()
         if self.now % 10 == 0:
