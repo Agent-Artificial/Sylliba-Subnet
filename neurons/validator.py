@@ -180,11 +180,11 @@ class Validator(BaseValidatorNeuron):
                         miner_output_data = responses[j].miner_response
                     
                     results.append(
-                        self.process_validator_output(
+                        int(self.process_validator_output(
                             miner_output_data,
                             sample_request['output'],
                             task_string
-                        )
+                        ) * 1000) # 'numpy.float64' object cannot be interpreted as integer
                     )
                 else:
                     results.append(
