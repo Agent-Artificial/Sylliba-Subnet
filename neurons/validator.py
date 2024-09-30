@@ -106,6 +106,7 @@ class Validator(BaseValidatorNeuron):
         bt.wallet.add_args(parser)
 
         config = bt.config(parser)
+        bt.logging.info(config)
 
         dev = config.dev
         if dev:
@@ -187,6 +188,7 @@ class Validator(BaseValidatorNeuron):
                 timeout=5
             )
         healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
+        healthy_uids = [i for i, check in enumerate(healthcheck) if check.response is True]
         
         bt.logging.info(f'Health Axons are {healthy_axons}')
 
@@ -210,7 +212,7 @@ class Validator(BaseValidatorNeuron):
                         
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
                     
-                    successful.append([miner_output_data, j])
+                    successful.append([miner_output_data, healthy_uids[j]])
                 else:
                     bt.logging.warning(f"Miner {j} failed to respond.")
         except Exception as e:
