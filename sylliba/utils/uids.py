@@ -26,6 +26,32 @@ def check_uid_availability(
     return True
 
 
+def get_miner_uids(
+    self, exclude: List[int] = None
+) -> np.ndarray:
+    """Returns available miner uids from the metagraph.
+
+    Args:
+        exclude (List[int], optional): List of uids to exclude. Defaults to None.
+
+    Returns:
+        np.ndarray: All miner uids
+    """
+    candidate_uids = []
+    
+    for uid in range(self.metagraph.n.item()):
+        uid_is_available = check_uid_availability(
+            self.metagraph, uid, self.config.neuron.vpermit_tao_limit
+        )
+        uid_is_not_excluded = exclude is None or uid not in exclude
+        
+        if uid_is_available:
+            if uid_is_not_excluded:
+                candidate_uids.append(uid)
+                
+        uids = np.array(candidate_uids)
+        return uids
+
 def get_random_uids(
     self, k: int, exclude: List[int] = None
 ) -> np.ndarray:
