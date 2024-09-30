@@ -14,7 +14,6 @@ import torch
 import time
 from sylliba.api.subnet_api import SubnetAPI
 import copy
-from neurons.config import validator_config
 from sylliba.utils.config import check_config, add_args, config
 from sylliba.protocol import TranslateRequest, HealthCheck
 
@@ -24,6 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from neurons.utils.serialization import audio_decode, audio_encode
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
+from neurons.validator import Validator
 
 
 class TranslationInput(BaseModel):
@@ -53,7 +53,7 @@ class APIServer:
 
     def __init__(self, config = None):
         self.config = self.config()
-        self.config.merge(validator_config())
+        self.config.merge(Validator.get_config())
         
         self.wallet = bt.wallet(config=self.config)
         self.subtensor = bt.subtensor(config=self.config)
@@ -132,4 +132,4 @@ class APIServer:
         # Set the default event loop policy to avoid conflicts with uvloop
         asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
         # Start the Uvicorn server with your app
-        uvicorn.run(self.app, host="0.0.0.0", port=self.config.api_port, loop="asyncio", workers=int(os.getenv('WORKER_COUNT', 1)))
+        uvicorn.run(self.app, host="0.0.0.0", port=self.config.api_port, loop="asyncio", workers=self.config.axon.max_workers)
