@@ -200,7 +200,7 @@ class Validator(BaseValidatorNeuron):
         
         # Updating the scores
         bt.logging.debug(f"Results: {results}")
-        self.update_scores(np.array(results), miner_axons)    
+        self.update_scores(np.array(results), miner_uids)    
             
         # Set weights
         self.now = time.time()
