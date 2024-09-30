@@ -149,7 +149,7 @@ class Validator(BaseValidatorNeuron):
                     "target_language": target_language
                 })
     
-        miner_uids = get_miner_uids()
+        miner_uids = get_miner_uids(self)
         miner_axons = [self.metagraph.axons[uid] for uid in miner_uids]
         bt.logging.debug(f"Miner axons are {miner_axons}")
         # healthcheck = await self.dendrite(
