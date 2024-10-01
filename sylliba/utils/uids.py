@@ -55,9 +55,9 @@ def get_miner_uids(
             if uid_is_not_excluded:
                 candidate_uids.append(uid)
                 
-        uids = np.array(candidate_uids)
-        bt.logging.debug(f"get_miner_uids:candidate_uids:{uids}")
-        return uids
+    uids = np.array(candidate_uids)
+    bt.logging.debug(f"get_miner_uids:candidate_uids:{uids}")
+    return uids
 
 def get_random_uids(
     self, k: int, exclude: List[int] = None
