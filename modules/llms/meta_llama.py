@@ -1,8 +1,9 @@
-from llama_cpp import Llama
-from neurons.validator import MODELS
-from typing import List, Dict, Any
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import torch
-from neurons.utils.model_load import load_llama
+from typing import List, Dict, Any
+
+from neurons.validator import MODELS
+from neurons.utils.model_load import load_meta_llama
 
 def process(messages: List[Dict[str, Any]], device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     """
@@ -14,12 +15,18 @@ def process(messages: List[Dict[str, Any]], device = torch.device("cuda" if torc
     Returns:
         The processed result.
     """
-    if 'llama' not in MODELS:
-        MODELS['llama'] = load_llama(device)
-    llm = MODELS['llama']
-    
-    result = llm.create_chat_completion(messages = messages)
-    return result['choices'][0]['message']['content']
+    if 'meta-llama' not in MODELS:
+        MODELS['meta-llama'] = load_meta_llama(device)
+    model, tokenizer = MODELS['meta-llama']
+
+    get_pipeline = pipeline(
+        "text-generation",
+        model=model,
+        tokenizer=tokenizer,
+    )
+
+    response = get_pipeline(messages, max_length = 1000)
+    return response[0]['generated_text'][-1]['content']
 
 if __name__ == '__main__':
     text = """Sylliba is a revolutionary translation module designed to bridge the gap in communication across diverse languages. With the capability to translate many languages, Sylliba supports both audio and text for inputs and outputs, making it a versatile tool for global interactions.

@@ -1,4 +1,5 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline, T5Tokenizer, T5ForConditionalGeneration, AutoProcessor, SeamlessM4Tv2Model
+from llama_cpp import Llama
 import torch
 
 def load_flan_t5_large(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
@@ -10,7 +11,7 @@ def load_flan_t5_large(device = torch.device("cuda" if torch.cuda.is_available()
 
     return model, tokenizer
 
-def load_llama(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+def load_meta_llama(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     model_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
     
     quant_config = BitsAndBytesConfig(
@@ -39,3 +40,11 @@ def load_seamless(device = torch.device("cuda" if torch.cuda.is_available() else
     model = SeamlessM4Tv2Model.from_pretrained(model_id).to(device)
 
     return model, processor
+
+def load_llama(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+    llm = Llama.from_pretrained(
+        repo_id="bartowski/Meta-Llama-3.1-8B-Instruct-GGUF",
+        filename="Meta-Llama-3.1-8B-Instruct-IQ2_M.gguf",
+    )
+
+    return llm
