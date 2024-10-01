@@ -172,7 +172,7 @@ class Validator(BaseValidatorNeuron):
                 axons=miner_axons,
                 synapse=synapse,
                 deserialize=False,
-                timeout=300
+                timeout=30
             )
             bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
             # Processing miner output into rewards
