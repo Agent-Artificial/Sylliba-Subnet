@@ -43,6 +43,8 @@ def get_miner_uids(
     """
     candidate_uids = []
     
+    bt.logging.debug(f"get_miner_uids:to_map:{self.metagraph.n.item()}")
+    
     for uid in range(self.metagraph.n.item()):
         uid_is_available = check_uid_availability(
             self.metagraph, uid, self.config.neuron.vpermit_tao_limit
