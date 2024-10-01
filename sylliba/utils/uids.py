@@ -15,14 +15,18 @@ def check_uid_availability(
     Returns:
         bool: True if uid is available, False otherwise
     """
+    bt.logging.debug(f"check_uid_availability:{uid}")
     # Filter non serving axons.
     if not metagraph.axons[uid].is_serving:
+        bt.logging.debug(f"\tunavailable:is not serving")
         return False
     # Filter validator permit > 1024 stake.
     if metagraph.validator_permit[uid]:
         if metagraph.S[uid] > vpermit_tao_limit:
+            bt.logging.debug(f"\tunavailable:is validator or has vpermit and higher than {vpermit_tao_limit} stake")
             return False
     # Available otherwise.
+    bt.logging.debug(f"\tavailable:succeeded availability check")
     return True
 
 
@@ -50,6 +54,7 @@ def get_miner_uids(
                 candidate_uids.append(uid)
                 
         uids = np.array(candidate_uids)
+        bt.logging.debug(f"get_miner_uids:candidate_uids:{uids}")
         return uids
 
 def get_random_uids(
