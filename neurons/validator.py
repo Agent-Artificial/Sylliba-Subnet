@@ -37,6 +37,7 @@ from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 import json
 import argparse
 import yaml
+import os
 
 from neurons.utils.serialization import audio_encode, audio_decode
 
@@ -186,6 +187,7 @@ class Validator(BaseValidatorNeuron):
         healthy_axon_uids = [i for i, check in enumerate(healthcheck) if check.response is True]
         
         bt.logging.info(f'Health Axons are {healthy_axons}')
+        bt.logging.info(f'Health Axon UIDs are {healthy_axon_uids}')
         results = []
 
         synapse = TranslateRequest(
@@ -207,11 +209,11 @@ class Validator(BaseValidatorNeuron):
                         miner_output_data = responses[j].miner_response
                     
                     results.append(
-                        int(self.process_validator_output(
+                        float(self.process_validator_output(
                             miner_output_data,
                             sample_request['output'],
                             task_string
-                        ) * 1000) # 'numpy.float64' object cannot be interpreted as integer
+                        )) # 'numpy.float64' object cannot be interpreted as integer
                     )
                 else:
                     results.append(
