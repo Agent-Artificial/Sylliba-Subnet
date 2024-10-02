@@ -177,11 +177,12 @@ class Validator(BaseValidatorNeuron):
                 })
     
         axons = self.metagraph.axons
+        bt.logging.debug(f"All Axons are {axons}")
         healthcheck = await self.dendrite(
                 axons=axons,
                 synapse=HealthCheck(),
                 deserialize=False,
-                timeout=5
+                timeout=30
             )
         healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
         healthy_axon_uids = [i for i, check in enumerate(healthcheck) if check.response is True]
