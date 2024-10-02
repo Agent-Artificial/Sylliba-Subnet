@@ -21,7 +21,7 @@ def process(messages: List[Dict[str, Any]], device = torch.device("cuda" if torc
     def preprocess(messages):
         text = [f"<|im_start|>{message['role']}\n{message['content']}<|im_end|>" for message in messages]
         text = "\n".join(text)
-        return text.strip() + '<|im_start|>assistant'
+        return f'{text.strip()}<|im_start|>assistant'
 
     messages = preprocess(messages)
 
