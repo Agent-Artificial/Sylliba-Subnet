@@ -1,5 +1,4 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline, T5Tokenizer, T5ForConditionalGeneration, AutoProcessor, SeamlessM4Tv2Model
-from unsloth import FastLanguageModel
 import torch
 
 def load_flan_t5_large(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
