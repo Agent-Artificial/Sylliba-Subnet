@@ -121,6 +121,7 @@ class BaseMinerNeuron(BaseNeuron):
                     self.block - self.metagraph.last_update[self.uid]
                     < self.config.neuron.epoch_length
                 ):
+                    bt.logging.debug(f"spam:\n\tblock:{self.block}\n\tlast_update:{self.metagraph.last_update[self.uid]}\n\tepoch_length:{self.config.epoch_length}")
                     # Wait before checking again.
                     time.sleep(1)
 
