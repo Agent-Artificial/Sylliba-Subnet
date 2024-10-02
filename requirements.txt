@@ -20,3 +20,5 @@ bitsandbytes
 pydub
 sentencepiece
 python-multipart
+llama-cpp-python
+unsloth

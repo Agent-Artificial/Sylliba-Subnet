@@ -30,29 +30,58 @@ import bittensor as bt
 import sylliba
 # import base miner class which takes care of most of the boilerplate
 from sylliba.base.miner import BaseMinerNeuron
-from neurons.config import miner_config
+import argparse
+import yaml
 
+from modules.translation.translation import Translation
+from modules.translation.data_models import TranslationRequest
 
 class Miner(BaseMinerNeuron):
+    def get_config():
+
+        parser = argparse.ArgumentParser()
+
+        parser.add_argument("--dev", action=argparse.BooleanOptionalAction)
+
+        bt.subtensor.add_args(parser)
+        bt.logging.add_args(parser)
+        bt.wallet.add_args(parser)
+
+        config = bt.config(parser)
+
+        dev = config.dev
+        if dev:
+            dev_config_path = "miner.yml"
+            if os.path.exists(dev_config_path):
+                with open(dev_config_path, 'r') as f:
+                    dev_config = yaml.safe_load(f.read())
+                config.update(dev_config)
+            else:
+                with open(dev_config_path, 'w') as f:
+                    yaml.safe_dump(config, f)
+        bt.logging.info(config)
+        return config
     
-    def __init__(self, config=miner_config(), module_name="translation"):
-        super(Miner, self).__init__(config=config)
+    def __init__(self, config=None, module_name="translation"):
+        super(Miner, self).__init__(config=Miner.get_config())
         logger.info(config)
         logger.info(self.axon.info())
         self.module = import_module('modules.translation.translation')
         self.axon.attach(forward_fn=self.healthcheck)
+        self.translation = Translation(self.device)
 
     async def forward(
         self, synapse: sylliba.protocol.TranslateRequest
     ) -> sylliba.protocol.TranslateRequest:
-        bt.logging.info(f'synapse received: {synapse}')
-        response = await self.module.process(synapse.translation_request)
+        bt.logging.info(f'translation synapse received')
+        response = await self.translation.process(translation_request=synapse.translation_request)
         synapse.miner_response = response
         bt.logging.info(f"synapse.miner_response : {synapse.miner_response[:100]}")
         return synapse
 
     async def healthcheck(self, synapse: sylliba.protocol.HealthCheck):
         synapse.response = True
+        bt.logging.info('Health check received')
         return synapse
 
     async def blacklist(

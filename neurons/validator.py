@@ -29,13 +29,15 @@ from importlib import import_module
 from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from sylliba.validator import forward
-from neurons.config import validator_config
 from sylliba.protocol import TranslateRequest, HealthCheck
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 import json
+import argparse
+import yaml
+import os
 
 from neurons.utils.serialization import audio_encode, audio_decode
 
@@ -70,8 +72,8 @@ TOPICS = [
 ]
 
 LLMS : list[str] = [
-    # "modules.llms.llama",
-    "modules.llms.flan_t5_large"
+    "modules.llms.llama",
+    # "modules.llms.flan_t5_large"
 ]
 
 TTS : list[str] = [
@@ -89,9 +91,34 @@ class Validator(BaseValidatorNeuron):
 
     This class provides reasonable default behavior for a validator such as keeping a moving average of the scores of the miners and using them to set weights at the end of each epoch. Additionally, the scores are reset for new hotkeys at the end of each epoch.
     """
+    def get_config():
+
+        parser = argparse.ArgumentParser()
+
+        parser.add_argument("--dev", action=argparse.BooleanOptionalAction)
+
+        bt.subtensor.add_args(parser)
+        bt.logging.add_args(parser)
+        bt.wallet.add_args(parser)
+
+        config = bt.config(parser)
+        bt.logging.info(config)
+
+        dev = config.dev
+        if dev:
+            dev_config_path = "validator.yml"
+            if os.path.exists(dev_config_path):
+                with open(dev_config_path, 'r') as f:
+                    dev_config = yaml.safe_load(f.read())
+                config.update(dev_config)
+            else:
+                with open(dev_config_path, 'w') as f:
+                    yaml.safe_dump(config, f)
+        bt.logging.info(config)
+        return config
 
     def __init__(self, config=None):
-        super(Validator, self).__init__(config=validator_config())
+        super(Validator, self).__init__(config=Validator.get_config())
         self.total_miners = len(self.metagraph.uids)
         self.validated = set()
         self.batch_size = 3
@@ -161,6 +188,7 @@ class Validator(BaseValidatorNeuron):
         healthy_axon_uids = [i for i, check in enumerate(healthcheck) if check.response is True]
         
         bt.logging.info(f'Health Axons are {healthy_axons}')
+        bt.logging.info(f'Health Axon UIDs are {healthy_axon_uids}')
         results = []
 
         synapse = TranslateRequest(
@@ -182,11 +210,11 @@ class Validator(BaseValidatorNeuron):
                         miner_output_data = responses[j].miner_response
                     
                     results.append(
-                        int(self.process_validator_output(
+                        float(self.process_validator_output(
                             miner_output_data,
                             sample_request['output'],
                             task_string
-                        ) * 1000) # 'numpy.float64' object cannot be interpreted as integer
+                        )) # 'numpy.float64' object cannot be interpreted as integer
                     )
                 else:
                     results.append(
@@ -213,7 +241,7 @@ class Validator(BaseValidatorNeuron):
             scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
         return sum(scores) / len(scores)
     
-    def generate_input_data(self, llm, topic, source_language):
+    def generate_input_data(self, llm, topic, source_language, device):
         messages = [{"role": "system", "content": f"""
                 You are an expert story teller.
                 You can write short stories that capture the imagination, 
@@ -221,9 +249,9 @@ class Validator(BaseValidatorNeuron):
                 Please write a short story about {topic} in {source_language}. 
                 Keep the story short but be sure to use an alegory and complete the idea."""}]
         bt.logging.debug(f"generate_input_data:prompt:{messages}")
-        return llm.process(messages)
+        return llm.process(messages, device)
 
-    def generate_output_data(self, llm, input_data, source_language, target_language):
+    def generate_output_data(self, llm, input_data, source_language, target_language, device):
         messages = [
             {"role": "system", "content": f"""
                 Provided text is written in {source_language}.
@@ -233,18 +261,18 @@ class Validator(BaseValidatorNeuron):
                 """},
             {"role": "user", "content": input_data}
         ]
-        return llm.process(messages)
+        return llm.process(messages, device)
     
     def select_random_module(self, modules):
         return import_module(random.choice(modules))
     
     async def generate_query(self, target_language: str, source_language: str, task_string: str, topic: str):
-        llm = self.select_random_module(LLMS)
+        llm = import_module(LLMS[0])
         tts = self.select_random_module(TTS)
 
         bt.logging.debug(f"generate_query:llm:{llm}")
         bt.logging.debug(f"generate_query:tts:{tts}")
-        input_data = self.generate_input_data(llm, topic, source_language)
+        input_data = self.generate_input_data(llm, topic, source_language, self.device)
         bt.logging.debug(f"generate_query:input_data:{input_data}")
 
         outputs = []
@@ -252,11 +280,16 @@ class Validator(BaseValidatorNeuron):
         for llm_module in LLMS:
             llm = import_module(llm_module)
             
-            output_data = self.generate_output_data(llm, input_data, source_language, target_language)
+            output_data = self.generate_output_data(llm, input_data, source_language, target_language, self.device)
 
             if task_string.endswith("speech"):
                 output_data = tts.process(output_data, target_language)
             outputs.append(output_data)
+        
+        bt.logging.info(f'Generated Query Input Text: {input_data}')
+        bt.logging.info(f'Generated Query Sample Output Text: {outputs}')
+
+        bt.logging.debug(f"generate_query:outputs:{outputs}")
 
         bt.logging.debug(f"generate_query:outputs:{outputs}")
 
