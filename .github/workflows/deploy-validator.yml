@@ -141,6 +141,7 @@ jobs:
           -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/validator.py
           --logging.debug
           --netuid ${{inputs.BT_NETUID}}
+          --subtensor.network ${{inputs.BT_NETWORK}}
           --wallet.path ${{inputs.BT_WALLET_PATH}}
           --wallet.name ${{inputs.BT_VALIDATOR_COLDKEY}}
           --wallet.hotkey ${{inputs.BT_VALIDATOR_HOTKEY}}
@@ -149,4 +150,4 @@ jobs:
           --axon.external_ip ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_IP}}
           --axon.external_port ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_PORT}}
           --axon.max_workers ${{inputs.BT_AXON_MAX_WORKERS}}
-          --subtensor.chain_endpoint ws://204.12.218.18:30333
+          --subtensor.chain_endpoint ws://204.12.218.18:9944
