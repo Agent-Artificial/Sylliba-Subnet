@@ -29,7 +29,6 @@ from importlib import import_module
 from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from sylliba.utils.uids import get_miner_uids
-from neurons.config import validator_config
 from sylliba.protocol import TranslateRequest, HealthCheck
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
