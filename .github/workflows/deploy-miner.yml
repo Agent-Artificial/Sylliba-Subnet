@@ -159,6 +159,6 @@ jobs:
           --axon.external_ip ${{inputs.BT_AXON_MINER_EXTERNAL_IP}}
           --axon.external_port ${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}
           --axon.max_workers ${{inputs.BT_AXON_MAX_WORKERS}}
-          --subtensor.chain_endpoint wss://204.12.218.18:30333
+          --subtensor.chain_endpoint ws://204.12.218.18:30333
 
 
