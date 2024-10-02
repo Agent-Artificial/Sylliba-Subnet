@@ -83,6 +83,19 @@ TTS : list[str] = [
 MODELS: dict = {
 }
 
+PROMPTS: dict = {
+    "GENERATE_INPUT_DATA": """You are an expert story teller.
+You can write short stories that capture the imagination, 
+end readers on an adventure and complete an alegorical thought all within 100~200 words. 
+Please write a short story about {topic} in {source_language}. 
+Keep the story short but be sure to use an alegory and complete the idea.""",
+    "GENERATE_OUTPUT_DATA": """
+Provided text is written in {source_language}.
+Please translate into {target_language}
+Don't put any tags, description or decorators.
+Write only translated text in raw text format.
+"""}
+
 class Validator(BaseValidatorNeuron):
     """
     Your validator neuron class. You should use this class to define your validator's behavior. In particular, you should replace the forward function with your own logic.
@@ -242,23 +255,13 @@ class Validator(BaseValidatorNeuron):
         return sum(scores) / len(scores)
     
     def generate_input_data(self, llm, topic, source_language, device):
-        messages = [{"role": "system", "content": f"""
-                You are an expert story teller.
-                You can write short stories that capture the imagination, 
-                end readers on an adventure and complete an alegorical thought all within 100~200 words. 
-                Please write a short story about {topic} in {source_language}. 
-                Keep the story short but be sure to use an alegory and complete the idea."""}]
+        messages = [{"role": "system", "content": PROMPTS["GENERATE_INPUT_DATA"].format(topic=topic, source_language=source_language)}]
         bt.logging.debug(f"generate_input_data:prompt:{messages}")
         return llm.process(messages, device)
 
     def generate_output_data(self, llm, input_data, source_language, target_language, device):
         messages = [
-            {"role": "system", "content": f"""
-                Provided text is written in {source_language}.
-                Please translate into {target_language}
-                Don't put any tags, description or decorators.
-                Write only translated text in raw text format.
-                """},
+            {"role": "system", "content": PROMPTS["GENERATE_OUTPUT_DATA"].format(source_language=source_language, target_language=target_language)},
             {"role": "user", "content": input_data}
         ]
         return llm.process(messages, device)
