@@ -140,7 +140,6 @@ jobs:
           --add-host host.docker.internal:host-gateway
           -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/validator.py
           --logging.debug
-          --subtensor.network ${{inputs.BT_NETWORK}}
           --netuid ${{inputs.BT_NETUID}}
           --wallet.path ${{inputs.BT_WALLET_PATH}}
           --wallet.name ${{inputs.BT_VALIDATOR_COLDKEY}}
@@ -149,4 +148,5 @@ jobs:
           --axon.port ${{inputs.BT_AXON_VALIDATOR_PORT}}
           --axon.external_ip ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_IP}}
           --axon.external_port ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_PORT}}
-          --axon.max_workers ${{inputs.BT_AXON_MAX_WORKERS}}          
+          --axon.max_workers ${{inputs.BT_AXON_MAX_WORKERS}}
+          --subtensor.chain_endpoint wss://204.12.218.18:30333

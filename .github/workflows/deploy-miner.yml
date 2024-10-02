@@ -150,7 +150,6 @@ jobs:
           --gpus "device=${{inputs.gpu_index_vali}}"
           --add-host host.docker.internal:host-gateway
           -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/miner.py
-          --subtensor.network ${{inputs.BT_NETWORK}}
           --netuid ${{inputs.BT_NETUID}}
           --wallet.path ${{inputs.BT_WALLET_PATH}}
           --wallet.name ${{inputs.BT_MINER_COLDKEY}}
@@ -160,5 +159,6 @@ jobs:
           --axon.external_ip ${{inputs.BT_AXON_MINER_EXTERNAL_IP}}
           --axon.external_port ${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}
           --axon.max_workers ${{inputs.BT_AXON_MAX_WORKERS}}
+          --subtensor.chain_endpoint wss://204.12.218.18:30333
 
 
