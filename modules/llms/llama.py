@@ -1,4 +1,3 @@
-from llama_cpp import Llama
 from neurons.validator import MODELS
 from typing import List, Dict, Any
 import torch
