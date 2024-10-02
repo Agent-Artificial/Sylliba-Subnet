@@ -26,15 +26,11 @@ import bittensor as bt
 
 from sylliba.base.neuron import BaseNeuron
 from sylliba.utils.config import add_miner_args
-from neurons.config import miner_config
 
 from typing import Union
 from dotenv import load_dotenv
 
 load_dotenv()
-
-config = miner_config()
-
 
 class BaseMinerNeuron(BaseNeuron):
     """
@@ -109,9 +105,9 @@ class BaseMinerNeuron(BaseNeuron):
         # Serve passes the axon information to the network + netuid we are hosting on.
         # This will auto-update if the axon port of external ip have changed.
         bt.logging.info(
-            f"Serving miner axon {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {int(os.getenv('BT_NETUID'))}"
+            f"Serving miner axon {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
         )
-        self.axon.serve(netuid=int(os.getenv("BT_NETUID")), subtensor=self.subtensor)
+        self.axon.serve(netuid=self.config.netuid, subtensor=self.subtensor)
 
         # Start  starts the miner's axon, making it active on the network.
         self.axon.start()
@@ -196,7 +192,7 @@ class BaseMinerNeuron(BaseNeuron):
 
     def resync_metagraph(self):
         """Resyncs the metagraph and updates the hotkeys and moving averages based on the new metagraph."""
-        bt.logging.info("resync_metagraph()")
+        # bt.logging.info("resync_metagraph()")
 
         # Sync the metagraph.
         self.metagraph.sync(subtensor=self.subtensor)

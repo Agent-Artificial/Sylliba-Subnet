@@ -84,12 +84,12 @@ Finally you can serve the miner or validator with the following command.
 
 1. **Running a validator:**
    ```bash
-   python3 neurons/validator.py
+   python3 neurons/validator.py --netuid 49 --wallet.name VALIDATOR_COLDKEY_HERE --wallet.hotkey VALIDATOR_HOTKEY_HERE
    ```
 
 2. **Running a miner:**
    ```bash
-   python3 neurons/miner.py
+   python3 neurons/miner.py --netuid 49 --wallet.name MINER_COLDKEY_HERE --wallet.hotkey MINER_HOTKEY_HERE
    ```
 
 
@@ -98,12 +98,12 @@ Finally you can serve the miner or validator with pm2 using following command.
 
 1. **Running a validator:**
    ```bash
-   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3
+   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3 -- --wallet.name VALIDATOR_COLDKEY_HERE --wallet.hotkey VALIDATOR_HOTKEY_HERE
    ```
 
 2. **Running a miner:**
    ```bash
-   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3
+   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --netuid 49 --wallet.name MINER_COLDKEY_HERE --wallet.hotkey MINER_HOTKEY_HERE
    ```
 
 
@@ -169,13 +169,13 @@ You can register a key for use with a miner or validator by executing following 
 1. **Registering a validator:**
    Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
    ```bash
-   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_VALIDATOR_COLDKEY --wallet.hotkey YOUR_VALIDATOR_HOTKEY
+   btcli subnet register --netuid 49 --wallet.name VALIDATOR_COLDKEY_HERE --wallet.hotkey VALIDATOR_HOTKEY_HERE
    ```
 
 2. **Registering a miner:**
    Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
    ```bash
-   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
+   btcli subnet register --netuid 49 --wallet.name MINER_COLDKEY_HERE --wallet.hotkey MINER_HOTKEY_HERE
    ```
 
 ## Running Multiple Miners
@@ -184,7 +184,7 @@ You can register a key for use with a miner or validator by executing following 
 To run multiple miners without docker you can run this command multiple times, once for each miner.
 
 ```bash
-pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug --axon.port [port for new miner] --axon.external_port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
+pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --netuid 49 --axon.port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
 ```
 
 ### Using Docker
