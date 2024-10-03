@@ -20,8 +20,7 @@ jobs:
             SUBNET_API_PORT: 20002
 
             ## Miner Section ##
-            # Leave as 0.0.0.0 unless you know what you're doing
-            BT_AXON_MINER_IP: "0.0.0.0"
+            BT_AXON_MINER_IP: "204.12.218.18"
             BT_AXON_MINER_PORT: 20007
             BT_AXON_MINER_EXTERNAL_IP: "204.12.218.18"
             BT_AXON_MINER_EXTERNAL_PORT: 20007
@@ -29,8 +28,7 @@ jobs:
             BT_MINER_HOTKEY: "sylliba-test-miner"
 
             ## Validator Section ##
-            # Leave as 0.0.0.0 unless you know what you're doing
-            BT_AXON_VALIDATOR_IP: "0.0.0.0"
+            BT_AXON_VALIDATOR_IP: "204.12.218.18"
             BT_AXON_VALIDATOR_PORT: 20001
             BT_AXON_VALIDATOR_EXTERNAL_IP: "204.12.218.18"
             BT_AXON_VALIDATOR_EXTERNAL_PORT: 20001

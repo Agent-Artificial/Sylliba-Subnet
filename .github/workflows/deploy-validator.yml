@@ -130,7 +130,7 @@ jobs:
           docker run
           --name ${{inputs.microservice}}-validator-${{inputs.microservice_env}}
           --restart always
-          -p ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_PORT}}:${{inputs.BT_AXON_VALIDATOR_PORT}}
+          -p ${{inputs.BT_AXON_VALIDATOR_PORT}}:${{inputs.BT_AXON_VALIDATOR_PORT}}
           -v /home/ubuntu/.bittensor/wallets:/root/.bittensor/wallets
           -e APP_VERSION=$GITHUB_REF_NAME
           -e environment=${{inputs.microservice_env}}
@@ -145,5 +145,8 @@ jobs:
           --wallet.path ${{inputs.BT_WALLET_PATH}}
           --wallet.name ${{inputs.BT_VALIDATOR_COLDKEY}}
           --wallet.hotkey ${{inputs.BT_VALIDATOR_HOTKEY}}
+          --axon.ip ${{inputs.BT_AXON_VALIDATOR_IP}}
           --axon.port ${{inputs.BT_AXON_VALIDATOR_PORT}}
+          --axon.external_ip ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_IP}}
+          --axon.external_port ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_PORT}}
           --axon.max_workers ${{inputs.BT_AXON_MAX_WORKERS}}
