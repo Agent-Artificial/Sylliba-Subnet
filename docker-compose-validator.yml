@@ -1,20 +1,26 @@
+---
+
 services:
   validator:
     build: 
       context: .
-    env_file:
-      - .env
+    environment:
+      - PYTHONPATH=.
     ports:
-      - ${BT_AXON_VALIDATOR_EXTERNAL_PORT}:${BT_AXON_VALIDATOR_EXTERNAL_PORT}
+      - ${BT_AXON_VALIDATOR_PORT}:${BT_AXON_VALIDATOR_PORT}
     volumes:
-      - ${HOME}/.bittensor:/root/.bittensor      
+      - ${HOME}/.bittensor:/root/.bittensor
     command:
-      - neurons/validator.py
-      #- --logging.debug
+      - neurons/validator.py 
+      - --subtensor.network ${BT_NETWORK} 
+      - --netuid ${BT_NETUID} 
+      - --wallet.name ${BT_VALIDATOR_COLDKEY} 
+      - --wallet.hotkey ${BT_VALIDATOR_HOTKEY} 
+      - --logging.debug
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu]        
+              capabilities: [gpu]
