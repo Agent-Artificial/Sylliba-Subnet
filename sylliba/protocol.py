@@ -130,9 +130,7 @@ class TranslateRequest(bt.Synapse):
         Returns:
             int or original value: Converted integer if possible, otherwise the original value.
         """
-        if isinstance(v, str) and v.isdigit():
-            return int(v)
-        return v
+        return int(v) if isinstance(v, str) and v.isdigit() else v
 
     def __init__(self, **data):
         """
