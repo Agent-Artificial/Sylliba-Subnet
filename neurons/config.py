@@ -1,8 +1,10 @@
 import os
 from dotenv import load_dotenv
+import bittensor as bt
+import argparse
+from sylliba.utils.config import config as base_config, add_validator_args, add_miner_args, add_args
 
 load_dotenv()
-
 
 def miner_config():
     return {
@@ -27,7 +29,7 @@ def miner_config():
             "chain_endpoint": "",
             "mock": False,
         },
-        "netuid": int(os.getenv("BT_NETUID", 197)),
+        "netuid": int(os.getenv("BT_NETUID", 49)),
         "wandb": {
             "off": True,
             "offline": False,
@@ -40,7 +42,7 @@ def miner_config():
             "allow_non_registered": False,
             "mock": False,
         },
-        "axon":{
+        "axon": {
             "port": int(os.getenv('BT_AXON_MINER_PORT', 9197)),
             "ip": os.getenv('BT_AXON_MINER_IP', '0.0.0.0'),
             "external_port": int(os.getenv('BT_AXON_MINER_EXTERNAL_PORT', 9197)),
@@ -49,18 +51,16 @@ def miner_config():
         },
     }
 
-
 def validator_config():
     return {
-        "netuid": int(os.getenv("BT_NETUID", 197)),
-        "axon":{
+        "netuid": int(os.getenv("BT_NETUID", 49)),
+        "axon": {
             "port": int(os.getenv('BT_AXON_VALIDATOR_PORT', 9198)),
             "ip": os.getenv('BT_AXON_VALIDATOR_IP', '0.0.0.0'),
             "external_port": int(os.getenv('BT_AXON_VALIDATOR_EXTERNAL_PORT', 9198)),
             "external_ip": os.getenv('BT_AXON_VALIDATOR_EXTERNAL_IP', '0.0.0.0'),
             "max_workers": int(os.getenv('BT_AXON_MAX_WORKERS', 5)),
         },
-            
         "logging": {
             "logging_dir": "~/.bittensor/logs",
         },
@@ -104,3 +104,38 @@ def validator_config():
         },
         "api_port": int(os.getenv("SUBNET_API_PORT", 8080)),
     }
+    
+class Config(bt.Config):
+    @classmethod
+    def get_config(cls):
+        return base_config(cls)
+    
+    @classmethod
+    def add_args(cls, is_validator):
+        parser = argparse.ArgumentParser()
+        add_args(cls, parser)
+        if is_validator:
+            return add_validator_args(cls, parser)
+        else: 
+            return add_miner_args(cls, parser)
+
+    def update_nested(self, config_dict):
+        for key, value in config_dict.items():
+            if isinstance(value, dict):
+                if not hasattr(self, key) or getattr(self, key) is None:
+                    setattr(self, key, Config())
+                getattr(self, key).update_nested(value)
+            else:
+                setattr(self, key, value)
+
+def get_validator_config():
+    config = Config()
+    config.add_args(is_validator=True)
+    config.update_nested(validator_config())
+    return config
+
+def get_miner_config():
+    config = Config()
+    config.add_args(is_validator=False)
+    config.update_nested(miner_config())
+    return config

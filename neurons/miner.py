@@ -30,7 +30,9 @@ import bittensor as bt
 import sylliba
 # import base miner class which takes care of most of the boilerplate
 from sylliba.base.miner import BaseMinerNeuron
-from neurons.config import miner_config
+from neurons.config import get_miner_config
+
+
 
 
 class Miner(BaseMinerNeuron):
@@ -44,7 +46,7 @@ class Miner(BaseMinerNeuron):
         module (module): The imported translation module for processing requests.
     """
 
-    def __init__(self, config=miner_config(), module_name="translation"):
+    def __init__(self, config=None, module_name="translation"):
         """
         Initializes the Miner with the given configuration and translation module.
 
@@ -52,6 +54,8 @@ class Miner(BaseMinerNeuron):
             config (Config): Configuration for the miner. Defaults to miner_config().
             module_name (str): Name of the module to import for translation. Defaults to "translation".
         """
+        if not config:
+            config = get_miner_config()
         super(Miner, self).__init__(config=config)
         logger.info(config)
         logger.info(self.axon.info())

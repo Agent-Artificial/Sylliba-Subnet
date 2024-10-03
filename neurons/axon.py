@@ -1,6 +1,6 @@
 import os
 from bittensor.axon import axon, FastAPIThreadedServer
-from bittensor import config
+from neurons.config import validator_config, miner_config
 from sylliba.protocol import ValidatorRequest
 import bittensor
 from dotenv import load_dotenv
@@ -10,10 +10,14 @@ load_dotenv()
 config = config.axon_config()
 
 class TranslationRequest(ValidatorRequest):
+    config = miner_config()
     def __init__(self, data: dict):
         super().__init__()
         self.data = data
         self.blacklisted = []
+        self.is_validator = False
+        if self.is_validator:
+            self.config = validator_config()
         self.fast_server = FastAPIThreadedServer(config)
         
 # Define a custom request forwarding function using your synapse class
@@ -23,7 +27,7 @@ class TranslationRequest(ValidatorRequest):
         return synapse
 
     # Define a custom request verification function
-    def verify_my_synapse(synapse: ValidatorRequest):
+    def verify_my_synapse(self, synapse: ValidatorRequest):
         # Apply custom verification logic to synapse
         # Optionally raise Exception
         assert synapse.validator_request is not None
@@ -39,21 +43,8 @@ class TranslationRequest(ValidatorRequest):
         def prioritize_my_synape(synapse: ValidatorRequest) -> float:
             # Apply custom priority
             return 1.0
-
-        # Initialize Axon object with a custom configuration
-        my_axon = bittensor.axon(
-            config=config,
-            wallet=bittensor.wallet(
-                name=os.getenv("WALLET_NAME"),
-                config=config,
-                hotkey=os.getenv("WALLET_HOTKEY", "default"),
-                path=os.getenv("WALLET_PATH", "default"),
-            ),
-            port=os.getenv("AXON_PORT", 7070),
-            ip="192.0.2.0",
-            external_ip="203.0.113.0",
-            external_port=7070
-        )
+        
+        my_axon = self.get_my_axon()
 
         # Attach the endpoint with the specified verification and forward functions.
         my_axon.attach(
@@ -68,3 +59,20 @@ class TranslationRequest(ValidatorRequest):
             netuid = int(os.getenv("BT_NETUID")),
             subtensor = bittensor.subtensor(int(os.getenv("BT_NETUID")), config=config),
             ).start()
+    
+    def get_my_axon(self, config):
+
+        # Initialize Axon object with a custom configuration
+        return bittensor.axon(
+            config=config,
+            wallet=bittensor.wallet(
+                name=os.getenv("WALLET_NAME"),
+                config=config,
+                hotkey=os.getenv("WALLET_HOTKEY", "default"),
+                path=os.getenv("WALLET_PATH", "default"),
+            ),
+            port=os.getenv("BT_AXON_PORT", 7070),
+            ip=os.getenv("BT_AXON_VALIDATOR_IP", "0.0.0.0"),
+            external_ip=os.getenv("BT_AXON_VALIDATOR_EXTERNAL_IP"),
+            external_port=os.getenv("BT_AXON_VALIDATOR_EXTERNAL_PORT")
+        )

@@ -19,7 +19,7 @@
 
 from typing import Optional, Any, Dict, Union
 import bittensor as bt
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from modules.translation.data_models import TranslationRequest
 import json
 
@@ -89,7 +89,7 @@ class TranslateRequest(bt.Synapse):
         dendrite_signature (Optional[str]): Signature from the dendrite.
         computed_body_hash (Optional[str]): Computed hash of the request body.
     """
-    translation_request: Optional[Union[Dict[str, Any], TranslationRequest]] = Field(default_factory=dict or TranslationRequest)
+    translation_request: Optional[Union[Dict[str, Any], TranslationRequest]] = Field(default_factory=dict)
     miner_response: Optional[Any] = Field(default=None)
     
     # Add fields for the headers we're receiving
@@ -104,8 +104,22 @@ class TranslateRequest(bt.Synapse):
     dendrite_signature: Optional[str] = Field(default=None)
     computed_body_hash: Optional[str] = Field(default=None)
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_validator("*")
+    def convert_string_to_int(cls, v):
+        """
+        Converts string values to integers if possible.
+
+        Args:
+            v: The value to be converted.
+
+        Returns:
+            int or original value: Converted integer if possible, otherwise the original value.
+        """
+        if isinstance(v, str) and v.isdigit():
+            return int(v)
+        return v
 
     @field_validator("*")
     def convert_string_to_int(cls, v):
