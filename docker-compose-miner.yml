@@ -2,7 +2,7 @@
 
 services:
   miner:
-    build: 
+    build:
       context: .
     environment:
       - PYTHONPATH=.
@@ -10,12 +10,7 @@ services:
       - ${BT_AXON_MINER_PORT}:${BT_AXON_MINER_PORT}
     volumes:
       - ${HOME}/.bittensor:/root/.bittensor
-    command:
-      - neurons/miner.py 
-      - --subtensor.network ${BT_NETWORK} 
-      - --netuid ${BT_NETUID} 
-      - --wallet.name ${BT_MINER_COLDKEY} 
-      - --wallet.hotkey ${BT_MINER_HOTKEY}
+    command: "neurons/miner.py --subtensor.network ${BT_NETWORK} --netuid ${BT_NETUID} --wallet.name ${BT_MINER_COLDKEY} --wallet.hotkey ${BT_MINER_HOTKEY} --axon.port ${BT_AXON_MINER_PORT} --axon.ip ${BT_AXON_IP} --axon.external_port ${BT_AXON_MINER_PORT} --axon.external_ip ${BT_AXON_IP}"
     deploy:
       resources:
         reservations:
