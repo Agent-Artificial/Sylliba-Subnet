@@ -34,8 +34,24 @@ from neurons.config import miner_config
 
 
 class Miner(BaseMinerNeuron):
-    
+    """
+    A specialized miner class for the Sylliba network, focusing on translation tasks.
+
+    This class extends BaseMinerNeuron to provide specific functionality for handling
+    translation requests in the Sylliba ecosystem.
+
+    Attributes:
+        module (module): The imported translation module for processing requests.
+    """
+
     def __init__(self, config=miner_config(), module_name="translation"):
+        """
+        Initializes the Miner with the given configuration and translation module.
+
+        Args:
+            config (Config): Configuration for the miner. Defaults to miner_config().
+            module_name (str): Name of the module to import for translation. Defaults to "translation".
+        """
         super(Miner, self).__init__(config=config)
         logger.info(config)
         logger.info(self.axon.info())
@@ -45,6 +61,18 @@ class Miner(BaseMinerNeuron):
     async def forward(
         self, synapse: sylliba.protocol.TranslateRequest
     ) -> sylliba.protocol.TranslateRequest:
+        """
+        Processes incoming translation requests.
+
+        This method handles the core functionality of the miner, processing translation
+        requests and returning the results.
+
+        Args:
+            synapse (sylliba.protocol.TranslateRequest): The incoming translation request.
+
+        Returns:
+            sylliba.protocol.TranslateRequest: The processed synapse with the translation response.
+        """
         bt.logging.info(f'synapse received')
         response = await self.module.process(synapse.translation_request)
         synapse.miner_response = response
@@ -52,6 +80,17 @@ class Miner(BaseMinerNeuron):
         return synapse
 
     async def healthcheck(self, synapse: sylliba.protocol.HealthCheck):
+        """
+        Performs a health check on the miner.
+
+        This method is used to verify that the miner is operational and responsive.
+
+        Args:
+            synapse (sylliba.protocol.HealthCheck): The incoming health check request.
+
+        Returns:
+            sylliba.protocol.HealthCheck: The synapse with a positive health check response.
+        """
         synapse.response = True
         return synapse
 
@@ -59,35 +98,18 @@ class Miner(BaseMinerNeuron):
         self, synapse: sylliba.protocol.TranslateRequest
     ) -> typing.Tuple[bool, str]:
         """
-        Determines whether an incoming request should be blacklisted and thus ignored. Your implementation should
-        define the logic for blacklisting requests based on your needs and desired security parameters.
+        Determines whether an incoming request should be blacklisted.
 
-        Blacklist runs before the synapse data has been deserialized (i.e. before synapse.data is available).
-        The synapse is instead contracted via the headers of the request. It is important to blacklist
-        requests before they are deserialized to avoid wasting resources on requests that will be ignored.
+        This method implements security measures to prevent resource wastage on undesired requests.
+        It checks the validity and permissions of the requesting entity before processing the request.
 
         Args:
-            synapse (template.protocol.Translate): A synapse object constructed from the headers of the incoming request.
+            synapse (sylliba.protocol.TranslateRequest): The incoming translation request.
 
         Returns:
-            Tuple[bool, str]: A tuple containing a boolean indicating whether the synapse's hotkey is blacklisted,
-                            and a string providing the reason for the decision.
-
-        This function is a security measure to prevent resource wastage on undesired requests. It should be enhanced
-        to include checks against the metagraph for entity registration, validator status, and sufficient stake
-        before deserialization of synapse data to minimize processing overhead.
-
-        Example blacklist logic:
-        - Reject if the hotkey is not a registered entity within the metagraph.
-        - Consider blacklisting entities that are not validators or have insufficient stake.
-
-        In practice it would be wise to blacklist requests from entities that are not validators, or do not have
-        enough stake. This can be checked via metagraph.S and metagraph.validator_permit. You can always attain
-        the uid of the sender via a metagraph.hotkeys.index( synapse.dendrite.hotkey ) call.
-
-        Otherwise, allow the request to be processed further.
+            Tuple[bool, str]: A tuple containing a boolean indicating whether the request is blacklisted,
+                              and a string providing the reason for the decision.
         """
-
         if synapse.dendrite is None or synapse.dendrite.hotkey is None:
             bt.logging.warning("Received a request without a dendrite or hotkey.")
             return True, "Missing dendrite or hotkey"
@@ -119,23 +141,16 @@ class Miner(BaseMinerNeuron):
 
     async def priority(self, synapse: sylliba.protocol.TranslateRequest) -> float:
         """
-        The priority function determines the order in which requests are handled. More valuable or higher-priority
-        requests are processed before others. You should design your own priority mechanism with care.
+        Determines the priority of an incoming request.
 
-        This implementation assigns priority to incoming requests based on the calling entity's stake in the metagraph.
+        This method assigns a priority score to incoming requests based on the calling entity's
+        stake in the metagraph. Higher stake results in higher priority.
 
         Args:
-            synapse (template.protocol.Translate): The synapse object that contains metadata about the incoming request.
+            synapse (sylliba.protocol.TranslateRequest): The incoming translation request.
 
         Returns:
-            float: A priority score derived from the stake of the calling entity.
-
-        Miners may receive messages from multiple entities at once. This function determines which request should be
-        processed first. Higher values indicate that the request should be processed first. Lower values indicate
-        that the request should be processed later.
-
-        Example priority logic:
-        - A higher stake results in a higher priority value.
+            float: A priority score for the request, based on the caller's stake.
         """
         if synapse.dendrite is None or synapse.dendrite.hotkey is None:
             bt.logging.warning("Received a request without a dendrite or hotkey.")
@@ -158,7 +173,16 @@ class Miner(BaseMinerNeuron):
 
 # This is the main function, which runs the miner.
 if __name__ == "__main__":
+    """
+    Main entry point for running the Miner.
+
+    This section initializes and runs the Miner when the script is executed directly.
+    It uses a context manager to ensure proper setup and teardown of the miner.
+    """
     with Miner() as miner:
-        while True:
-            bt.logging.info(f"Miner running... {time.time()}")
-            time.sleep(10)
+        # [fix/validator-miner-communcation]: move the looping logic into the run function 
+        # of the base/miner.py rather than running nested coniditional while loops
+        miner.start_miner()
+        
+        miner.run()
+
