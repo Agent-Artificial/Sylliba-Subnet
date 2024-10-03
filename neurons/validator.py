@@ -28,14 +28,11 @@ from importlib import import_module
 # import base validator class which takes care of most of the boilerplate
 from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
-from sylliba.validator import forward
-from neurons.config import validator_config
+from neurons.config import get_validator_config
 from sylliba.protocol import TranslateRequest, HealthCheck
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
 from sylliba.validator import reward_text, reward_speech
-from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
-import json
 
 from neurons.utils.serialization import audio_encode, audio_decode
 
@@ -91,7 +88,9 @@ class Validator(BaseValidatorNeuron):
     """
 
     def __init__(self, config=None):
-        super(Validator, self).__init__(config=validator_config())
+        if not config:
+            config = get_validator_config()
+        super(Validator, self).__init__(config=config)
         self.total_miners = len(self.metagraph.uids)
         self.validated = set()
         self.batch_size = 3
@@ -142,12 +141,15 @@ class Validator(BaseValidatorNeuron):
         else:
             miner_input_data = sample_request['input']
 
-        translation_request = TranslationRequest(data = {
-                    "input": miner_input_data,
-                    "task_string": task_string,
-                    "source_language": source_language,
-                    "target_language": target_language
-                })
+        translation_request = TranslationRequest(
+            data = {
+                "input": miner_input_data,
+                "task_string": task_string,
+                "source_language": source_language,
+                "target_language": target_language
+            },
+            is_validator=True
+        )
     
         axons = self.metagraph.axons
         healthcheck = await self.dendrite(
