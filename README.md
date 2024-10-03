@@ -206,13 +206,11 @@ Run multiple miners via Docker Compose.
 
 1. Navigate to the ./docker-multi-miner folder
 
-2. Copy .env.example to .env.  This file is ONLY used for the ports in the docker-compose.yml.  Add lines for the amount of miners you are going to start
+2. Copy .env.example to .env.  This file is ONLY used for the variables in the docker-compose.yml.  Add lines for the amount of miners you are going to start
 
-3. Make a .env# for every miner you want.  Example, copy .env1.example to .env1, then .env2.example to env2.  All of the .env#.example are identical so make as many as you need with the specific miner information.
+3. Edit the docker-compose.yml file.  The one that is there has three miners.  To add more just copy one of them and paste below editing all of the name references (i.e. miner3 to miner4) and the .env file (i.e. .env3 to .env4)
 
-4. Edit the docker-compose.yml file.  The one that is there has three miners.  To add more just copy one of them and paste below editing the name (i.e. miner3 to miner4) and the .env file (i.e. .env3 to .env4)
-
-5. Run this command to launch all of the miners in containers: 
+4. Run this command to launch all of the miners in containers: 
 ```bash
 docker compose up -d 
 ```
