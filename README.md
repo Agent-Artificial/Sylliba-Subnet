@@ -66,15 +66,12 @@ You can run the following commands in your console to install the Sylliba Subnet
    source .venv/bin/activate
    ```
 
-5. **Copy the environment variables template:**
+5. **Add the Python Path to Env Vars:**
    ```bash
-   cp .env.example .env
+   export PYTHONPATH=.
    ```
 
-6. **Set up the environment variables**  
-   Edit the `.env` file and configure the necessary values.  (You do not need to fill in the validator parts if you are only running a miner.)
-
-7. **Install the required dependencies:**
+6. **Install the required dependencies:**
    ```bash
    pip3 install -r requirements.txt
    ```
@@ -83,27 +80,35 @@ You can run the following commands in your console to install the Sylliba Subnet
 Finally you can serve the miner or validator with the following command. 
 
 1. **Running a validator:**
+
+   NOTE: The default port is 8091, however you can override this with `--axon.port [port number]`
+
    ```bash
-   python3 neurons/validator.py
+   python3 neurons/validator.py --netuid 49 --wallet.name VALIDATOR_COLDKEY_HERE --wallet.hotkey VALIDATOR_HOTKEY_HERE
    ```
 
 2. **Running a miner:**
+
+   NOTE: The default port is 8091, however you can override this with `--axon.port [port number]`
+
    ```bash
-   python3 neurons/miner.py
+   python3 neurons/miner.py --netuid 49 --wallet.name MINER_COLDKEY_HERE --wallet.hotkey MINER_HOTKEY_HERE
    ```
 
 
 ### Serving with pm2
 Finally you can serve the miner or validator with pm2 using following command. 
 
+NOTE: The default port is 8091, however you can override this with `--axon.port [port number]`
+
 1. **Running a validator:**
    ```bash
-   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3
+   pm2 start neurons/validator.py --name sylliba-validator --interpreter python3 -- --wallet.name VALIDATOR_COLDKEY_HERE --wallet.hotkey VALIDATOR_HOTKEY_HERE
    ```
 
 2. **Running a miner:**
    ```bash
-   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3
+   pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --netuid 49 --wallet.name MINER_COLDKEY_HERE --wallet.hotkey MINER_HOTKEY_HERE
    ```
 
 
@@ -167,15 +172,16 @@ To view your container's log:
 You can register a key for use with a miner or validator by executing following commands. Registering lets the block chain and the validator know that you are are going to be available to provide the service on the chain.
 
 1. **Registering a validator:**
-   Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
+   Use ```--subtensor.network test and --netuid 197``` for testnet if you wish to deploy there
+   
    ```bash
-   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_VALIDATOR_COLDKEY --wallet.hotkey YOUR_VALIDATOR_HOTKEY
+   btcli subnet register --subtensor.network finney --netuid 49 --wallet.name VALIDATOR_COLDKEY_HERE --wallet.hotkey VALIDATOR_HOTKEY_HERE
    ```
 
 2. **Registering a miner:**
    Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
    ```bash
-   btcli subnet register --subtensor.network test --netuid 197 --wallet.name YOUR_MINER_COLDKEY --wallet.hotkey YOUR_MINER_HOTKEY
+   btcli subnet register --subtensor.network finney --netuid 49 --wallet.name MINER_COLDKEY_HERE --wallet.hotkey MINER_HOTKEY_HERE
    ```
 
 ## Running Multiple Miners
@@ -184,7 +190,7 @@ You can register a key for use with a miner or validator by executing following 
 To run multiple miners without docker you can run this command multiple times, once for each miner.
 
 ```bash
-pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --logging.debug --axon.port [port for new miner] --axon.external_port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
+pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --netuid 49 --axon.port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
 ```
 
 ### Using Docker

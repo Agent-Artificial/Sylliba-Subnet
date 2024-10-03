@@ -165,3 +165,5 @@ testing/
 .vscode/settings.json
 modules/translation/audio_request.wav
 modules/translation/audio_output.wav
+validator.yml
+miner.yml

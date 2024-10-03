@@ -1,21 +1,25 @@
+---
+
 services:
   miner:
     build: 
       context: .
-    env_file:
-      - .env
+    environment:
+      - PYTHONPATH=.
     ports:
-      - ${BT_AXON_MINER_EXTERNAL_PORT}:${BT_AXON_MINER_EXTERNAL_PORT}
+      - ${BT_AXON_MINER_PORT}:${BT_AXON_MINER_PORT}
     volumes:
       - ${HOME}/.bittensor:/root/.bittensor
     command:
-      - neurons/miner.py
+      - neurons/miner.py 
+      - --subtensor.network ${BT_NETWORK} 
+      - --netuid ${BT_NETUID} 
+      - --wallet.name ${BT_MINER_COLDKEY} 
+      - --wallet.hotkey ${BT_MINER_HOTKEY}
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu]         
-
-
+              capabilities: [gpu]

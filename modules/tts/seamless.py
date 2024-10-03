@@ -5,7 +5,7 @@ from neurons.validator import MODELS
 from neurons.utils.model_load import load_seamless
 from modules.translation.data_models import TARGET_LANGUAGES
 
-def process(messages, source_language):
+def process(messages, source_language, device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     """
     Process messages for text-to-speech conversion.
 
@@ -17,7 +17,6 @@ def process(messages, source_language):
         Processed data for text-to-speech conversion.
     """
     # Model ID for Seamless M4T V2 Large
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     if 'seamless' not in MODELS:
         MODELS['seamless'] = load_seamless()

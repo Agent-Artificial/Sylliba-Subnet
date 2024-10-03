@@ -24,4 +24,4 @@ RUN pip3 install -r requirements.txt
 ENTRYPOINT ["python3"]
 
 # The default script, but it will be overridden if arguments are passed
-CMD ["neurons/miner.py", "--logging.debug"]
+CMD ["neurons/miner.py"]

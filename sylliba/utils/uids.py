@@ -15,16 +15,49 @@ def check_uid_availability(
     Returns:
         bool: True if uid is available, False otherwise
     """
+    bt.logging.debug(f"check_uid_availability:{uid}")
     # Filter non serving axons.
     if not metagraph.axons[uid].is_serving:
+        bt.logging.debug(f"\tunavailable:is not serving")
         return False
     # Filter validator permit > 1024 stake.
     if metagraph.validator_permit[uid]:
         if metagraph.S[uid] > vpermit_tao_limit:
+            bt.logging.debug(f"\tunavailable:is validator or has vpermit and higher than {vpermit_tao_limit} stake")
             return False
     # Available otherwise.
+    bt.logging.debug(f"\tavailable:succeeded availability check")
     return True
 
+
+def get_miner_uids(
+    self, exclude: List[int] = None
+) -> np.ndarray:
+    """Returns available miner uids from the metagraph.
+
+    Args:
+        exclude (List[int], optional): List of uids to exclude. Defaults to None.
+
+    Returns:
+        np.ndarray: All miner uids
+    """
+    candidate_uids = []
+    
+    bt.logging.debug(f"get_miner_uids:to_map:{self.metagraph.n.item()}")
+    
+    for uid in range(self.metagraph.n.item()):
+        uid_is_available = check_uid_availability(
+            self.metagraph, uid, self.config.neuron.vpermit_tao_limit
+        )
+        uid_is_not_excluded = exclude is None or uid not in exclude
+        
+        if uid_is_available:
+            if uid_is_not_excluded:
+                candidate_uids.append(uid)
+                
+    uids = np.array(candidate_uids)
+    bt.logging.debug(f"get_miner_uids:candidate_uids:{uids}")
+    return uids
 
 def get_random_uids(
     self, k: int, exclude: List[int] = None

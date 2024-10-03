@@ -24,7 +24,7 @@ from neurons.validator import MODELS
 from neurons.utils.model_load import load_seamless
 
 class Translation:
-    def __init__(self):
+    def __init__(self, device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         """
         Initializes a new instance of the Translation class.
 
@@ -43,7 +43,7 @@ class Translation:
             - source_language (None): The source language for translation.
             - target_language (None): The target language for translation.
         """
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = device
 
         if 'seamless' not in MODELS:
             MODELS['seamless'] = load_seamless()
@@ -287,21 +287,6 @@ def speech2speech(translation: Translation, miner_request: Optional[TranslationR
         data={"input": "./modules/translation/audio_request.wav", "task_string": "speech2speech", "source_language": "English", "target_language": "French"}
     )
     return translation.process(translation_request)
-
-translation = Translation()
-
-async def process(translation_request: TranslationRequest):
-    result = None
-    try:
-        loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(translation.process(translation_request=translation_request))
-    except Exception:
-        new_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(new_loop)
-        result = loop.run_until_complete(translation.process(translation_request=translation_request))
-        new_loop.close()
-    finally:
-        return result  # type: ignore
 
 if __name__ == "__main__":
     translation = Translation()
