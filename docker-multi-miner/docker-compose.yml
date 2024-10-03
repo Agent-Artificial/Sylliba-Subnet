@@ -1,16 +1,13 @@
 services:
   miner1:
-    build: 
-      context: ../
-    env_file:
-      - .env1
+    image: sylliba
+    environment:
+      - PYTHONPATH=.
     ports:
-      - ${BT_AXON_MINER1_EXTERNAL_PORT}:${BT_AXON_MINER1_PORT}
+      - ${BT_AXON_MINER1_PORT}:${BT_AXON_MINER1_PORT}
     volumes:
       - ${HOME}/.bittensor:/root/.bittensor
-    command:
-      - neurons/miner.py
-      - --logging.debug
+    command: "neurons/miner.py --subtensor.network ${BT_NETWORK} --netuid ${BT_NETUID} --wallet.name ${BT_MINER_COLDKEY} --wallet.hotkey ${BT_MINER1_HOTKEY} --axon.port ${BT_AXON_MINER1_PORT} --axon.ip ${BT_AXON_IP} --axon.external_port ${BT_AXON_MINER1_PORT} --axon.external_ip ${BT_AXON_IP}"
     deploy:
       resources:
         reservations:
@@ -20,17 +17,14 @@ services:
               capabilities: [gpu]   
 
   miner2:
-    build: 
-      context: ../
-    env_file:
-      - .env2
+    image: sylliba
+    environment:
+      - PYTHONPATH=.
     ports:
-      - ${BT_AXON_MINER2_EXTERNAL_PORT}:${BT_AXON_MINER2_PORT}
+      - ${BT_AXON_MINER2_PORT}:${BT_AXON_MINER2_PORT}
     volumes:
       - ${HOME}/.bittensor:/root/.bittensor
-    command:
-      - neurons/miner.py
-      - --logging.debug
+    command: "neurons/miner.py --subtensor.network ${BT_NETWORK} --netuid ${BT_NETUID} --wallet.name ${BT_MINER_COLDKEY} --wallet.hotkey ${BT_MINER2_HOTKEY} --axon.port ${BT_AXON_MINER2_PORT} --axon.ip ${BT_AXON_IP} --axon.external_port ${BT_AXON_MINER2_PORT} --axon.external_ip ${BT_AXON_IP}"
     deploy:
       resources:
         reservations:
@@ -40,17 +34,14 @@ services:
               capabilities: [gpu]         
 
   miner3:
-    build: 
-      context: ../
-    env_file:
-      - .env3
+    image: sylliba
+    environment:
+      - PYTHONPATH=.
     ports:
-      - ${BT_AXON_MINER3_EXTERNAL_PORT}:${BT_AXON_MINER3_PORT}
+      - ${BT_AXON_MINER3_PORT}:${BT_AXON_MINER3_PORT}
     volumes:
       - ${HOME}/.bittensor:/root/.bittensor
-    command:
-      - neurons/miner.py
-      - --logging.debug
+    command: "neurons/miner.py --subtensor.network ${BT_NETWORK} --netuid ${BT_NETUID} --wallet.name ${BT_MINER_COLDKEY} --wallet.hotkey ${BT_MINER3_HOTKEY} --axon.port ${BT_AXON_MINER3_PORT} --axon.ip ${BT_AXON_IP} --axon.external_port ${BT_AXON_MINER3_PORT} --axon.external_ip ${BT_AXON_IP}"
     deploy:
       resources:
         reservations:
