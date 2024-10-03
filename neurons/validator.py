@@ -28,7 +28,7 @@ from importlib import import_module
 # import base validator class which takes care of most of the boilerplate
 from sylliba.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
-from sylliba.validator import forward
+from sylliba.utils.uids import get_miner_uids
 from sylliba.protocol import TranslateRequest, HealthCheck
 from modules.translation.data_models import TranslationRequest
 from dotenv import load_dotenv
@@ -189,19 +189,19 @@ class Validator(BaseValidatorNeuron):
                     "target_language": target_language
                 })
     
-        axons = self.metagraph.axons
-        bt.logging.debug(f"All Axons are {axons}")
-        healthcheck = await self.dendrite(
-                axons=axons,
-                synapse=HealthCheck(),
-                deserialize=False,
-                timeout=30
-            )
-        healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
-        healthy_axon_uids = [i for i, check in enumerate(healthcheck) if check.response is True]
+        miner_uids = get_miner_uids(self)
+        miner_axons = [self.metagraph.axons[uid] for uid in miner_uids]
+        bt.logging.debug(f"Miner axons are {miner_axons}")
+        # healthcheck = await self.dendrite(
+        #         axons=[self.metagraph.axons[uid] for uid in miner_uids],
+        #         synapse=HealthCheck(),
+        #         deserialize=False,
+        #         timeout=30
+        #     )
+        # healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
+        # healthy_axon_uids = [i for i, check in enumerate(healthcheck) if check.response is True]
         
-        bt.logging.info(f'Health Axons are {healthy_axons}')
-        bt.logging.info(f'Health Axon UIDs are {healthy_axon_uids}')
+        # bt.logging.info(f'Health Axons are {healthy_axons}')
         results = []
 
         synapse = TranslateRequest(
@@ -209,11 +209,12 @@ class Validator(BaseValidatorNeuron):
         )
         try:
             responses = await self.dendrite(
-                axons=healthy_axons,
+                axons=miner_axons,
                 synapse=synapse,
                 deserialize=False,
                 timeout=300
             )
+            bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
             # Processing miner output into rewards
             for j in range(0, len(responses)):
                 if responses[j].miner_response is not None:
@@ -238,7 +239,7 @@ class Validator(BaseValidatorNeuron):
         
         # Updating the scores
         bt.logging.debug(f"Results: {results}")
-        self.update_scores(np.array(results), healthy_axon_uids)    
+        self.update_scores(np.array(results), miner_uids)    
             
         # Set weights
         self.now = time.time()
