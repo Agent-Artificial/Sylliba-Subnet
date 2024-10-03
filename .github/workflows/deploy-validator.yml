@@ -145,8 +145,5 @@ jobs:
           --wallet.path ${{inputs.BT_WALLET_PATH}}
           --wallet.name ${{inputs.BT_VALIDATOR_COLDKEY}}
           --wallet.hotkey ${{inputs.BT_VALIDATOR_HOTKEY}}
-          --axon.ip ${{inputs.BT_AXON_VALIDATOR_IP}}
           --axon.port ${{inputs.BT_AXON_VALIDATOR_PORT}}
-          --axon.external_ip ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_IP}}
-          --axon.external_port ${{inputs.BT_AXON_VALIDATOR_EXTERNAL_PORT}}
           --axon.max_workers ${{inputs.BT_AXON_MAX_WORKERS}}
