@@ -73,7 +73,7 @@ class Miner(BaseMinerNeuron):
     async def forward(
         self, synapse: sylliba.protocol.TranslateRequest
     ) -> sylliba.protocol.TranslateRequest:
-        uid = await self.metagraph.hotkeys.index(synapse.dendrite.hotkey)
+        uid = self.metagraph.hotkeys.index(synapse.dendrite.hotkey)
         bt.logging.info(f'translation synapse received from uid: {uid}')
         response = await self.translation.process(translation_request=synapse.translation_request)
         synapse.miner_response = response
@@ -82,7 +82,7 @@ class Miner(BaseMinerNeuron):
 
     async def healthcheck(self, synapse: sylliba.protocol.HealthCheck):
         synapse.response = True
-        uid = await self.metagraph.hotkeys.index(synapse.dendrite.hotkey)
+        uid = self.metagraph.hotkeys.index(synapse.dendrite.hotkey)
         bt.logging.info(f'Health check received from uid: {uid}')
         return synapse
 
