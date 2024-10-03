@@ -140,10 +140,17 @@ You can run the following commands in your console to install the Sylliba Subnet
 4. **Set up the environment variables**  
    Edit the `.env` file and configure the necessary values.  (You do not need to fill in the validator parts if you are only running a miner.)
 
-5. **Docker Compose Build:**
+5a. **Miner - Docker Compose Build:**
+   
    ```bash
-   docker compose build
+   docker compose -f docker-compose-miner.yml build
    ```
+
+5b. **Validator - Docker Compose Build:**
+   
+   ```bash
+   docker compose -f docker-compose-validator.yml build
+   ```   
 
 6a. **Miner - Docker Compose Up:**
    ```bash
@@ -173,13 +180,14 @@ You can register a key for use with a miner or validator by executing following 
 
 1. **Registering a validator:**
    Use ```--subtensor.network test and --netuid 197``` for testnet if you wish to deploy there
-   
+
    ```bash
    btcli subnet register --subtensor.network finney --netuid 49 --wallet.name VALIDATOR_COLDKEY_HERE --wallet.hotkey VALIDATOR_HOTKEY_HERE
    ```
 
 2. **Registering a miner:**
-   Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
+   Use ```--subtensor.network test and --netuid 197``` for testnet if you wish to deploy there
+
    ```bash
    btcli subnet register --subtensor.network finney --netuid 49 --wallet.name MINER_COLDKEY_HERE --wallet.hotkey MINER_HOTKEY_HERE
    ```
