@@ -46,6 +46,7 @@ class Miner(BaseMinerNeuron):
         bt.subtensor.add_args(parser)
         bt.logging.add_args(parser)
         bt.wallet.add_args(parser)
+        bt.axon.add_args(parser)
 
         config = bt.config(parser)
 

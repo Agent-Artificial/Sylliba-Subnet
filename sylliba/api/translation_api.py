@@ -132,4 +132,4 @@ class APIServer:
         # Set the default event loop policy to avoid conflicts with uvloop
         asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
         # Start the Uvicorn server with your app
-        uvicorn.run(self.app, host="0.0.0.0", port=self.config.api_port, loop="asyncio", workers=self.config.axon.max_workers)
+        uvicorn.run(self.app, host="0.0.0.0", port=self.config.api_port, loop="asyncio")
