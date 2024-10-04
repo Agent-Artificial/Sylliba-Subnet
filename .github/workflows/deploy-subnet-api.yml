@@ -134,24 +134,7 @@ jobs:
           -p ${{inputs.SUBNET_API_PORT}}:${{inputs.SUBNET_API_PORT}}
           -v /home/ubuntu/.bittensor/wallets:/root/.bittensor/wallets
           -e APP_VERSION=$GITHUB_REF_NAME
-          -e environment=${{inputs.microservice_env}}
-          -e BT_NETWORK=${{inputs.BT_NETWORK}}
-          -e BT_NETUID=${{inputs.BT_NETUID}}
-          -e BT_AXON_MAX_WORKERS=${{inputs.BT_AXON_MAX_WORKERS}}
-          -e BT_WALLET_PATH=${{inputs.BT_WALLET_PATH}}
-          -e SUBNET_API_PORT=${{inputs.SUBNET_API_PORT}}
-          -e BT_AXON_MINER_PORT=${{inputs.BT_AXON_MINER_PORT}}
-          -e BT_AXON_MINER_IP=${{inputs.BT_AXON_MINER_IP}}
-          -e BT_AXON_MINER_EXTERNAL_PORT=${{inputs.BT_AXON_MINER_EXTERNAL_PORT}}
-          -e BT_AXON_MINER_EXTERNAL_IP=${{inputs.BT_AXON_MINER_EXTERNAL_IP}}
-          -e BT_MINER_COLDKEY=${{inputs.BT_MINER_COLDKEY}}
-          -e BT_MINER_HOTKEY=${{inputs.BT_MINER_HOTKEY}}
-          -e BT_AXON_VALIDATOR_PORT=${{inputs.BT_AXON_VALIDATOR_PORT}}
-          -e BT_AXON_VALIDATOR_IP=${{inputs.BT_AXON_VALIDATOR_IP}}
-          -e BT_AXON_VALIDATOR_EXTERNAL_PORT=${{inputs.BT_AXON_VALIDATOR_EXTERNAL_PORT}}
-          -e BT_AXON_VALIDATOR_EXTERNAL_IP=${{inputs.BT_AXON_VALIDATOR_EXTERNAL_IP}}          
-          -e BT_VALIDATOR_COLDKEY=${{inputs.BT_VALIDATOR_COLDKEY}}
-          -e BT_VALIDATOR_HOTKEY=${{inputs.BT_VALIDATOR_HOTKEY}}          
+          -e environment=${{inputs.microservice_env}}      
           -e PYTHONPATH=${{inputs.PYTHONPATH}}
           --gpus all
           --add-host host.docker.internal:host-gateway
@@ -160,3 +143,9 @@ jobs:
           --label "traefik.http.routers.sylliba-api-${{ inputs.microservice_env }}.entrypoints=websecure"
           --label "traefik.http.routers.sylliba-api-${{ inputs.microservice_env }}.tls.certresolver=le"          
           -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} api/run_subnet_api.py
+          --logging.debug
+          --netuid ${{inputs.BT_NETUID}}
+          --subtensor.network ${{inputs.BT_NETWORK}}
+          --wallet.name ${{inputs.BT_VALIDATOR_COLDKEY}}
+          --wallet.hotkey ${{inputs.BT_VALIDATOR_HOTKEY}}
+          --api_port ${{inputs.SUBNET_API_PORT}}
