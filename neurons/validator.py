@@ -109,10 +109,12 @@ class Validator(BaseValidatorNeuron):
         parser = argparse.ArgumentParser()
 
         parser.add_argument("--dev", action=argparse.BooleanOptionalAction)
+        parser.add_argument("--api_port", type=int, default=8080, help="Port for the API")
 
         bt.subtensor.add_args(parser)
         bt.logging.add_args(parser)
         bt.wallet.add_args(parser)
+        bt.axon.add_args(parser)
 
         config = bt.config(parser)
         bt.logging.info(config)

@@ -10,13 +10,7 @@ services:
       - ${BT_AXON_VALIDATOR_PORT}:${BT_AXON_VALIDATOR_PORT}
     volumes:
       - ${HOME}/.bittensor:/root/.bittensor
-    command:
-      - neurons/validator.py 
-      - --subtensor.network ${BT_NETWORK} 
-      - --netuid ${BT_NETUID} 
-      - --wallet.name ${BT_VALIDATOR_COLDKEY} 
-      - --wallet.hotkey ${BT_VALIDATOR_HOTKEY} 
-      - --logging.debug
+    command: "neurons/validator.py --subtensor.network ${BT_NETWORK} --netuid ${BT_NETUID} --wallet.name ${BT_VALIDATOR_COLDKEY} --wallet.hotkey ${BT_VALIDATOR_HOTKEY} --axon.port ${BT_AXON_VALIDATOR_PORT} --axon.ip ${BT_AXON_IP} --axon.external_port ${BT_AXON_VALIDATOR_PORT} --axon.external_ip ${BT_AXON_IP}"
     deploy:
       resources:
         reservations:

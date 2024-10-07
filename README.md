@@ -140,10 +140,17 @@ You can run the following commands in your console to install the Sylliba Subnet
 4. **Set up the environment variables**  
    Edit the `.env` file and configure the necessary values.  (You do not need to fill in the validator parts if you are only running a miner.)
 
-5. **Docker Compose Build:**
+5a. **Miner - Docker Compose Build:**
+   
    ```bash
-   docker compose build
+   docker compose -f docker-compose-miner.yml build
    ```
+
+5b. **Validator - Docker Compose Build:**
+   
+   ```bash
+   docker compose -f docker-compose-validator.yml build
+   ```   
 
 6a. **Miner - Docker Compose Up:**
    ```bash
@@ -173,13 +180,14 @@ You can register a key for use with a miner or validator by executing following 
 
 1. **Registering a validator:**
    Use ```--subtensor.network test and --netuid 197``` for testnet if you wish to deploy there
-   
+
    ```bash
    btcli subnet register --subtensor.network finney --netuid 49 --wallet.name VALIDATOR_COLDKEY_HERE --wallet.hotkey VALIDATOR_HOTKEY_HERE
    ```
 
 2. **Registering a miner:**
-   Use ```--subtensor.network finney and --netuid 49``` for mainnet if you wish to deploy there
+   Use ```--subtensor.network test and --netuid 197``` for testnet if you wish to deploy there
+
    ```bash
    btcli subnet register --subtensor.network finney --netuid 49 --wallet.name MINER_COLDKEY_HERE --wallet.hotkey MINER_HOTKEY_HERE
    ```
@@ -190,7 +198,7 @@ You can register a key for use with a miner or validator by executing following 
 To run multiple miners without docker you can run this command multiple times, once for each miner.
 
 ```bash
-pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --netuid 49 --axon.port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
+pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --netuid 49 --axon.port [port for new miner] --wallet.name [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
 ```
 
 ### Using Docker
@@ -198,13 +206,11 @@ Run multiple miners via Docker Compose.
 
 1. Navigate to the ./docker-multi-miner folder
 
-2. Copy .env.example to .env.  This file is ONLY used for the ports in the docker-compose.yml.  Add lines for the amount of miners you are going to start
+2. Copy .env.example to .env.  This file is ONLY used for the variables in the docker-compose.yml.  Add lines for the amount of miners you are going to start
 
-3. Make a .env# for every miner you want.  Example, copy .env1.example to .env1, then .env2.example to env2.  All of the .env#.example are identical so make as many as you need with the specific miner information.
+3. Edit the docker-compose.yml file.  The one that is there has three miners.  To add more just copy one of them and paste below editing all of the name references (i.e. miner3 to miner4) and the .env file (i.e. .env3 to .env4)
 
-4. Edit the docker-compose.yml file.  The one that is there has three miners.  To add more just copy one of them and paste below editing the name (i.e. miner3 to miner4) and the .env file (i.e. .env3 to .env4)
-
-5. Run this command to launch all of the miners in containers: 
+4. Run this command to launch all of the miners in containers: 
 ```bash
 docker compose up -d 
 ```
