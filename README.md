@@ -198,7 +198,7 @@ You can register a key for use with a miner or validator by executing following 
 To run multiple miners without docker you can run this command multiple times, once for each miner.
 
 ```bash
-pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --netuid 49 --axon.port [port for new miner] --wallet.coldkey [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
+pm2 start neurons/miner.py --name sylliba-miner --interpreter python3 -- --netuid 49 --axon.port [port for new miner] --wallet.name [coldkey for new miner] --wallet.hotkey [hotkey for new miner]
 ```
 
 ### Using Docker
