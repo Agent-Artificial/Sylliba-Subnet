@@ -85,8 +85,8 @@ class APIServer:
         async def get_translation(request: TranslationInput):
             bt.logging.info('request received')
             if request.task_string.startswith('speech'):
-                file_path = _save_raw_audio_file(request.input, 'modules/translation/audio_request.wav')
-                input, sample_rate = await _wav_to_tensor(file_path)
+                file_path = _save_raw_audio_file(request.input)
+                input, _, _, _ = await _wav_to_tensor(file_path)
                 request.input = audio_encode(input)
             
             translation_request = TranslationRequest(data = {

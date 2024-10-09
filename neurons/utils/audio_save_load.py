@@ -39,7 +39,7 @@ async def _wav_to_tensor(file: Union[str, File]) -> torch.Tensor:
     # Convert the numpy array to a PyTorch tensor
     audio_tensor = torch.tensor(audio_data, dtype=torch.float32)
 
-    return audio_tensor, sample_rate
+    return audio_tensor, sample_rate, num_channels, sampwidth
 
 def _tensor_to_wav(tensor: torch.Tensor, file_path: str = None, sample_rate: int = 16000):
     """
@@ -104,7 +104,11 @@ def _save_raw_audio_file(audio_data, file_path: str = None, sample_rate: int = 1
         elif(isinstance(audio_data, str)):
             audio_data = base64.b64decode(audio_data)
         wav_file.writeframes(audio_data)
-
+        
     if file_path:
         print(f"Audio saved as '{file_path}'")
+        
+    if isinstance(file_path, io.BytesIO):
+        file_path.seek(0)
+
     return file_path
