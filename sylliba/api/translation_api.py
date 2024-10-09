@@ -22,7 +22,7 @@ import random
 from fastapi.middleware.cors import CORSMiddleware
 
 from neurons.utils.serialization import audio_decode, audio_encode
-from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
+from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav, _save_raw_audio_file
 from neurons.validator import Validator
 
 
@@ -85,8 +85,8 @@ class APIServer:
         async def get_translation(request: TranslationInput):
             bt.logging.info('request received')
             if request.task_string.startswith('speech'):
-                wav_data = audio_decode(request.input)
-                input, sample_rate = await _wav_to_tensor(io.BytesIO(wav_data))
+                file_path = _save_raw_audio_file(request.input, 'modules/translation/audio_request.wav')
+                input, sample_rate = await _wav_to_tensor(file_path)
                 request.input = audio_encode(input)
             
             translation_request = TranslationRequest(data = {
