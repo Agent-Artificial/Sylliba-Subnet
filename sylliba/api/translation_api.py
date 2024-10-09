@@ -16,13 +16,14 @@ from sylliba.api.subnet_api import SubnetAPI
 import copy
 from sylliba.utils.config import check_config, add_args, config
 from sylliba.protocol import TranslateRequest, HealthCheck
+import wave
 
 import random
 
 from fastapi.middleware.cors import CORSMiddleware
 
 from neurons.utils.serialization import audio_decode, audio_encode
-from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav, _save_raw_audio_file
+from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav, _save_raw_audio_file, _load_raw_audio_file
 from neurons.validator import Validator
 
 
@@ -118,7 +119,8 @@ class APIServer:
                     if translation_request.data['task_string'].endswith('speech'):
                         miner_output_data = audio_decode(response.miner_response)
                         wav_file = _tensor_to_wav(miner_output_data)
-                        miner_output_data = audio_encode(wav_file)
+                        miner_output_data, _, _, _ = _load_raw_audio_file(wav_file)
+                        miner_output_data = base64.b64encode(miner_output_data).decode("utf-8")
                     else:
                         miner_output_data = response.miner_response
                     bt.logging.info(f'DECODED OUTPUT DATA: {miner_output_data}')
