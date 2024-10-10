@@ -25,7 +25,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from neurons.utils.serialization import audio_decode, audio_encode
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav, _save_raw_audio_file, _load_raw_audio_file
 from neurons.validator import Validator
-
+from sylliba.utils.uids import get_miner_uids
+from sylliba.utils.config import add_validator_args
 
 class TranslationInput(BaseModel):
     input: str
@@ -42,6 +43,7 @@ class APIServer:
     @classmethod
     def add_args(cls, parser):
         add_args(cls, parser)
+        add_validator_args(cls, parser)
         
     @classmethod
     def config(cls):
@@ -54,7 +56,7 @@ class APIServer:
 
     def __init__(self, config = None):
         self.config = self.config()
-        self.config.merge(Validator.get_config())
+        self.config.merge(copy.deepcopy(Validator.get_config()))
         
         self.wallet = bt.wallet(config=self.config)
         self.subtensor = bt.subtensor(config=self.config)
@@ -97,21 +99,16 @@ class APIServer:
                 "target_language": request.target_language
             })
             translation_synapse = TranslateRequest(translation_request = translation_request)
-            
-            axons = self.metagraph.axons
-            healthcheck = await self.subnet_api(
-                axons=axons,
-                synapse=HealthCheck(),
-                timeout=5
-            )
-            healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
+    
+            miner_uids = get_miner_uids(self)
+            miner_axons = [self.metagraph.axons[uid] for uid in miner_uids]
         
-            bt.logging.info(f'Health Axons are {healthy_axons}')
+            bt.logging.info(f'Miner Axons are {miner_axons}')
 
             responses = await self.subnet_api(
-                axons=healthy_axons,
+                axons=miner_axons,
                 synapse=translation_synapse,
-                timeout=30
+                timeout=5
             )
             result = []
             for response in responses:
