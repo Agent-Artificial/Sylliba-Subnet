@@ -116,7 +116,10 @@ class APIServer:
                     if translation_request.data['task_string'].endswith('speech'):
                         miner_output_data = audio_decode(response.miner_response)
                         wav_file = _tensor_to_wav(miner_output_data)
-                        miner_output_data, _, _, _ = _load_raw_audio_file(wav_file)
+                        if isinstance(wav_file, io.BytesIO):
+                            miner_output_data = wav_file.getvalue()
+                        elif isinstance(wav_file, str):
+                            miner_output_data = open(wav_file, 'rb').read()
                         miner_output_data = base64.b64encode(miner_output_data).decode("utf-8")
                     else:
                         miner_output_data = response.miner_response
