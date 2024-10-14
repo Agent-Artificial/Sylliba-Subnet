@@ -115,7 +115,8 @@ jobs:
     Deploy-Validator:
         needs: [Variables, Create-Local-Docker-Image]
         uses: ./.github/workflows/deploy-validator.yml
-        with:
+        secrets: inherit
+        with:         
             gpu_index_vali: ${{ needs.variables.outputs.gpu_index_vali }}
             gpu_index_miner: ${{ needs.variables.outputs.gpu_index_miner }}        
             image_tag: ${{ needs.variables.outputs.image_tag }}
