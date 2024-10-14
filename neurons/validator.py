@@ -151,6 +151,14 @@ class Validator(BaseValidatorNeuron):
             self.wandb_run.finish()
     
     def init_wandb(self):
+        wandb_api_key = os.getenv("WANDB_API_KEY")
+        if wandb_api_key is not None:
+            bt.logging.info("Logging into wandb.")
+            wandb.login(key=wandb_api_key)
+        else:
+            bt.logging.warning("WANDB_API_KEY not found in environment variables.")
+            return
+        
         self.wandb_run = None
         self.wandb_run_start = None
         if not self.config.wandb.off:
