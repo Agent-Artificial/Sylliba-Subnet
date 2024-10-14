@@ -156,7 +156,7 @@ class Validator(BaseValidatorNeuron):
             bt.logging.info("Logging into wandb.")
             wandb.login(key=wandb_api_key)
         else:
-            bt.logging.error("WANDB_API_KEY not found in environment variables.")
+            bt.logging.warning("WANDB_API_KEY not found in environment variables.")
             return
         
         self.wandb_run = None
