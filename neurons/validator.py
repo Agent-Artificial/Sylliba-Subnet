@@ -40,6 +40,8 @@ import yaml
 import os
 
 from neurons.utils.serialization import audio_encode, audio_decode
+import wandb
+from datetime import datetime
 
 load_dotenv()
 
@@ -142,6 +144,37 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info("load_state()")
         self.now = time.time()
         self.load_state()
+        self.init_wandb()
+        
+    def __del__(self):
+        if self.wandb_run is not None:
+            self.wandb_run.finish()
+    
+    def init_wandb(self):
+        self.wandb_run = None
+        self.wandb_run_start = None
+        if not self.config.wandb.off:
+            self.new_wandb_run()
+    
+    def new_wandb_run(self):
+        """Creates a new wandb run to save information to."""
+        now = datetime.now()
+        self.wandb_run_start = now
+        run_id = now.strftime("%Y-%m-%d-%H-%M-%S")
+        name = f"validator-{self.uid}-{run_id}"
+        self.wandb_run = wandb.init(
+            project="sylliba",
+            name=name,
+            entity="mltrev23",
+            config={
+                "uid": self.uid,
+                "run_id": run_id,
+                "hotkey": self.wallet.hotkey.ss58_address,
+                "type": "validator",
+            },
+            reinit=True,
+        )
+        bt.logging.debug(f"Started a new wandb run: {name}")
 
     def get_batch(self, batchsize):
         batch = []
