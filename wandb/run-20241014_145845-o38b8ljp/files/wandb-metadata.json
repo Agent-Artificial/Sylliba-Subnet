@@ -1,0 +1,46 @@
+{
+  "os":  "Linux-5.15.0-107-generic-x86_64-with-glibc2.35",
+  "python":  "3.10.12",
+  "startedAt":  "2024-10-14T19:58:45.713257Z",
+  "args":  [
+    "--dev"
+  ],
+  "program":  "/home/mltrev23/bittensor-subnets/Sylliba-Subnet/neurons/validator.py",
+  "codePath":  "neurons/validator.py",
+  "git":  {
+    "remote":  "https://github.com/Agent-Artificial/Sylliba-Subnet.git",
+    "commit":  "fcc7b9dd8f3a6d3718dd1546534e8f93e18bbf86"
+  },
+  "email":  "trevor.dev23@gmail.com",
+  "root":  "/home/mltrev23/bittensor-subnets/Sylliba-Subnet",
+  "host":  "m15364.contaboserver.net",
+  "username":  "root",
+  "executable":  "/home/mltrev23/bittensor-subnets/Sylliba-Subnet/venv/bin/python3",
+  "codePathLocal":  "neurons/validator.py",
+  "cpu_count":  32,
+  "cpu_count_logical":  64,
+  "gpu":  "[NVIDIA A2]",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "3926250954752",
+      "used":  "990032183296"
+    }
+  },
+  "memory":  {
+    "total":  "270164475904"
+  },
+  "cpu":  {
+    "count":  32,
+    "countLogical":  64
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA A2",
+      "memoryTotal":  "16101933056",
+      "cudaCores":  1280,
+      "architecture":  "Ampere"
+    }
+  ],
+  "cudaVersion":  "12.2"
+}
