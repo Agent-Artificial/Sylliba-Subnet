@@ -154,6 +154,11 @@ class Validator(BaseValidatorNeuron):
         self.wandb_run = None
         self.wandb_run_start = None
         if not self.config.wandb.off:
+            if self.config.subtensor.network == "finney":
+                self.wandb_project_name = "sylliba"
+            else:
+                self.wandb_project_name = "sylliba-test"
+            self.wandb_entity = "sylliba-agent-artificial"
             self.new_wandb_run()
     
     def new_wandb_run(self):
@@ -163,9 +168,9 @@ class Validator(BaseValidatorNeuron):
         run_id = now.strftime("%Y-%m-%d-%H-%M-%S")
         name = f"validator-{self.uid}-{run_id}"
         self.wandb_run = wandb.init(
-            project=self.config.wandb.project_name,
+            project=self.wandb_project_name,
             name=name,
-            entity=self.config.wandb.entity,
+            entity=self.wandb_entity,
             config={
                 "uid": self.uid,
                 "run_id": run_id,
