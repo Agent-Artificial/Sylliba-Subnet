@@ -163,9 +163,9 @@ class Validator(BaseValidatorNeuron):
         run_id = now.strftime("%Y-%m-%d-%H-%M-%S")
         name = f"validator-{self.uid}-{run_id}"
         self.wandb_run = wandb.init(
-            project="sylliba",
+            project=self.config.wandb.project_name,
             name=name,
-            entity="mltrev23",
+            entity=self.config.wandb.entity,
             config={
                 "uid": self.uid,
                 "run_id": run_id,
