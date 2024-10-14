@@ -154,14 +154,14 @@ def add_miner_args(cls, parser):
     parser.add_argument(
         "--wandb.project_name",
         type=str,
-        default="template-miners",
+        default="sylliba",
         help="Wandb project to log to.",
     )
 
     parser.add_argument(
         "--wandb.entity",
         type=str,
-        default="opentensor-dev",
+        default="sylliba-agent-artificial",
         help="Wandb entity to log to.",
     )
 
