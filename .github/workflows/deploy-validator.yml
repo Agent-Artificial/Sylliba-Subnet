@@ -136,6 +136,7 @@ jobs:
           -e environment=${{inputs.microservice_env}}
           -e SUBNET_API_PORT=${{inputs.SUBNET_API_PORT}}
           -e PYTHONPATH=${{inputs.PYTHONPATH}}
+          -e WANDB_API_KEY=${{secrets.WANDB_API_KEY}}
           --gpus "device=${{inputs.gpu_index_vali}}"
           --add-host host.docker.internal:host-gateway
           -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/validator.py

@@ -40,6 +40,8 @@ import yaml
 import os
 
 from neurons.utils.serialization import audio_encode, audio_decode
+import wandb
+from datetime import datetime
 
 load_dotenv()
 
@@ -142,6 +144,50 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info("load_state()")
         self.now = time.time()
         self.load_state()
+        self.init_wandb()
+        
+    def __del__(self):
+        if self.wandb_run is not None:
+            self.wandb_run.finish()
+    
+    def init_wandb(self):
+        wandb_api_key = os.getenv("WANDB_API_KEY")
+        if wandb_api_key is not None:
+            bt.logging.info("Logging into wandb.")
+            wandb.login(key=wandb_api_key)
+        else:
+            bt.logging.warning("WANDB_API_KEY not found in environment variables.")
+            return
+        
+        self.wandb_run = None
+        self.wandb_run_start = None
+        if not self.config.wandb.off:
+            if self.config.subtensor.network == "finney":
+                self.wandb_project_name = "sylliba"
+            else:
+                self.wandb_project_name = "sylliba-test"
+            self.wandb_entity = "sylliba-agent-artificial"
+            self.new_wandb_run()
+    
+    def new_wandb_run(self):
+        """Creates a new wandb run to save information to."""
+        now = datetime.now()
+        self.wandb_run_start = now
+        run_id = now.strftime("%Y-%m-%d-%H-%M-%S")
+        name = f"validator-{self.uid}"
+        self.wandb_run = wandb.init(
+            project=self.wandb_project_name,
+            name=name,
+            entity=self.wandb_entity,
+            config={
+                "uid": self.uid,
+                "run_id": run_id,
+                "hotkey": self.wallet.hotkey.ss58_address,
+                "type": "validator",
+            },
+            reinit=True,
+        )
+        bt.logging.debug(f"Started a new wandb run: {name}")
 
     def get_batch(self, batchsize):
         batch = []
@@ -173,7 +219,6 @@ class Validator(BaseValidatorNeuron):
 
         # Generating the query
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
-        bt.logging.debug(f"sample_request: {str(sample_request)}")
 
         if task_string.startswith('speech'):
             try:
@@ -293,11 +338,6 @@ class Validator(BaseValidatorNeuron):
             outputs.append(output_data)
         
         bt.logging.info(f'Generated Query Input Text: {input_data}')
-        bt.logging.info(f'Generated Query Sample Output Text: {outputs}')
-
-        bt.logging.debug(f"generate_query:outputs:{outputs}")
-
-        bt.logging.debug(f"generate_query:outputs:{outputs}")
 
         if task_string.startswith("speech"):
             input_data = tts.process(input_data, source_language)
