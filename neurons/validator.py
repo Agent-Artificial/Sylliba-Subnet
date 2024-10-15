@@ -219,7 +219,6 @@ class Validator(BaseValidatorNeuron):
 
         # Generating the query
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
-        bt.logging.debug(f"sample_request: {str(sample_request)}")
 
         if task_string.startswith('speech'):
             try:
@@ -339,11 +338,6 @@ class Validator(BaseValidatorNeuron):
             outputs.append(output_data)
         
         bt.logging.info(f'Generated Query Input Text: {input_data}')
-        bt.logging.info(f'Generated Query Sample Output Text: {outputs}')
-
-        bt.logging.debug(f"generate_query:outputs:{outputs}")
-
-        bt.logging.debug(f"generate_query:outputs:{outputs}")
 
         if task_string.startswith("speech"):
             input_data = tts.process(input_data, source_language)
