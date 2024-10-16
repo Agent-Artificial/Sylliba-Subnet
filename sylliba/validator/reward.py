@@ -29,7 +29,7 @@ from nltk.translate.bleu_score import sentence_bleu
 from difflib import SequenceMatcher
 import numpy as np
 
-def reward_text(miner_response: str, sample_output: str) -> float:
+def reward_text(miner_response: str, module) -> float:
     bt.logging.info('-------------------------------- REWARD_TEXT HERE ---------------------------------')
     bt.logging.info(f'miner_response : {miner_response}')
     bt.logging.info(f'sample_output : {sample_output}')

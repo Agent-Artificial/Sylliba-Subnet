@@ -273,7 +273,7 @@ class Validator(BaseValidatorNeuron):
                     results.append(
                         float(self.process_validator_output(
                             miner_output_data,
-                            sample_request['output'],
+                            # sample_request['output'],
                             task_string
                         )) # 'numpy.float64' object cannot be interpreted as integer
                     )
@@ -295,11 +295,11 @@ class Validator(BaseValidatorNeuron):
         
     # ? Regardless of the type, this is the "sum" of one and divided by 1?
     # ? Is this so we can come up with more reward functions and add them?
-    def process_validator_output(self, miner_response, sample_outputs, task_string):
+    def process_validator_output(self, miner_response, task_string):
         if task_string.endswith('text'):
-            scores = [reward_text(miner_response, sample_output) for sample_output in sample_outputs]
+            scores = [reward_text(miner_response, import_module(llm)) for llm in LLMS]
         else:
-            scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
+            scores = [reward_speech(miner_response, import_module(llm)) for llm in LLMS]
         return sum(scores) / len(scores)
     
     def generate_input_data(self, llm, topic, source_language, device):
@@ -343,7 +343,7 @@ class Validator(BaseValidatorNeuron):
             input_data = tts.process(input_data, source_language)
         return {
                     "input": input_data,
-                    "output": outputs,
+                    # "output": outputs,
                     "task_string": task_string,
                     "source_language": source_language,
                     "target_language": target_language
