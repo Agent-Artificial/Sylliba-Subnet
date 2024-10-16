@@ -174,7 +174,7 @@ class Validator(BaseValidatorNeuron):
         now = datetime.now()
         self.wandb_run_start = now
         run_id = now.strftime("%Y-%m-%d-%H-%M-%S")
-        name = f"validator-{self.uid}-{run_id}"
+        name = f"validator-{self.uid}"
         self.wandb_run = wandb.init(
             project=self.wandb_project_name,
             name=name,
@@ -219,7 +219,6 @@ class Validator(BaseValidatorNeuron):
 
         # Generating the query
         sample_request = await self.generate_query(target_language, source_language, task_string, topic)
-        bt.logging.debug(f"sample_request: {str(sample_request)}")
 
         if task_string.startswith('speech'):
             try:
@@ -339,11 +338,6 @@ class Validator(BaseValidatorNeuron):
             outputs.append(output_data)
         
         bt.logging.info(f'Generated Query Input Text: {input_data}')
-        bt.logging.info(f'Generated Query Sample Output Text: {outputs}')
-
-        bt.logging.debug(f"generate_query:outputs:{outputs}")
-
-        bt.logging.debug(f"generate_query:outputs:{outputs}")
 
         if task_string.startswith("speech"):
             input_data = tts.process(input_data, source_language)
