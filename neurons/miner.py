@@ -22,7 +22,6 @@ import typing
 import os
 import asyncio
 from pathlib import Path
-from loguru import logger
 from importlib import import_module
 import bittensor as bt
 
@@ -65,8 +64,6 @@ class Miner(BaseMinerNeuron):
     
     def __init__(self, config=None, module_name="translation"):
         super(Miner, self).__init__(config=Miner.get_config())
-        logger.info(config)
-        logger.info(self.axon.info())
         self.module = import_module('modules.translation.translation')
         self.axon.attach(forward_fn=self.healthcheck)
         self.translation = Translation(self.device)

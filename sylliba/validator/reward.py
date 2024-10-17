@@ -43,8 +43,10 @@ def evaluate_audio_quality_from_tensor(audio_tensor, sample_rate = 16000):
     # Calculate signal-to-noise ratio (SNR)
     audio_tensor = audio_tensor.flatten()
     noise_threshold = np.percentile(np.abs(audio_tensor), 25)  # assuming low amplitudes represent noise
-    signal_power = np.mean(audio_tensor**2, axis=0)
-    noise_power = np.mean((audio_tensor[audio_tensor < noise_threshold])**2, axis=0)
+    bt.logging.info(f'audio tensor is {audio_tensor}')
+    bt.logging.info(f'square of audio tensor is {(audio_tensor**2)}')
+    signal_power = (audio_tensor**2).mean()
+    noise_power = ((audio_tensor[audio_tensor < noise_threshold])**2).mean()
     snr = 10 * np.log10(signal_power / noise_power) if noise_power > 0 else float('inf')
 
     # Return quality metrics
