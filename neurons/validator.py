@@ -43,60 +43,10 @@ from neurons.utils.serialization import audio_encode, audio_decode
 import wandb
 from datetime import datetime
 
+from neurons.enums.task import *
+from neurons.enums.models import *
+
 load_dotenv()
-
-TASK_STRINGS = [
-    "text2text",
-    "text2speech",
-    "speech2text",
-    "speech2speech",
-]
-
-TARGET_LANGUAGES = [
-    "English",
-    "French",
-    "Spanish",
-    "German",
-    "Italian"
-]
-
-TOPICS = [
-    "Time travel mishap",
-    "Unexpected inheritance",
-    "Last day on Earth",
-    "Secret underground society",
-    "Talking animal companion",
-    "Mysterious recurring dream",
-    "Alien first contact",
-    "Memory-erasing technology",
-    "Haunted antique shop",
-    "Parallel universe discovery"
-]
-
-LLMS : list[str] = [
-    "modules.llms.llama",
-    # "modules.llms.flan_t5_large"
-]
-
-TTS : list[str] = [
-    "modules.tts.seamless"
-]
-
-MODELS: dict = {
-}
-
-PROMPTS: dict = {
-    "GENERATE_INPUT_DATA": """You are an expert story teller.
-You can write short stories that capture the imagination, 
-end readers on an adventure and complete an alegorical thought all within 100~200 words. 
-Please write a short story about {topic} in {source_language}. 
-Keep the story short but be sure to use an alegory and complete the idea.""",
-    "GENERATE_OUTPUT_DATA": """
-Provided text is written in {source_language}.
-Please translate into {target_language}
-Don't put any tags, description or decorators.
-Write only translated text in raw text format.
-"""}
 
 class Validator(BaseValidatorNeuron):
     """
@@ -239,16 +189,6 @@ class Validator(BaseValidatorNeuron):
         miner_uids = get_miner_uids(self)
         miner_axons = [self.metagraph.axons[uid] for uid in miner_uids]
         bt.logging.debug(f"Miner axons are {miner_axons}")
-        # healthcheck = await self.dendrite(
-        #         axons=[self.metagraph.axons[uid] for uid in miner_uids],
-        #         synapse=HealthCheck(),
-        #         deserialize=False,
-        #         timeout=30
-        #     )
-        # healthy_axons = [axons[i] for i, check in enumerate(healthcheck) if check.response is True]
-        # healthy_axon_uids = [i for i, check in enumerate(healthcheck) if check.response is True]
-        
-        # bt.logging.info(f'Health Axons are {healthy_axons}')
         results = []
 
         synapse = TranslateRequest(
@@ -273,7 +213,7 @@ class Validator(BaseValidatorNeuron):
                     results.append(
                         float(self.process_validator_output(
                             miner_output_data,
-                            sample_request['output'],
+                            sample_request['input_string'],
                             task_string
                         )) # 'numpy.float64' object cannot be interpreted as integer
                     )
@@ -285,7 +225,8 @@ class Validator(BaseValidatorNeuron):
             bt.logging.error(f"Failed to query miners with exception: {e}")
         
         # Updating the scores
-        bt.logging.debug(f"Results: {results}")
+        bt.logging.info(f"Results: {results}")
+        bt.logging.info(f"miner_uids: {miner_uids}")
         self.update_scores(np.array(results), miner_uids)    
             
         # Set weights
@@ -295,11 +236,11 @@ class Validator(BaseValidatorNeuron):
         
     # ? Regardless of the type, this is the "sum" of one and divided by 1?
     # ? Is this so we can come up with more reward functions and add them?
-    def process_validator_output(self, miner_response, sample_outputs, task_string):
+    def process_validator_output(self, miner_response, input_string, task_string):
         if task_string.endswith('text'):
-            scores = [reward_text(miner_response, sample_output) for sample_output in sample_outputs]
+            scores = [reward_text(miner_response, input_string, import_module(llm)) for llm in LLMS]
         else:
-            scores = [reward_speech(miner_response, sample_output) for sample_output in sample_outputs]
+            scores = [reward_speech(miner_response, input_string, import_module(llm)) for llm in LLMS]
         return sum(scores) / len(scores)
     
     def generate_input_data(self, llm, topic, source_language, device):
@@ -321,29 +262,13 @@ class Validator(BaseValidatorNeuron):
         llm = import_module(LLMS[0])
         tts = self.select_random_module(TTS)
 
-        bt.logging.debug(f"generate_query:llm:{llm}")
-        bt.logging.debug(f"generate_query:tts:{tts}")
-        input_data = self.generate_input_data(llm, topic, source_language, self.device)
-        bt.logging.debug(f"generate_query:input_data:{input_data}")
-
-        outputs = []
-
-        for llm_module in LLMS:
-            llm = import_module(llm_module)
-            
-            output_data = self.generate_output_data(llm, input_data, source_language, target_language, self.device)
-
-            if task_string.endswith("speech"):
-                output_data = tts.process(output_data, target_language)
-            outputs.append(output_data)
-        
-        bt.logging.info(f'Generated Query Input Text: {input_data}')
+        input_string = self.generate_input_data(llm, topic, source_language, self.device)
 
         if task_string.startswith("speech"):
-            input_data = tts.process(input_data, source_language)
+            input_data = tts.process(input_string, source_language)
         return {
-                    "input": input_data,
-                    "output": outputs,
+                    "input": input_data if task_string.startswith("speech") else input_string,
+                    "input_string": input_string,
                     "task_string": task_string,
                     "source_language": source_language,
                     "target_language": target_language

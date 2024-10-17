@@ -1,7 +1,7 @@
 from transformers import AutoProcessor, SeamlessM4Tv2Model, pipeline
 import torch
 
-from neurons.validator import MODELS
+from neurons.enums.models import MODELS
 from neurons.utils.model_load import load_seamless
 from modules.translation.data_models import TARGET_LANGUAGES
 

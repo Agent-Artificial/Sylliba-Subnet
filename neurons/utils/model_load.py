@@ -1,4 +1,9 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline, T5Tokenizer, T5ForConditionalGeneration, AutoProcessor, SeamlessM4Tv2Model
+from transformers import (
+    AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, 
+    pipeline, T5Tokenizer, T5ForConditionalGeneration, 
+    AutoProcessor, SeamlessM4Tv2Model, 
+    Wav2Vec2ForCTC, Wav2Vec2Tokenizer
+)
 import torch
 
 def load_flan_t5_large(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
@@ -39,6 +44,14 @@ def load_seamless(device = torch.device("cuda" if torch.cuda.is_available() else
     model = SeamlessM4Tv2Model.from_pretrained(model_id).to(device)
 
     return model, processor
+
+def load_wav2vec(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+    model_id = "facebook/wav2vec2-base-960h"
+
+    tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
+    model = Wav2Vec2ForCTC.from_pretrained(model_id).to(device)
+
+    return model, tokenizer
 
 def load_llama(device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     
