@@ -29,7 +29,7 @@ def process(messages: List[Dict[str, Any]], device = torch.device("cuda" if torc
 
     # Generate answer
     with torch.no_grad():
-        output_ids = model.generate(input_ids, max_length=1024, num_return_sequences = 1).to(device)
+        output_ids = model.generate(input_ids, max_new_tokens=1024, num_return_sequences = 1).to(device)
 
     # Decode the generated answer
     output_answer = tokenizer.decode(output_ids[0], skip_special_tokens=True)

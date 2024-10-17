@@ -225,7 +225,8 @@ class Validator(BaseValidatorNeuron):
             bt.logging.error(f"Failed to query miners with exception: {e}")
         
         # Updating the scores
-        bt.logging.debug(f"Results: {results}")
+        bt.logging.info(f"Results: {results}")
+        bt.logging.info(f"miner_uids: {miner_uids}")
         self.update_scores(np.array(results), miner_uids)    
             
         # Set weights
