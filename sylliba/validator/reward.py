@@ -20,53 +20,24 @@ import numpy as np
 import torch
 from typing import List
 import bittensor as bt
-from sklearn.feature_extraction.text import CountVectorizer
-from scipy.special import expit
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from nltk.translate.bleu_score import sentence_bleu
-from difflib import SequenceMatcher
+import modules.asr.wav2vec as wav2vec
 import numpy as np
 
-def reward_text(miner_response: str, input_string: str, module) -> float:
-    prompt = """Evaluate the following translation:\n\n\
-Original Text: {original}\n\
-Translation: {translation}\n\n\
-Rate the quality of this translation on a scale from 0 to 10, floating point is possible\
-where 0 means it's very poor and 10 means it's flawless. Please provide only the number."""
+from neurons.enums.models import PROMPTS
 
-    score = float(module.process(prompt.format(translation=miner_response, original=input_string)))
+import librosa
+
+def reward_text(miner_response: str, input_string: str, module) -> float:
+    messages = [{"role": "system", "content": PROMPTS["EVALUATE_RESULT"].format(translation=miner_response, original=input_string)}]
+
+    score = float(module.process(messages))
+    print("Translation Evaluation:", score)
     
     return score
 
-from scipy.spatial.distance import euclidean
-import librosa
-from google.cloud import speech_v1p1beta1 as speech
-
-def transcribe_audio(file_path):
-    client = speech.SpeechClient()
-    with open(file_path, 'rb') as audio_file:
-        content = audio_file.read()
-
-    audio = speech.RecognitionAudio(content=content)
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        sample_rate_hertz=16000,
-        language_code="en-US"
-    )
-
-    response = client.recognize(config=config, audio=audio)
-    
-    # Extract transcription from the response
-    transcription = ""
-    for result in response.results:
-        transcription += result.alternatives[0].transcript
-
-    return transcription
-
 def evaluate_audio_quality_from_tensor(audio_tensor, sample_rate = 16000):
     # Calculate loudness (RMS - Root Mean Square)
+    audio_tensor = audio_tensor.cpu()
     rms = np.mean(librosa.feature.rms(y=audio_tensor))
 
     # Calculate signal-to-noise ratio (SNR)
@@ -80,7 +51,7 @@ def evaluate_audio_quality_from_tensor(audio_tensor, sample_rate = 16000):
 
 def reward_speech(miner_audio: torch.Tensor, input_string: str, module) -> float:
     # Step 1: Transcribe the audio
-    transcription = transcribe_audio(miner_audio)
+    transcription = wav2vec.process(miner_audio)
 
     # Step 2: Evaluate the transcription
     transcription_evaluation = reward_text(transcription, input_string, module)
@@ -91,9 +62,6 @@ def reward_speech(miner_audio: torch.Tensor, input_string: str, module) -> float
     print("Audio Quality Evaluation:", audio_quality)
     
     return transcription_evaluation * 0.5 + audio_quality * 0.5
-
-
-
 
 def get_rewards(
     query: int,

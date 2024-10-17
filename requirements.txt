@@ -21,3 +21,4 @@ sentencepiece==0.2.0
 python-multipart==0.0.10
 transformers==4.45.1
 wandb==0.18.3
+google-cloud-speech==2.27.0

@@ -2,7 +2,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 from typing import List, Dict, Any
 
-from neurons.validator import MODELS
+from neurons.enums.models import MODELS
 from neurons.utils.model_load import load_meta_llama
 
 def process(messages: List[Dict[str, Any]], device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):

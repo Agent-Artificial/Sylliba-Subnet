@@ -20,7 +20,7 @@ import bittensor as bt
 from neurons.utils.serialization import audio_encode, audio_decode
 from neurons.utils.audio_save_load import _wav_to_tensor, _tensor_to_wav
 
-from neurons.validator import MODELS
+from neurons.enums.models import MODELS
 from neurons.utils.model_load import load_seamless
 
 class Translation:

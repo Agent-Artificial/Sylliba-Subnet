@@ -43,60 +43,10 @@ from neurons.utils.serialization import audio_encode, audio_decode
 import wandb
 from datetime import datetime
 
+from neurons.enums.task import *
+from neurons.enums.models import *
+
 load_dotenv()
-
-TASK_STRINGS = [
-    "text2text",
-    "text2speech",
-    "speech2text",
-    "speech2speech",
-]
-
-TARGET_LANGUAGES = [
-    "English",
-    "French",
-    "Spanish",
-    "German",
-    "Italian"
-]
-
-TOPICS = [
-    "Time travel mishap",
-    "Unexpected inheritance",
-    "Last day on Earth",
-    "Secret underground society",
-    "Talking animal companion",
-    "Mysterious recurring dream",
-    "Alien first contact",
-    "Memory-erasing technology",
-    "Haunted antique shop",
-    "Parallel universe discovery"
-]
-
-LLMS : list[str] = [
-    "modules.llms.llama",
-    # "modules.llms.flan_t5_large"
-]
-
-TTS : list[str] = [
-    "modules.tts.seamless"
-]
-
-MODELS: dict = {
-}
-
-PROMPTS: dict = {
-    "GENERATE_INPUT_DATA": """You are an expert story teller.
-You can write short stories that capture the imagination, 
-end readers on an adventure and complete an alegorical thought all within 100~200 words. 
-Please write a short story about {topic} in {source_language}. 
-Keep the story short but be sure to use an alegory and complete the idea.""",
-    "GENERATE_OUTPUT_DATA": """
-Provided text is written in {source_language}.
-Please translate into {target_language}
-Don't put any tags, description or decorators.
-Write only translated text in raw text format.
-"""}
 
 class Validator(BaseValidatorNeuron):
     """
@@ -244,35 +194,35 @@ class Validator(BaseValidatorNeuron):
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
-        try:
-            responses = await self.dendrite(
-                axons=miner_axons,
-                synapse=synapse,
-                deserialize=False,
-                timeout=300
-            )
-            bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
-            # Processing miner output into rewards
-            for j in range(0, len(responses)):
-                if responses[j].miner_response is not None:
-                    if task_string.endswith('speech'):
-                        miner_output_data = audio_decode(responses[j].miner_response)
-                    else:
-                        miner_output_data = responses[j].miner_response
-                    
-                    results.append(
-                        float(self.process_validator_output(
-                            miner_output_data,
-                            sample_request['input_string'],
-                            task_string
-                        )) # 'numpy.float64' object cannot be interpreted as integer
-                    )
+        # try:
+        responses = await self.dendrite(
+            axons=miner_axons,
+            synapse=synapse,
+            deserialize=False,
+            timeout=300
+        )
+        bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
+        # Processing miner output into rewards
+        for j in range(0, len(responses)):
+            if responses[j].miner_response is not None:
+                if task_string.endswith('speech'):
+                    miner_output_data = audio_decode(responses[j].miner_response)
                 else:
-                    results.append(
-                        0
-                    )
-        except Exception as e:
-            bt.logging.error(f"Failed to query miners with exception: {e}")
+                    miner_output_data = responses[j].miner_response
+                
+                results.append(
+                    float(self.process_validator_output(
+                        miner_output_data,
+                        sample_request['input_string'],
+                        task_string
+                    )) # 'numpy.float64' object cannot be interpreted as integer
+                )
+            else:
+                results.append(
+                    0
+                )
+        # except Exception as e:
+        #     bt.logging.error(f"Failed to query miners with exception: {e}")
         
         # Updating the scores
         bt.logging.debug(f"Results: {results}")
@@ -316,7 +266,7 @@ class Validator(BaseValidatorNeuron):
         if task_string.startswith("speech"):
             input_data = tts.process(input_string, source_language)
         return {
-                    "input": input_data,
+                    "input": input_data if task_string.startswith("speech") else input_string,
                     "input_string": input_string,
                     "task_string": task_string,
                     "source_language": source_language,
