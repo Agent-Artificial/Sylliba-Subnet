@@ -194,35 +194,35 @@ class Validator(BaseValidatorNeuron):
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
-        # try:
-        responses = await self.dendrite(
-            axons=miner_axons,
-            synapse=synapse,
-            deserialize=False,
-            timeout=300
-        )
-        bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
-        # Processing miner output into rewards
-        for j in range(0, len(responses)):
-            if responses[j].miner_response is not None:
-                if task_string.endswith('speech'):
-                    miner_output_data = audio_decode(responses[j].miner_response)
+        try:
+            responses = await self.dendrite(
+                axons=miner_axons,
+                synapse=synapse,
+                deserialize=False,
+                timeout=300
+            )
+            bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
+            # Processing miner output into rewards
+            for j in range(0, len(responses)):
+                if responses[j].miner_response is not None:
+                    if task_string.endswith('speech'):
+                        miner_output_data = audio_decode(responses[j].miner_response)
+                    else:
+                        miner_output_data = responses[j].miner_response
+                    
+                    results.append(
+                        float(self.process_validator_output(
+                            miner_output_data,
+                            sample_request['input_string'],
+                            task_string
+                        )) # 'numpy.float64' object cannot be interpreted as integer
+                    )
                 else:
-                    miner_output_data = responses[j].miner_response
-                
-                results.append(
-                    float(self.process_validator_output(
-                        miner_output_data,
-                        sample_request['input_string'],
-                        task_string
-                    )) # 'numpy.float64' object cannot be interpreted as integer
-                )
-            else:
-                results.append(
-                    0
-                )
-        # except Exception as e:
-        #     bt.logging.error(f"Failed to query miners with exception: {e}")
+                    results.append(
+                        0
+                    )
+        except Exception as e:
+            bt.logging.error(f"Failed to query miners with exception: {e}")
         
         # Updating the scores
         bt.logging.debug(f"Results: {results}")
