@@ -29,5 +29,6 @@ services:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - postgres_network
+
+volumes:
+  postgres_data:
