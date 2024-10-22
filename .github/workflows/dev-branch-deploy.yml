@@ -150,6 +150,7 @@ jobs:
     Deploy-Miner:
         needs: [Variables, Create-Local-Docker-Image]
         uses: ./.github/workflows/deploy-miner.yml
+        secrets: inherit
         with:
             gpu_index_vali: ${{ needs.variables.outputs.gpu_index_vali }}
             gpu_index_miner: ${{ needs.variables.outputs.gpu_index_miner }}            
@@ -184,6 +185,7 @@ jobs:
     Deploy-Subnet-API:
         needs: [Variables, Create-Local-Docker-Image]
         uses: ./.github/workflows/deploy-subnet-api.yml
+        secrets: inherit        
         with:
             gpu_index_vali: ${{ needs.variables.outputs.gpu_index_vali }}
             gpu_index_miner: ${{ needs.variables.outputs.gpu_index_miner }}            
