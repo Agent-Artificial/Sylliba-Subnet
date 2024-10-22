@@ -147,7 +147,7 @@ jobs:
           -e environment=${{inputs.microservice_env}}
           -e SUBNET_API_PORT=${{inputs.SUBNET_API_PORT}}
           -e PYTHONPATH=${{inputs.PYTHONPATH}}
-          --gpus "device=${{inputs.gpu_index_vali}}"
+          --gpus "device=${{inputs.gpu_index_miner}}"
           --add-host host.docker.internal:host-gateway
           -d ${{env.REPO}}/${{ inputs.microservice }}-${{ inputs.microservice_env }}:${{ inputs.image_tag }} neurons/miner.py
           --netuid ${{inputs.BT_NETUID}}
