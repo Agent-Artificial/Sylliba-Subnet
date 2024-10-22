@@ -53,12 +53,11 @@ def evaluate_audio_quality_from_tensor(audio_tensor, sample_rate = 16000):
     return rms, snr
 
 def reward_speech(miner_audio: torch.Tensor, input_string: str, llm_module_name: str) -> float:
-    module = import_module(llm_module_name)
     # Step 1: Transcribe the audio
     transcription = wav2vec.process(miner_audio)
 
     # Step 2: Evaluate the transcription
-    transcription_evaluation = reward_text(transcription, input_string, module)
+    transcription_evaluation = reward_text(transcription, input_string, llm_module_name)
     print("Transcription Evaluation:", transcription_evaluation)
     
     # Step 3: Evaluate the audio quality
