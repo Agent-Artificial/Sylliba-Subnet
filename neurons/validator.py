@@ -201,39 +201,39 @@ class Validator(BaseValidatorNeuron):
         synapse = TranslateRequest(
             translation_request=translation_request,
         )
-        # try:
-        responses = await self.dendrite(
-            axons=miner_axons,
-            synapse=synapse,
-            deserialize=False,
-            timeout=300
-        )
-        bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
-        # Processing miner output into rewards
-        for j in range(0, len(responses)):
-            if responses[j].miner_response is not None:
-                if task_string.endswith('speech'):
-                    miner_output_data = audio_decode(responses[j].miner_response)
-                else:
-                    miner_output_data = responses[j].miner_response
-                
-                scores = self.process_validator_output(
-                        miner_output_data,
-                        sample_request['input_string'],
-                        task_string
-                    ) # 'numpy.float64' object cannot be interpreted as integer
-                results.append(sum([score['overall_score'] for score in scores]) / len(scores))
+        try:
+            responses = await self.dendrite(
+                axons=miner_axons,
+                synapse=synapse,
+                deserialize=False,
+                timeout=300
+            )
+            bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
+            # Processing miner output into rewards
+            for j in range(0, len(responses)):
+                if responses[j].miner_response is not None:
+                    if task_string.endswith('speech'):
+                        miner_output_data = audio_decode(responses[j].miner_response)
+                    else:
+                        miner_output_data = responses[j].miner_response
+                    
+                    scores = self.process_validator_output(
+                            miner_output_data,
+                            sample_request['input_string'],
+                            task_string
+                        ) # 'numpy.float64' object cannot be interpreted as integer
+                    results.append(sum([score['overall_score'] for score in scores]) / len(scores))
 
-                for score in scores:
-                    self.db_manager.add_entry(miner_uids[j], miner_input_data, task_string, source_language, target_language, 
-                                            responses[j].miner_response, score['text_score'], score['rms'], score['snr'], 
-                                            score['overall_socre'], score['llm_module_name'])
-            else:
-                results.append(
-                    0
-                )
-        # except Exception as e:
-        #     bt.logging.error(f"Failed to query miners with exception: {e}")
+                    for score in scores:
+                        self.db_manager.add_entry(miner_uids[j], miner_input_data, task_string, source_language, target_language, 
+                                                responses[j].miner_response, score['text_score'], score['rms'], score['snr'], 
+                                                score['overall_socre'], score['llm_module_name'])
+                else:
+                    results.append(
+                        0
+                    )
+        except Exception as e:
+            bt.logging.error(f"Failed to query miners with exception: {e}")
         
         # Updating the scores
         bt.logging.info(f"Results: {results}")
