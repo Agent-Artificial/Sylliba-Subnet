@@ -22,18 +22,20 @@ from typing import List
 import bittensor as bt
 import modules.asr.wav2vec as wav2vec
 import numpy as np
+from importlib import import_module
 
 from neurons.enums.models import PROMPTS
 
 import librosa
 
-def reward_text(miner_response: str, input_string: str, module) -> float:
+def reward_text(miner_response: str, input_string: str, llm_module_name: str) -> float:
+    module = import_module(llm_module_name)
     messages = [{"role": "system", "content": PROMPTS["EVALUATE_RESULT"].format(translation=miner_response, original=input_string)}]
 
     score = float(module.process(messages))
     print("Translation Evaluation:", score)
     
-    return score
+    return {'text_score': score, 'overall_score': score, 'module_name': llm_module_name}
 
 def evaluate_audio_quality_from_tensor(audio_tensor, sample_rate = 16000):
     # Calculate loudness (RMS - Root Mean Square)
@@ -48,9 +50,10 @@ def evaluate_audio_quality_from_tensor(audio_tensor, sample_rate = 16000):
     snr = 10 * np.log10(signal_power / noise_power) if noise_power > 0 else float('inf')
 
     # Return quality metrics
-    return rms * 0.5 + snr * 0.5
+    return rms, snr
 
-def reward_speech(miner_audio: torch.Tensor, input_string: str, module) -> float:
+def reward_speech(miner_audio: torch.Tensor, input_string: str, llm_module_name: str) -> float:
+    module = import_module(llm_module_name)
     # Step 1: Transcribe the audio
     transcription = wav2vec.process(miner_audio)
 
@@ -59,10 +62,10 @@ def reward_speech(miner_audio: torch.Tensor, input_string: str, module) -> float
     print("Transcription Evaluation:", transcription_evaluation)
     
     # Step 3: Evaluate the audio quality
-    audio_quality = evaluate_audio_quality_from_tensor(miner_audio)
-    print("Audio Quality Evaluation:", audio_quality)
+    rms, snr = evaluate_audio_quality_from_tensor(miner_audio)
+    print(f"Audio Quality Evaluation: rms({rms}), snr({snr})")
     
-    return transcription_evaluation * 0.5 + audio_quality * 0.5
+    return {"overall_score": transcription_evaluation * 0.5 + rms * 0.25 + snr * 0.25, "text_score": transcription_evaluation, 'rms': rms, 'snr': snr, 'module_name': llm_module_name}
 
 def get_rewards(
     query: int,

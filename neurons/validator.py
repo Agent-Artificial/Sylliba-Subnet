@@ -46,6 +46,8 @@ from datetime import datetime
 from neurons.enums.task import *
 from neurons.enums.models import *
 
+from db.db_manager import DBManager
+
 load_dotenv()
 
 class Validator(BaseValidatorNeuron):
@@ -93,8 +95,11 @@ class Validator(BaseValidatorNeuron):
         self.current_batch = self.get_batch(self.batch_size)
         bt.logging.info("load_state()")
         self.now = time.time()
+
         self.load_state()
         self.init_wandb()
+
+        self.db_manager = DBManager()
         
     def __del__(self):
         if self.wandb_run is not None:
@@ -210,13 +215,17 @@ class Validator(BaseValidatorNeuron):
                     else:
                         miner_output_data = responses[j].miner_response
                     
-                    results.append(
-                        float(self.process_validator_output(
+                    scores = self.process_validator_output(
                             miner_output_data,
                             sample_request['input_string'],
                             task_string
-                        )) # 'numpy.float64' object cannot be interpreted as integer
-                    )
+                        ) # 'numpy.float64' object cannot be interpreted as integer
+                    results.append(sum([score['overall_score'] for score in scores]) / len(scores))
+
+                    for score in scores:
+                        self.db_manager.add_entry(miner_uids[j], miner_input_data, task_string, source_language, target_language, 
+                                              responses[j].miner_response, score['text_score'], score['audio_quality_score'], 
+                                              score['overall_socre'], score['llm_module_name'])
                 else:
                     results.append(
                         0
@@ -238,10 +247,10 @@ class Validator(BaseValidatorNeuron):
     # ? Is this so we can come up with more reward functions and add them?
     def process_validator_output(self, miner_response, input_string, task_string):
         if task_string.endswith('text'):
-            scores = [reward_text(miner_response, input_string, import_module(llm)) for llm in LLMS]
+            scores = [reward_text(miner_response, input_string, llm) for llm in LLMS]
         else:
-            scores = [reward_speech(miner_response, input_string, import_module(llm)) for llm in LLMS]
-        return sum(scores) / len(scores)
+            scores = [reward_speech(miner_response, input_string, llm) for llm in LLMS]
+        return scores
     
     def generate_input_data(self, llm, topic, source_language, device):
         messages = [{"role": "system", "content": PROMPTS["GENERATE_INPUT_DATA"].format(topic=topic, source_language=source_language)}]
