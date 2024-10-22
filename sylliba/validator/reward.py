@@ -49,9 +49,12 @@ def reward_text(miner_response: str, sample_output: str) -> float:
     # Aggregate the scores (with customizable weights)
     aggregated_score = 0.5 * cosine_sim + 0.3 * bleu_score + 0.2 * lev_sim
 
-    bt.logging.info(f'similarity score: {aggregated_score}')
+    bt.logging.info(f'SCORE:cosine similarity score: {cosine_sim}')
+    bt.logging.info(f'SCORE: bleu score: {bleu_score}')
+    bt.logging.info(f'SCORE: levenshtein similarity score: {lev_sim}')
+    bt.logging.info(f'SCORE: aggregated score: {aggregated_score}')
     bt.logging.info('------------------------------- REWARD_TEXT FINISEHD ------------------------------')
-    
+
     return aggregated_score
 
 from scipy.spatial.distance import euclidean
