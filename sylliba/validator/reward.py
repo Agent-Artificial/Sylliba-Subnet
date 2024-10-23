@@ -50,14 +50,14 @@ def evaluate_audio_quality_from_tensor(audio_tensor, sample_rate = 16000):
     snr = 10 * np.log10(signal_power / noise_power) if noise_power > 0 else float('inf')
 
     # Return quality metrics
-    return rms, snr
+    return float(rms), float(snr)
 
 def reward_speech(miner_audio: torch.Tensor, input_string: str, llm_module_name: str) -> float:
     # Step 1: Transcribe the audio
     transcription = wav2vec.process(miner_audio)
 
     # Step 2: Evaluate the transcription
-    transcription_evaluation = reward_text(transcription, input_string, llm_module_name)
+    transcription_evaluation = reward_text(transcription, input_string, llm_module_name)['text_score']
     print("Transcription Evaluation:", transcription_evaluation)
     
     # Step 3: Evaluate the audio quality

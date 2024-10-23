@@ -206,7 +206,7 @@ class Validator(BaseValidatorNeuron):
                 axons=miner_axons,
                 synapse=synapse,
                 deserialize=False,
-                timeout=300
+                timeout=60
             )
             bt.logging.debug(f"Received {len(responses)}/{len(miner_axons)} responses.")
             # Processing miner output into rewards
@@ -225,9 +225,9 @@ class Validator(BaseValidatorNeuron):
                     results.append(sum([score['overall_score'] for score in scores]) / len(scores))
 
                     for score in scores:
-                        self.db_manager.add_entry(miner_uids[j], miner_input_data, task_string, source_language, target_language, 
-                                                responses[j].miner_response, score['text_score'], score['rms'], score['snr'], 
-                                                score['overall_socre'], score['llm_module_name'])
+                        self.db_manager.add_entry(int(miner_uids[j]), miner_input_data, task_string, source_language, target_language, 
+                                                responses[j].miner_response, score['text_score'], score.get('rms', 0), score.get('snr', 0), 
+                                                score['overall_score'], score['module_name'])
                 else:
                     results.append(
                         0
