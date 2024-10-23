@@ -2,7 +2,7 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 import torch
 import json
 
-from neurons.validator import MODELS
+from neurons.enums.models import MODELS
 from neurons.utils.model_load import load_flan_t5_large
 
 def process(messages, device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
@@ -21,7 +21,7 @@ def process(messages, device = torch.device("cuda" if torch.cuda.is_available() 
     model, tokenizer = MODELS['flan_t5_large']
 
     input_text = '\n'.join([message['content'] for message in messages])
-    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to("cuda")
+    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(device)
 
     outputs = model.generate(input_ids, max_length=1000)
     return tokenizer.decode(outputs[0], skip_special_tokens=True)  # The output translation
